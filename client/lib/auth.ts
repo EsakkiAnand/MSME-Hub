@@ -47,6 +47,21 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day
   },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          const domain = user.email ? user.email.split("@")[1] : null;
+          return {
+            data: {
+              ...user,
+              institutionDomain: domain,
+            },
+          };
+        },
+      },
+    },
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;
