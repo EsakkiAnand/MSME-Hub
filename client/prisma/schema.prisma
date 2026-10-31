@@ -81,6 +81,7 @@ model User {
   role              UserRole  @default(STUDENT)
   isVerified        Boolean   @default(false)
   institutionDomain String?
+  uniqueId          String?   @unique
 
   // Auth Relations
   sessions          Session[]
@@ -162,6 +163,8 @@ model IndustryProfile {
   userId             String           @unique
   companyName        String
   udyamRegNo         String           @unique
+  companyId          String?          @unique
+  companyPrefix      String?
   domain             String
   websiteUrl         String?
   verificationDocUrl String?
@@ -351,3 +354,16 @@ model Feedback {
 
   @@map("feedback")
 }
+
+// ---------------------------------------------------------------------------
+// Atomic ID Sequence Allocator
+// ---------------------------------------------------------------------------
+
+model IdSequence {
+  prefix     String   @id
+  lastNumber Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  @@map("id_sequence")
+}
+

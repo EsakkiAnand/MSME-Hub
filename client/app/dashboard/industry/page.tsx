@@ -17,20 +17,26 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 
 function IndustryDashboardContent() {
   const searchParams = useSearchParams();
   const session = authClient.useSession();
   const user = session?.data?.user;
   const isVerified = (user as any)?.isVerified || false;
+  const industryId = (user as any)?.uniqueId || "IND0001";
+  const companyId = (user as any)?.companyId || "HTMP001";
+  const companyName = (user as any)?.companyName || "Hexaware Technology";
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
             <h1 className="text-2xl font-bold tracking-tight">Industry Partner Portal</h1>
+            <CopyIdBadge id={companyId} label="Company ID" />
+            <CopyIdBadge id={industryId} label="Partner ID" size="xs" />
             <Badge
               variant="outline"
               className={
@@ -43,7 +49,7 @@ function IndustryDashboardContent() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            Welcome, {user?.name || "Partner"}. Submit real-world operational challenges, track student deliverables, and rate completed solutions.
+            Welcome, {user?.name || "Partner"} ({companyName}). Submit real-world operational challenges, track student deliverables, and rate completed solutions.
           </p>
         </div>
 

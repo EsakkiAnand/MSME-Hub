@@ -27,6 +27,11 @@ export const auth = betterAuth({
         required: false,
         input: true,
       },
+      uniqueId: {
+        type: "string",
+        required: false,
+        input: false,
+      },
     },
   },
   emailAndPassword: {
@@ -52,10 +57,17 @@ export const auth = betterAuth({
       create: {
         before: async (user) => {
           const domain = user.email ? user.email.split("@")[1] : null;
+          const assignedRole = (user as any).role || "STUDENT";
+          let uniqueId = (user as any).uniqueId;
+          if (!uniqueId) {
+            const { allocateUserUniqueId } = await import("./id-generator");
+            uniqueId = await allocateUserUniqueId(assignedRole);
+          }
           return {
             data: {
               ...user,
               institutionDomain: domain,
+              uniqueId,
             },
           };
         },

@@ -10,6 +10,7 @@ import {
 } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { IOSSelect } from "@/components/ui/ios-select";
 import {
   Card,
   CardHeader,
@@ -452,17 +453,12 @@ export default function SignupPage() {
                           <Briefcase className="size-3.5 text-muted-foreground" />
                           Industry Domain *
                         </label>
-                        <select
+                        <IOSSelect
                           value={industryDomain}
-                          onChange={(e) => setIndustryDomain(e.target.value)}
-                          className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                        >
-                          {industryDomains.map((dom) => (
-                            <option key={dom} value={dom}>
-                              {dom}
-                            </option>
-                          ))}
-                        </select>
+                          onChange={(val) => setIndustryDomain(val)}
+                          options={industryDomains}
+                          placeholder="Select industry domain..."
+                        />
                       </div>
 
                       <div className="space-y-1.5">

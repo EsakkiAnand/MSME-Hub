@@ -34,6 +34,7 @@ CREATE TABLE "user" (
     "role" "UserRole" NOT NULL DEFAULT 'STUDENT',
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "institutionDomain" TEXT,
+    "uniqueId" TEXT UNIQUE,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -89,6 +90,8 @@ CREATE TABLE "industry_profile" (
     "userId" TEXT NOT NULL,
     "companyName" TEXT NOT NULL,
     "udyamRegNo" TEXT NOT NULL,
+    "companyId" TEXT UNIQUE,
+    "companyPrefix" TEXT,
     "domain" TEXT NOT NULL,
     "websiteUrl" TEXT,
     "verificationDocUrl" TEXT,
@@ -324,4 +327,13 @@ ALTER TABLE "feedback" ADD CONSTRAINT "feedback_projectId_fkey" FOREIGN KEY ("pr
 
 -- AddForeignKey
 ALTER TABLE "feedback" ADD CONSTRAINT "feedback_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- CreateTable
+CREATE TABLE "id_sequence" (
+    "prefix" TEXT NOT NULL,
+    "lastNumber" INTEGER NOT NULL DEFAULT 0,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "id_sequence_pkey" PRIMARY KEY ("prefix")
+);
 

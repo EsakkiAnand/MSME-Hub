@@ -59,7 +59,8 @@ export function getRoleDashboardPath(role?: string | null): string {
     case "STUDENT":
       return "/dashboard/student";
     case "STAFF":
-      return "/dashboard/staff";
+    case "FACULTY":
+      return "/dashboard/faculty";
     case "INDUSTRY":
       return "/dashboard/industry";
     case "ALUMNI":
