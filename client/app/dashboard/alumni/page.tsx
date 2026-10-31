@@ -4,19 +4,22 @@ import { authClient } from "@/lib/auth-client";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Award, AlertCircle, HelpCircle, GitBranch, ThumbsUp } from "lucide-react";
+import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 
 export default function AlumniDashboardPage() {
   const session = authClient.useSession();
   const user = session?.data?.user;
   const isVerified = (user as any)?.isVerified || false;
+  const alumniId = (user as any)?.uniqueId || "ALU0001";
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
             <h1 className="text-2xl font-bold tracking-tight">Alumni Mentorship Hub</h1>
+            <CopyIdBadge id={alumniId} label="Alumni ID" />
             <Badge
               variant="outline"
               className={

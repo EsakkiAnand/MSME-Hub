@@ -11,6 +11,7 @@ import {
   AlumniSignupInput,
   getRoleDashboardPath,
 } from "@/lib/auth-utils";
+import { allocateUserUniqueId, allocateCompanyId } from "@/lib/id-generator";
 
 // ---------------------------------------------------------------------------
 // Helper: Allowed Institutional Domains Check
@@ -117,14 +118,21 @@ export async function registerIndustryAction(input: IndustrySignupInput) {
 
     const userId = authResult.user.id;
 
-    // Update role and create IndustryProfile in transaction
+    // Update role and create IndustryProfile with companyId in atomic transaction
     await prisma.$transaction(async (tx) => {
+      // Allocate permanent User Unique ID (IND0001 format)
+      const userUniqueId = await allocateUserUniqueId(UserRole.INDUSTRY, tx);
+      
+      // Allocate permanent Company ID (e.g. HTMP001 or derived company prefix)
+      const { companyId, prefix } = await allocateCompanyId(companyName, undefined, tx);
+
       await tx.user.update({
         where: { id: userId },
         data: {
           role: UserRole.INDUSTRY,
           isVerified: false,
           institutionDomain: email.split("@")[1] || null,
+          uniqueId: userUniqueId,
         },
       });
 
@@ -133,6 +141,8 @@ export async function registerIndustryAction(input: IndustrySignupInput) {
           userId,
           companyName,
           udyamRegNo,
+          companyId,
+          companyPrefix: prefix,
           domain,
           websiteUrl: websiteUrl || null,
         },
@@ -208,14 +218,18 @@ export async function registerAlumniAction(input: AlumniSignupInput) {
 
     const userId = authResult.user.id;
 
-    // Update role and create AlumniProfile in transaction
+    // Update role and create AlumniProfile with ALU ID in atomic transaction
     await prisma.$transaction(async (tx) => {
+      // Allocate permanent Alumni User Unique ID (ALU0001 format)
+      const userUniqueId = await allocateUserUniqueId(UserRole.ALUMNI, tx);
+
       await tx.user.update({
         where: { id: userId },
         data: {
           role: UserRole.ALUMNI,
           isVerified: false,
           institutionDomain: email.split("@")[1] || null,
+          uniqueId: userUniqueId,
         },
       });
 
@@ -275,8 +289,17 @@ export async function syncOAuthRoleAction(intendedRole?: "STUDENT" | "STAFF") {
       };
     }
 
-    // If intended role is STAFF and user is still at default STUDENT, elevate to STAFF
-    let activeRole = user.role;
+    let activeRole: UserRole = user.role;
+    if (intendedRole === "STAFF" && user.role === UserRole.STUDENT) {
+      activeRole = UserRole.STAFF;
+    }
+
+    // Ensure permanent Unique ID is allocated atomically if not yet present
+    let currentUniqueId = user.uniqueId;
+    if (!currentUniqueId) {
+      currentUniqueId = await allocateUserUniqueId(activeRole);
+    }
+
     if (
       intendedRole === "STAFF" &&
       user.role === UserRole.STUDENT
@@ -287,6 +310,7 @@ export async function syncOAuthRoleAction(intendedRole?: "STUDENT" | "STAFF") {
           role: UserRole.STAFF,
           institutionDomain: domainCheck.domain,
           isVerified: true,
+          uniqueId: currentUniqueId,
         },
       });
       activeRole = UserRole.STAFF;
@@ -296,6 +320,14 @@ export async function syncOAuthRoleAction(intendedRole?: "STUDENT" | "STAFF") {
         data: {
           isVerified: true,
           institutionDomain: domainCheck.domain,
+          uniqueId: currentUniqueId,
+        },
+      });
+    } else if (!user.uniqueId) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          uniqueId: currentUniqueId,
         },
       });
     }
