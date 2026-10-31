@@ -119,7 +119,7 @@ export async function registerIndustryAction(input: IndustrySignupInput) {
     const userId = authResult.user.id;
 
     // Update role and create IndustryProfile with companyId in atomic transaction
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       // Allocate permanent User Unique ID (IND0001 format)
       const userUniqueId = await allocateUserUniqueId(UserRole.INDUSTRY, tx);
       
@@ -219,7 +219,7 @@ export async function registerAlumniAction(input: AlumniSignupInput) {
     const userId = authResult.user.id;
 
     // Update role and create AlumniProfile with ALU ID in atomic transaction
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       // Allocate permanent Alumni User Unique ID (ALU0001 format)
       const userUniqueId = await allocateUserUniqueId(UserRole.ALUMNI, tx);
 
