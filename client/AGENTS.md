@@ -1,29 +1,27 @@
-# AGENTS.md — MSME-Hub
+# AGENTS.md — MSME-Hub Client
 
-Engineering guidelines, architectural constraints, and context pointers for autonomous and pair-programming agents working on **MSME-Hub**.
+Engineering guidelines, architectural constraints, and context pointers for autonomous and pair-programming agents working inside `client/`.
 
 ---
 
 ## 1. Context Pointers
 
-Consult these primary documents before designing features, naming symbols, or modifying architecture:
+Consult these primary repository documents before designing features, naming symbols, or modifying architecture:
 
-- **[`PRD.md`](./PRD.md)**: Authoritative functional specification, RBAC matrix, dual-track workflows (Industry Problem $\rightarrow$ Solution and Student Idea Incubation), and state machine lifecycles.
-- **[`GLOSSARY.md`](./GLOSSARY.md)**: Canonical domain terminology (`Project Team Lead`, `Guidance Request`, `Guidance Board`, `Industry Rating`, `Moderated Rating`, `Sponsorship Showcase`, `Deadline Extension Request`, `Helpful Endorsement`). Never coin competing synonyms.
-- **[`docs/adr/`](./docs/adr/)**: Architectural Decision Records (ADR 0001 to 0009). Locked decisions regarding auth, public GitHub repos, rate limiting, and database architecture.
+- **[`../PRD.md`](../PRD.md)**: Authoritative functional specification, RBAC matrix, dual-track workflows (Industry Problem $\rightarrow$ Solution and Student Idea Incubation), and state machine lifecycles.
+- **[`../GLOSSARY.md`](../GLOSSARY.md)**: Canonical domain terminology (`Project Team Lead`, `Guidance Request`, `Guidance Board`, `Industry Rating`, `Moderated Rating`, `Sponsorship Showcase`, `Deadline Extension Request`, `Helpful Endorsement`). Never coin competing synonyms.
+- **[`../docs/adr/`](../docs/adr/)**: Architectural Decision Records (ADR 0001 to 0009). Locked decisions regarding auth, public GitHub repos, rate limiting, and database architecture.
 
 ---
 
-## 2. Technology Stack & Environment
+## 2. Technology Stack & Key Files
 
-All application code resides in the `client/` directory:
-
-| Layer | Technology | Primary Config / File |
+| Layer | Technology | Primary Config / Implementation File |
 | :--- | :--- | :--- |
-| **Framework** | Next.js (App Router, React 19, TypeScript) | `client/next.config.ts`, `client/app/` |
-| **Styling & UI** | Tailwind CSS v4 + shadcn/ui (Radix primitives) | `client/app/globals.css`, `client/components.json` |
-| **Authentication** | Better Auth with Prisma adapter | `client/lib/auth.ts`, `client/lib/auth-client.ts` |
-| **Database & ORM** | PostgreSQL (Neon serverless) + Prisma ORM (v7) | `client/prisma/schema.prisma`, `client/lib/prisma.ts` |
+| **Framework** | Next.js (App Router, React 19, TypeScript) | `next.config.ts`, `app/` |
+| **Styling & UI** | Tailwind CSS v4 + shadcn/ui (Radix primitives) | `app/globals.css`, `components.json`, `components/ui/` |
+| **Authentication** | Better Auth with Prisma adapter | `lib/auth.ts`, `lib/auth-client.ts`, `app/api/auth/[...all]/route.ts` |
+| **Database & ORM** | PostgreSQL (Neon serverless) + Prisma ORM (v7) | `prisma/schema.prisma`, `prisma7.config.ts`, `lib/prisma.ts` |
 | **Mutations & Validation** | Server Actions + Zod + React Hook Form | Server Actions in `app/actions/` |
 | **File Storage** | Vercel Blob (Industry PDF registration proofs) | Server-side upload handler |
 | **Email** | Resend + React Email | Transactional notification helpers |
@@ -32,7 +30,7 @@ All application code resides in the `client/` directory:
 
 ## 3. Essential Commands
 
-Execute all commands from the `client/` directory:
+Execute all commands directly from this `client/` directory:
 
 ```bash
 # Development server (runs on port 3000)
@@ -84,4 +82,4 @@ When implementing features, enforce these non-negotiable rules:
 
 6. **UI & Styling Conventions**:
    - Compose with shadcn/ui primitives. Use semantic color tokens (`bg-primary`, `text-muted-foreground`, `border-border`) rather than hardcoded palette classes.
-   - Form controls must use `FieldGroup` / `Field` with accessible labels and ARIA attributes.
+   - Form controls must use accessible labels, descriptions, and ARIA attributes with Zod validation.
