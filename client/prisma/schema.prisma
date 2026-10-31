@@ -1,0 +1,353 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  STUDENT
+  STAFF
+  ALUMNI
+  INDUSTRY
+  MSME_ADMIN
+}
+
+enum ProblemStatus {
+  DRAFT
+  POOL_AVAILABLE
+  CLAIMED
+  REJECTED
+}
+
+enum ProjectStatus {
+  ASSIGNED
+  IN_PROGRESS
+  SOLUTION_SUBMITTED
+  REVISION_IN_PROGRESS
+  APPROVED
+  COMPLETED
+}
+
+enum IdeaStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  NEEDS_CHANGES
+  REJECTED
+  ACCEPTED
+  SHOWCASE_PUBLISHED
+  CONVERTED_TO_PROJECT
+}
+
+enum GuidanceStatus {
+  OPEN
+  ANSWERED
+  RESOLVED
+  CLOSED
+}
+
+enum ExtensionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum FeedbackCategory {
+  ARCHITECTURE
+  INDUSTRY_RELEVANCE
+  SECURITY_QUALITY
+  GENERAL
+}
+
+// ---------------------------------------------------------------------------
+// Better Auth Core Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id                String    @id @default(uuid())
+  name              String
+  email             String    @unique
+  emailVerified     Boolean   @default(false)
+  image             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Custom MSME-Hub User Attributes
+  role              UserRole  @default(STUDENT)
+  isVerified        Boolean   @default(false)
+  institutionDomain String?
+
+  // Auth Relations
+  sessions          Session[]
+  accounts          Account[]
+
+  // Domain Relations
+  industryProfile   IndustryProfile?
+  alumniProfile     AlumniProfile?
+  
+  // Staff Relations
+  claimedProblems   Problem[]         @relation("StaffClaimedProblems")
+  supervisedProjects Project[]        @relation("StaffSupervisedProjects")
+  
+  // Student Relations
+  projectMemberships ProjectMember[]
+  submittedIdeas    Idea[]            @relation("StudentIdeas")
+  guidanceRequests  GuidanceRequest[] @relation("StudentGuidanceRequests")
+  extensionRequests DeadlineExtension[] @relation("StudentExtensionRequests")
+
+  // Mentorship / Feedback Relations
+  alumniGuidance    GuidanceRequest[] @relation("AlumniAssignedGuidance")
+  feedbackAuthored  Feedback[]        @relation("AuthorFeedback")
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(uuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?   @db.Text
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, value])
+  @@map("verification")
+}
+
+// ---------------------------------------------------------------------------
+// Domain Profiles & Roles
+// ---------------------------------------------------------------------------
+
+model IndustryProfile {
+  id                 String           @id @default(uuid())
+  userId             String           @unique
+  companyName        String
+  udyamRegNo         String           @unique
+  domain             String
+  websiteUrl         String?
+  verificationDocUrl String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problems           Problem[]
+  ratings            IndustryRating[]
+
+  @@map("industry_profile")
+}
+
+model AlumniProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  degree         String
+  passoutYear    Int
+  currentCompany String
+  currentRole    String
+  linkedinUrl    String?
+  helpfulCount   Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("alumni_profile")
+}
+
+// ---------------------------------------------------------------------------
+// Industry Problem Lifecycle
+// ---------------------------------------------------------------------------
+
+model Problem {
+  id                   String        @id @default(uuid())
+  industryId           String
+  title                String
+  description          String        @db.Text
+  domain               String
+  constraints          String?       @db.Text
+  expectedDeliverables String?       @db.Text
+  status               ProblemStatus @default(POOL_AVAILABLE)
+  claimedByStaffId     String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  industry             IndustryProfile @relation(fields: [industryId], references: [id], onDelete: Cascade)
+  claimedByStaff       User?           @relation("StaffClaimedProblems", fields: [claimedByStaffId], references: [id], onDelete: SetNull)
+  projects             Project[]
+
+  @@map("problem")
+}
+
+// ---------------------------------------------------------------------------
+// Project Workspace & Deliverables
+// ---------------------------------------------------------------------------
+
+model Project {
+  id                  String             @id @default(uuid())
+  problemId           String?
+  ideaId              String?            @unique
+  title               String
+  status              ProjectStatus      @default(ASSIGNED)
+  staffId             String
+  targetDeadline      DateTime?
+  githubUrl           String?
+  githubTreeJson      Json?
+  githubTreeCachedAt  DateTime?
+  adminReviewNotes    String?            @db.Text
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  problem             Problem?           @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  idea                Idea?              @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+  staff               User               @relation("StaffSupervisedProjects", fields: [staffId], references: [id], onDelete: Restrict)
+  members             ProjectMember[]
+  guidanceRequests    GuidanceRequest[]
+  ratings             IndustryRating[]
+  deadlineExtensions  DeadlineExtension[]
+  feedback            Feedback[]
+
+  @@map("project")
+}
+
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String
+  studentId String
+  isLead    Boolean  @default(false)
+  joinedAt  DateTime @default(now())
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, studentId])
+  @@map("project_member")
+}
+
+// ---------------------------------------------------------------------------
+// Student Idea Incubation
+// ---------------------------------------------------------------------------
+
+model Idea {
+  id            String     @id @default(uuid())
+  studentId     String
+  title         String
+  description   String     @db.Text
+  domain        String
+  status        IdeaStatus @default(SUBMITTED)
+  staffComments String?    @db.Text
+  isShowcase    Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  student       User       @relation("StudentIdeas", fields: [studentId], references: [id], onDelete: Cascade)
+  project       Project?
+
+  @@map("idea")
+}
+
+// ---------------------------------------------------------------------------
+// Mentorship, Ratings & Governance
+// ---------------------------------------------------------------------------
+
+model GuidanceRequest {
+  id                   String         @id @default(uuid())
+  projectId            String
+  requestedByStudentId String
+  alumniId             String?
+  tags                 String[]
+  question             String         @db.Text
+  status               GuidanceStatus @default(OPEN)
+  isHelpful            Boolean?       @default(false)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  project              Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestedByStudent   User           @relation("StudentGuidanceRequests", fields: [requestedByStudentId], references: [id], onDelete: Cascade)
+  assignedAlumni       User?          @relation("AlumniAssignedGuidance", fields: [alumniId], references: [id], onDelete: SetNull)
+
+  @@map("guidance_request")
+}
+
+model IndustryRating {
+  id           String          @id @default(uuid())
+  projectId    String
+  industryId   String
+  stars        Int
+  feedbackText String          @db.Text
+  isModerated  Boolean         @default(false)
+  createdAt    DateTime        @default(now())
+
+  project      Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  industry     IndustryProfile @relation(fields: [industryId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, industryId])
+  @@map("industry_rating")
+}
+
+model DeadlineExtension {
+  id                   String          @id @default(uuid())
+  projectId            String
+  requestedByStudentId String
+  requestedDate        DateTime
+  reason               String          @db.Text
+  status               ExtensionStatus @default(PENDING)
+  createdAt            DateTime        @default(now())
+  reviewedAt           DateTime?
+
+  project              Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestedByStudent   User            @relation("StudentExtensionRequests", fields: [requestedByStudentId], references: [id], onDelete: Cascade)
+
+  @@map("deadline_extension")
+}
+
+model Feedback {
+  id        String           @id @default(uuid())
+  projectId String
+  authorId  String
+  category  FeedbackCategory @default(GENERAL)
+  content   String           @db.Text
+  createdAt DateTime         @default(now())
+
+  project   Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author    User             @relation("AuthorFeedback", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("feedback")
+}

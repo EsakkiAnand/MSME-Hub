@@ -1,0 +1,3 @@
+# In-Database JSON Tree Caching, Server Actions, and Resend
+
+To eliminate the cost and operational overhead of an external Redis cluster in v1, GitHub repository trees fetched via GitHub's API are serialized and stored directly in a PostgreSQL `Json` column on the `Project` model with a 5-minute time-to-live (`githubTreeCachedAt`). For application mutations and form handling, we standardize on Next.js Server Actions with Zod schemas and React Hook Form for full end-to-end type safety. Transactional email notifications (verification approvals, assignments, solution reviews) are routed through Resend with React Email templates.
