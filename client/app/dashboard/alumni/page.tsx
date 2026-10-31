@@ -1,104 +1,500 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  HelpCircle,
+  MessageSquare,
+  Award,
+  FolderKanban,
+  CheckCircle2,
+  Clock,
+  ArrowRight,
+  ExternalLink,
+  Tag,
+  Send,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, AlertCircle, HelpCircle, GitBranch, ThumbsUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import { IOSSelect } from "@/components/ui/ios-select";
+import { toast } from "sonner";
+import {
+  getAlumniOverviewAction,
+  respondToGuidanceRequestAction,
+} from "@/app/actions/alumni";
+import { GuidanceRequestItem, MentoredProject } from "@/lib/alumni-data";
 
-export default function AlumniDashboardPage() {
-  const session = authClient.useSession();
-  const user = session?.data?.user;
-  const isVerified = (user as any)?.isVerified || false;
-  const alumniId = (user as any)?.uniqueId || "ALU0001";
+export default function AlumniOverviewPage() {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<GuidanceRequestItem | null>(null);
+  const [responseCategory, setResponseCategory] = useState<string>("ARCHITECTURE");
+  const [responseText, setResponseText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const res = await getAlumniOverviewAction();
+      if (res.success) {
+        setData(res);
+      } else {
+        toast.error(res.error || "Failed to load overview");
+      }
+    } catch {
+      toast.error("Network error loading dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenAnswerModal = (req: GuidanceRequestItem) => {
+    setSelectedRequest(req);
+    setResponseCategory("ARCHITECTURE");
+    setResponseText("");
+  };
+
+  const handleSubmitResponse = async () => {
+    if (!selectedRequest) return;
+    if (!responseText.trim()) {
+      toast.error("Please enter your guidance feedback before submitting.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await respondToGuidanceRequestAction({
+        guidanceRequestId: selectedRequest.id,
+        projectId: selectedRequest.projectId,
+        category: responseCategory as any,
+        content: responseText.trim(),
+      });
+
+      if (res.success) {
+        toast.success(res.message || "Feedback posted to student team!");
+        setSelectedRequest(null);
+        setResponseText("");
+        await loadData();
+      } else {
+        toast.error(res.error || "Failed to post response");
+      }
+    } catch {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-slate-500">
+        <Loader2 className="size-8 animate-spin text-[#1d4ed8] mb-3" />
+        <p className="text-sm font-medium">Loading Alumni Mentor Workspace...</p>
+      </div>
+    );
+  }
+
+  const stats = data?.stats || {
+    openRequestsCount: 0,
+    myAnswersCount: 0,
+    helpfulEndorsements: 0,
+    projectsMentored: 0,
+  };
+
+  const openRequests: GuidanceRequestItem[] = data?.openRequests || [];
+  const projects: MentoredProject[] = data?.recentMentoredProjects || [];
+  const profile = data?.profile;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <h1 className="text-2xl font-bold tracking-tight">Alumni Mentorship Hub</h1>
-            <CopyIdBadge id={alumniId} label="Alumni ID" />
-            <Badge
-              variant="outline"
-              className={
-                isVerified
-                  ? "text-emerald-600 border-emerald-500/30 bg-emerald-500/10"
-                  : "text-amber-600 border-amber-500/30 bg-amber-500/10"
-              }
-            >
-              {isVerified ? "Verified Mentor" : "Verification Queue"}
-            </Badge>
+    <div className="space-y-6 max-w-6xl mx-auto">
+      {/* Welcome Banner */}
+      <div className="bg-gradient-to-r from-[#0f2744] to-[#1e3a5f] rounded-xl p-6 text-white shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                Alumni Expert Mentor
+              </span>
+              <CopyIdBadge id={data?.user?.uniqueId || "ALU0001"} label="Alumni ID" size="xs" />
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Welcome back, {data?.user?.name || "Mentor"}
+            </h2>
+            <p className="text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
+              {profile?.currentRole} at <span className="text-white font-medium">{profile?.currentCompany}</span>.
+              Share architectural advice, answer student queries, and help students ship production-grade open-source solutions.
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Welcome, {user?.name || "Mentor"}. Guide engineering students, provide architectural feedback on GitHub deliverables, and earn helpful endorsements.
-          </p>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <Link href="/dashboard/alumni/guidance">
+              <Button className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white text-xs h-9">
+                <HelpCircle className="size-3.5 mr-1.5" />
+                Browse Guidance Board
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Verification Notice Banner */}
-      {!isVerified && (
-        <Card className="border-amber-500/30 bg-amber-500/5">
-          <CardHeader className="py-3">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 shrink-0">
-                <AlertCircle className="size-5" />
-              </div>
-              <div className="flex-1">
-                <CardTitle className="text-base font-semibold text-amber-900 dark:text-amber-200">
-                  Profile Awaiting 1-Click Faculty Approval
-                </CardTitle>
-                <CardDescription className="text-xs text-amber-800/80 dark:text-amber-300/80 mt-1 leading-relaxed">
-                  Your alumni credentials have been submitted to the institutional verification queue. Once verified by university faculty, you will be able to answer Guidance Board queries and critique project repositories.
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-      )}
-
-      {/* Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <Card>
+      {/* Metric Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Open Requests */}
+        <Card className="border-slate-200 shadow-xs">
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium">Open Guidance Requests</CardDescription>
-            <CardTitle className="text-3xl font-extrabold flex items-center justify-between">
-              <span>0</span>
-              <HelpCircle className="size-5 text-amber-500" />
+            <CardDescription className="text-xs uppercase font-medium text-slate-500">
+              Open Guidance Requests
+            </CardDescription>
+            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-slate-900">
+              <span>{stats.openRequestsCount}</span>
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-md">
+                <HelpCircle className="size-4" />
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Questions from student builders on Guidance Board</p>
+            <p className="text-xs text-slate-500">Awaiting expert architectural guidance</p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Answers Provided */}
+        <Card className="border-slate-200 shadow-xs">
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium">Projects Reviewed</CardDescription>
-            <CardTitle className="text-3xl font-extrabold flex items-center justify-between">
-              <span>0</span>
-              <GitBranch className="size-5 text-blue-500" />
+            <CardDescription className="text-xs uppercase font-medium text-slate-500">
+              Mentorship Responses
+            </CardDescription>
+            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-slate-900">
+              <span>{stats.myAnswersCount}</span>
+              <div className="p-2 bg-purple-50 text-purple-600 rounded-md">
+                <MessageSquare className="size-4" />
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Student GitHub repositories critiqued</p>
+            <p className="text-xs text-slate-500">Architectural &amp; security answers provided</p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Helpful Endorsements */}
+        <Card className="border-slate-200 shadow-xs">
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium">Helpful Endorsements</CardDescription>
-            <CardTitle className="text-3xl font-extrabold flex items-center justify-between">
-              <span>0</span>
-              <ThumbsUp className="size-5 text-emerald-500" />
+            <CardDescription className="text-xs uppercase font-medium text-slate-500">
+              Helpful Endorsements
+            </CardDescription>
+            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-slate-900">
+              <span className="text-amber-600">{stats.helpfulEndorsements}</span>
+              <div className="p-2 bg-amber-50 text-amber-600 rounded-md">
+                <Award className="size-4" />
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Endorsements awarded by student teams</p>
+            <p className="text-xs text-slate-500">Awarded by students for solving bottlenecks</p>
+          </CardContent>
+        </Card>
+
+        {/* Projects Mentored */}
+        <Card className="border-slate-200 shadow-xs">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-xs uppercase font-medium text-slate-500">
+              Mentored Projects
+            </CardDescription>
+            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-slate-900">
+              <span>{stats.projectsMentored}</span>
+              <div className="p-2 bg-emerald-50 text-emerald-600 rounded-md">
+                <FolderKanban className="size-4" />
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-slate-500">Active industry challenges supported</p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Main Two Columns: Open Guidance Board + Mentored Projects */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column (2 Cols): Open Student Guidance Requests */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <HelpCircle className="size-4 text-[#1d4ed8]" />
+                Open Student Guidance Requests
+              </h3>
+              <p className="text-xs text-slate-500">
+                Recent questions posted by student project teams seeking architectural advice.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/alumni/guidance"
+              className="text-xs font-semibold text-[#1d4ed8] hover:underline flex items-center gap-1"
+            >
+              View All Board Requests
+              <ArrowRight className="size-3" />
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {openRequests.length === 0 ? (
+              <Card className="border-dashed p-8 text-center text-slate-500">
+                <CheckCircle2 className="size-8 text-emerald-500 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-slate-800">All questions answered!</p>
+                <p className="text-xs text-slate-500 mt-1">No open student queries on the board right now.</p>
+              </Card>
+            ) : (
+              openRequests.map((req) => (
+                <Card
+                  key={req.id}
+                  className="border-slate-200 hover:border-blue-300 transition-all shadow-xs"
+                >
+                  <CardHeader className="pb-3 pt-4 px-4 sm:px-5">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-[11px] font-mono text-slate-700 bg-slate-50">
+                          {req.id}
+                        </Badge>
+                        <span className="text-xs font-semibold text-slate-900">
+                          {req.projectTitle}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-400">
+                        {new Date(req.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <CardTitle className="text-sm font-semibold text-slate-900 leading-snug">
+                      {req.question}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-4 sm:px-5 pb-4 pt-0">
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[11px] text-slate-500 font-medium mr-1">
+                          Asked by {req.studentName} ({req.studentUniqueId}):
+                        </span>
+                        {req.tags.map((t) => (
+                          <span
+                            key={t}
+                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700"
+                          >
+                            <Tag className="size-2.5 mr-1 text-slate-400" />
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+
+                      <Button
+                        size="sm"
+                        onClick={() => handleOpenAnswerModal(req)}
+                        className="text-xs bg-[#1d4ed8] hover:bg-[#1e40af] text-white h-7 px-3"
+                      >
+                        <MessageSquare className="size-3 mr-1.5" />
+                        Provide Guidance
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Right Column (1 Col): Mentored Projects & Endorsements */}
+        <div className="space-y-6">
+          {/* Alumni Reputation & Endorsements Card */}
+          <Card className="border-slate-200 shadow-xs bg-gradient-to-br from-amber-500/5 to-transparent">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-md bg-amber-100 text-amber-700">
+                  <Award className="size-4" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm font-bold text-slate-900">
+                    Mentorship Endorsements
+                  </CardTitle>
+                  <CardDescription className="text-xs text-slate-500">
+                    PRD §8.6 Helpful Recognition
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="p-3 rounded-lg bg-white border border-amber-200 flex items-center justify-between">
+                <div>
+                  <span className="text-xs text-slate-600 block">Total Endorsements</span>
+                  <span className="text-xl font-black text-amber-600">
+                    {stats.helpfulEndorsements}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-amber-500">
+                  <Sparkles className="size-5" />
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 leading-normal">
+                When student teams resolve an architectural bottleneck with your advice, they award a Helpful Endorsement to your profile.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Mentored Projects Mini Tracker */}
+          <Card className="border-slate-200 shadow-xs">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <FolderKanban className="size-4 text-emerald-600" />
+                  Active Projects
+                </CardTitle>
+                <Link
+                  href="/dashboard/alumni/projects"
+                  className="text-[11px] text-[#1d4ed8] hover:underline"
+                >
+                  View All
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {projects.map((p) => (
+                <div
+                  key={p.id}
+                  className="p-2.5 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-semibold text-slate-900 truncate max-w-[180px]">
+                      {p.title}
+                    </span>
+                    <Badge variant="outline" className="text-[10px] bg-white">
+                      {p.status}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Lead: {p.teamLeadName}</span>
+                    <span className="text-[10px] text-slate-400">{p.domain}</span>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Answer Modal Dialog */}
+      <Dialog open={!!selectedRequest} onOpenChange={(open) => !open && setSelectedRequest(null)}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <MessageSquare className="size-4 text-[#1d4ed8]" />
+              Provide Architectural Guidance
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Your feedback is published directly to the student builder team and faculty advisor.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedRequest && (
+            <div className="space-y-4 py-2">
+              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
+                  <span>{selectedRequest.projectTitle}</span>
+                  <Badge variant="outline" className="text-[10px] font-mono">
+                    {selectedRequest.id}
+                  </Badge>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                  {selectedRequest.question}
+                </p>
+                <div className="flex items-center gap-1.5 pt-1">
+                  {selectedRequest.tags.map((t) => (
+                    <span
+                      key={t}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-white border text-slate-600"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-700">
+                  Guidance Category (PRD §8.6)
+                </label>
+                <IOSSelect
+                  value={responseCategory}
+                  onChange={setResponseCategory}
+                  options={[
+                    { value: "ARCHITECTURE", label: "Architecture & System Design" },
+                    { value: "SECURITY_QUALITY", label: "Security & Code Quality" },
+                    { value: "INDUSTRY_RELEVANCE", label: "Industry Best Practices & Deployment" },
+                    { value: "GENERAL", label: "General Feedback & Troubleshooting" },
+                  ]}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-700">
+                  Your Actionable Guidance
+                </label>
+                <Textarea
+                  value={responseText}
+                  onChange={(e) => setResponseText(e.target.value)}
+                  placeholder="Explain recommended architecture, patterns, security measures, or library choices..."
+                  rows={5}
+                  className="text-xs"
+                />
+                <p className="text-[11px] text-slate-400">
+                  Clear, production-tested guidance helps students resolve bottlenecks quickly.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedRequest(null)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSubmitResponse}
+              disabled={isSubmitting}
+              className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="size-3.5 mr-1.5 animate-spin" />
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  <Send className="size-3.5 mr-1.5" />
+                  Publish Guidance
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
