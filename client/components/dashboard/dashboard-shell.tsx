@@ -14,13 +14,30 @@ import {
   ShieldCheck,
   User as UserIcon,
   CheckCircle2,
+  LayoutDashboard,
+  FolderKanban,
+  FileText,
+  Lightbulb,
+  Code2,
+  Trophy,
+  Share2,
+  MessageSquare,
+  GraduationCap,
+  BookOpen,
+  Users,
+  PlusCircle,
+  Star,
+  Building2,
+  Award,
+  HelpCircle,
+  History,
+  Loader2,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
@@ -31,7 +48,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { getRoleDashboardPath } from "@/lib/auth-utils";
 import { signOutAction } from "@/app/actions/auth";
-import { Loader2 } from "lucide-react";
 
 export interface NavItem {
   href: string;
@@ -40,13 +56,128 @@ export interface NavItem {
   exact?: boolean;
 }
 
-export interface DashboardShellProps {
-  children: React.ReactNode;
-  role: "STUDENT" | "FACULTY" | "INDUSTRY" | "ALUMNI" | "MSME_ADMIN";
+export interface RoleConfig {
   portalTitle: string;
   portalSubtitle: string;
   portalIcon: React.ElementType;
   navItems: NavItem[];
+  defaultIdPrefix: string;
+  profileHref?: string;
+  badge?: {
+    label: string;
+    icon?: React.ElementType;
+    className?: string;
+  };
+}
+
+export const ROLE_DASHBOARD_CONFIG: Record<string, RoleConfig> = {
+  STUDENT: {
+    portalTitle: "Student Workspace",
+    portalSubtitle: "Academic Project Portal",
+    portalIcon: GraduationCap,
+    defaultIdPrefix: "STU",
+    profileHref: "/dashboard/student/profile",
+    badge: {
+      label: "Active Scholar",
+      icon: CheckCircle2,
+      className: "bg-blue-50 text-blue-700 border-blue-200",
+    },
+    navItems: [
+      { href: "/dashboard/student", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { href: "/dashboard/student/projects", label: "My Projects", icon: FolderKanban },
+      { href: "/dashboard/student/project-details", label: "Project Details", icon: FileText },
+      { href: "/dashboard/student/submit-idea", label: "Submit Idea", icon: Lightbulb },
+      { href: "/dashboard/student/code-access", label: "Code & Project Access", icon: Code2 },
+      { href: "/dashboard/student/leaderboard", label: "Leaderboard", icon: Trophy },
+      { href: "/dashboard/student/shared-projects", label: "Shared Projects", icon: Share2 },
+      { href: "/dashboard/student/feedback", label: "Feedback", icon: MessageSquare },
+      { href: "/dashboard/student/profile", label: "My Profile", icon: UserIcon },
+    ],
+  },
+  FACULTY: {
+    portalTitle: "Faculty Supervisor",
+    portalSubtitle: "Academic Project Supervisor",
+    portalIcon: BookOpen,
+    defaultIdPrefix: "FAC",
+    profileHref: "/dashboard/faculty/profile",
+    badge: {
+      label: "Verified Supervisor",
+      icon: CheckCircle2,
+      className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    },
+    navItems: [
+      { href: "/dashboard/faculty", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { href: "/dashboard/faculty/students", label: "My Students", icon: Users },
+      { href: "/dashboard/faculty/projects", label: "Projects", icon: FolderKanban },
+      { href: "/dashboard/faculty/project-details", label: "Project Details", icon: FileText },
+      { href: "/dashboard/faculty/idea-submissions", label: "Idea Submissions", icon: Lightbulb },
+      { href: "/dashboard/faculty/shared-projects", label: "Shared Projects", icon: Share2 },
+      { href: "/dashboard/faculty/feedback", label: "Feedback", icon: MessageSquare },
+      { href: "/dashboard/faculty/profile", label: "My Profile", icon: UserIcon },
+    ],
+  },
+  INDUSTRY: {
+    portalTitle: "Industry Partner",
+    portalSubtitle: "MSME Enterprise Portal",
+    portalIcon: Building2,
+    defaultIdPrefix: "IND",
+    profileHref: "/dashboard/industry/profile",
+    badge: {
+      label: "Verified Enterprise",
+      icon: CheckCircle2,
+      className: "bg-blue-50 text-blue-700 border-blue-200",
+    },
+    navItems: [
+      { href: "/dashboard/industry", label: "Overview", icon: LayoutDashboard, exact: true },
+      { href: "/dashboard/industry/submit-problem", label: "Submit Problem", icon: PlusCircle },
+      { href: "/dashboard/industry/problems", label: "My Problems", icon: FileText },
+      { href: "/dashboard/industry/projects", label: "Active Projects", icon: FolderKanban },
+      { href: "/dashboard/industry/ratings", label: "Ratings & Reviews", icon: Star },
+      { href: "/dashboard/industry/profile", label: "Company Profile", icon: Building2 },
+    ],
+  },
+  ALUMNI: {
+    portalTitle: "Alumni Mentor",
+    portalSubtitle: "Mentorship & Guidance Portal",
+    portalIcon: Award,
+    defaultIdPrefix: "ALM",
+    profileHref: "/dashboard/alumni/profile",
+    badge: {
+      label: "Verified Mentor",
+      icon: CheckCircle2,
+      className: "bg-amber-50 text-amber-700 border-amber-200",
+    },
+    navItems: [
+      { href: "/dashboard/alumni", label: "Overview", icon: LayoutDashboard, exact: true },
+      { href: "/dashboard/alumni/guidance", label: "Guidance Requests", icon: HelpCircle },
+      { href: "/dashboard/alumni/projects", label: "Mentored Projects", icon: FolderKanban },
+      { href: "/dashboard/alumni/history", label: "Guidance History", icon: History },
+      { href: "/dashboard/alumni/profile", label: "My Profile", icon: UserIcon },
+    ],
+  },
+  MSME_ADMIN: {
+    portalTitle: "MSME Administrator",
+    portalSubtitle: "Governance & Policy Portal",
+    portalIcon: ShieldCheck,
+    defaultIdPrefix: "ADM",
+    badge: {
+      label: "Super Admin",
+      icon: ShieldCheck,
+      className: "bg-rose-50 text-rose-700 border-rose-200",
+    },
+    navItems: [
+      { href: "/dashboard/admin", label: "Administration", icon: ShieldCheck, exact: true },
+    ],
+  },
+};
+
+export interface DashboardShellProps {
+  children: React.ReactNode;
+  role: "STUDENT" | "FACULTY" | "INDUSTRY" | "ALUMNI" | "MSME_ADMIN";
+  portalTitle?: string;
+  portalSubtitle?: string;
+  portalIcon?: React.ElementType;
+  navItems?: NavItem[];
   badge?: {
     label: string;
     icon?: React.ElementType;
@@ -61,16 +192,25 @@ export function DashboardShell({
   role,
   portalTitle,
   portalSubtitle,
-  portalIcon: PortalIcon,
+  portalIcon,
   navItems,
   badge,
   profileHref,
-  defaultIdPrefix = "FXEC",
+  defaultIdPrefix,
 }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const session = authClient.useSession();
   const user = session?.data?.user;
+
+  const config = ROLE_DASHBOARD_CONFIG[role] || ROLE_DASHBOARD_CONFIG.STUDENT;
+  const activePortalTitle = portalTitle || config.portalTitle;
+  const activePortalSubtitle = portalSubtitle || config.portalSubtitle;
+  const activeDefaultIdPrefix = defaultIdPrefix || config.defaultIdPrefix;
+  const activeProfileHref = profileHref !== undefined ? profileHref : config.profileHref;
+  const activeNavItems = navItems || config.navItems;
+  const activeBadge = badge || config.badge;
+  const PortalIcon = portalIcon || config.portalIcon;
 
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = React.useState(false);
@@ -81,12 +221,10 @@ export function DashboardShell({
     if (session.isPending) return;
 
     if (!session.data?.user) {
-      // Unauthenticated users must NEVER access protected dashboard routes
       window.location.href = "/login";
       return;
     }
 
-    // Role-Based Access Control: ensure user belongs to this portal
     const userRole = (session.data.user as any)?.role;
     if (userRole && userRole !== role) {
       const isStaffFacultyMatch =
@@ -113,7 +251,6 @@ export function DashboardShell({
   React.useEffect(() => {
     const handlePageShow = (event: PageTransitionEvent) => {
       if (event.persisted) {
-        // Page was restored from Back-Forward Cache (bfcache); reload to re-verify session with server
         window.location.reload();
       }
     };
@@ -121,47 +258,41 @@ export function DashboardShell({
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
 
-  // Derive unique ID
-  const userUniqueId = (user as any)?.uniqueId || `${defaultIdPrefix}0001`;
-
-  // Initials for avatar fallback
-  const initials = React.useMemo(() => {
-    if (!user?.name) return role.slice(0, 2).toUpperCase();
-    const parts = user.name.trim().split(/\\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return user.name.slice(0, 2).toUpperCase();
-  }, [user?.name, role]);
-
   const isActive = (item: NavItem) => {
-    if (item.exact) return pathname === item.href;
-    return pathname === item.href || pathname.startsWith(item.href + "/");
+    if (item.exact) {
+      return pathname === item.href;
+    }
+    return pathname.startsWith(item.href);
   };
 
-  // Find current active item title for header
+  const userUniqueId = (user as any)?.uniqueId || `${activeDefaultIdPrefix}0001`;
+
+  const initials = React.useMemo(() => {
+    if (!user?.name) return activePortalTitle.slice(0, 2).toUpperCase();
+    const parts = user.name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return user.name.slice(0, 2).toUpperCase();
+  }, [user?.name, activePortalTitle]);
+
   const currentTitle = React.useMemo(() => {
-    const activeItem = navItems.find((item) => isActive(item));
-    if (activeItem) return activeItem.label;
-    const parts = pathname.split("/").filter(Boolean);
-    const last = parts[parts.length - 1];
-    if (!last) return portalTitle;
+    const matched = activeNavItems.find((item) => isActive(item));
+    if (matched) return matched.label;
+    const segments = pathname.split("/").filter(Boolean);
+    const last = segments[segments.length - 1] || "Dashboard";
     return last
       .split("-")
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ");
-  }, [pathname, navItems, portalTitle]);
+  }, [pathname, activeNavItems, activePortalTitle]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
-      // 1. Server-side session invalidation: database purge & force cookie expiry
       await signOutAction();
-
-      // 2. Client-side library sign out
       await authClient.signOut();
 
-      // 3. Clear client-side web storages
       if (typeof window !== "undefined") {
         try {
           sessionStorage.clear();
@@ -170,8 +301,6 @@ export function DashboardShell({
       }
 
       toast.success("Signed out successfully.");
-
-      // 4. Hard replace navigation to login to prevent Back button re-entry
       window.location.replace("/");
     } catch (err) {
       console.error("Sign out error:", err);
@@ -216,7 +345,7 @@ export function DashboardShell({
       {/* Standardized Sidebar (260px) */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-40 h-full w-[260px] bg-[#f8f9fb] dark:bg-[#151516] text-foreground flex flex-col shrink-0 border-r border-black/[0.06] dark:border-white/[0.08] transition-transform duration-200 ease-out lg:translate-x-0",
+          "fixed top-0 left-0 z-40 h-full w-[260px] bg-[#f8f9fb] dark:bg-[#151516] text-foreground flex flex-col shrink-0 border-r border-black/[0.06] dark:border-white/[0.08] transition-transform duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] lg:translate-x-0",
           sidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
@@ -231,7 +360,7 @@ export function DashboardShell({
                 FXEC MSME Hub
               </span>
               <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight truncate">
-                {portalSubtitle}
+                {activePortalSubtitle}
               </span>
             </div>
           </div>
@@ -251,7 +380,7 @@ export function DashboardShell({
               Navigation
             </div>
             <ul className="space-y-1 mt-0.5">
-              {navItems.map((item) => {
+              {activeNavItems.map((item) => {
                 const active = isActive(item);
                 const ItemIcon = item.icon;
                 return (
@@ -291,7 +420,7 @@ export function DashboardShell({
                 setSidebarOpen(false);
                 setShowSignOutConfirm(true);
               }}
-              className="group w-full flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-xs font-medium text-[#FF3B30] dark:text-[#FF453A] hover:bg-red-500/10 dark:hover:bg-red-500/15 transition-all duration-150 cursor-pointer select-none active:scale-[0.99] text-left"
+              className="group w-full flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-xs font-medium text-[#FF3B30] dark:text-[#FF453A] hover:bg-red-500/10 dark:hover:bg-red-500/15 transition-all duration-150 cursor-pointer select-none active:scale-[0.98] text-left"
             >
               <LogOut className="size-4 shrink-0 transition-colors" />
               <span className="truncate flex-1">Log Out</span>
@@ -304,7 +433,7 @@ export function DashboardShell({
           user={user}
           role={role}
           userUniqueId={userUniqueId}
-          profileHref={profileHref}
+          profileHref={activeProfileHref}
           onSignOutClick={() => setShowSignOutConfirm(true)}
         />
       </aside>
@@ -323,7 +452,7 @@ export function DashboardShell({
             </button>
             <div className="min-w-0 flex items-center gap-2">
               <span className="text-xs font-normal text-slate-400 dark:text-slate-500 hidden sm:inline-block">
-                {portalTitle}
+                {activePortalTitle}
               </span>
               <span className="text-xs text-slate-300 dark:text-slate-600 hidden sm:inline-block">/</span>
               <h1 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white truncate tracking-tight">
@@ -334,15 +463,15 @@ export function DashboardShell({
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Role / Institutional Badge */}
-            {badge && (
+            {activeBadge && (
               <div
                 className={cn(
                   "hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border bg-slate-50 border-slate-200 text-slate-700",
-                  badge.className
+                  activeBadge.className
                 )}
               >
-                {badge.icon && <badge.icon className="size-3 shrink-0" />}
-                <span>{badge.label}</span>
+                {activeBadge.icon && <activeBadge.icon className="size-3 shrink-0" />}
+                <span>{activeBadge.label}</span>
               </div>
             )}
 
@@ -371,7 +500,7 @@ export function DashboardShell({
                 <div className="px-3 py-2.5 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between">
                   <div className="min-w-0 flex-1 mr-2">
                     <p className="text-xs font-semibold text-slate-900 dark:text-white truncate leading-tight">
-                      {user?.name || portalTitle}
+                      {user?.name || activePortalTitle}
                     </p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
                       {user?.email || "institutional.user@fxec.ac.in"}
@@ -380,9 +509,9 @@ export function DashboardShell({
                   <CopyIdBadge id={userUniqueId} size="xs" />
                 </div>
                 <div className="p-1 space-y-0.5">
-                  {profileHref && (
+                  {activeProfileHref && (
                     <DropdownMenuItem
-                      onClick={() => router.push(profileHref)}
+                      onClick={() => router.push(activeProfileHref)}
                       className="cursor-pointer text-xs rounded-[10px] flex items-center gap-2 py-2 text-slate-700 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                     >
                       <UserIcon className="size-3.5 text-slate-400" />
@@ -415,7 +544,7 @@ export function DashboardShell({
         open={showSignOutConfirm}
         onOpenChange={setShowSignOutConfirm}
         title="Log out?"
-        description="You'll need to sign in again to access your workspace."
+        description="You will need to sign in again to access your workspace."
         confirmText={isSigningOut ? "Logging out..." : "Log Out"}
         cancelText="Cancel"
         variant="destructive"
