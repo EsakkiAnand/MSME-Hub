@@ -3,7 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
+import { getRoleDashboardPath } from "@/lib/auth-utils";
+import { PublicHeader } from "@/components/navigation/public-header";
 import {
   registerIndustryAction,
   registerAlumniAction,
@@ -37,12 +40,27 @@ import {
   CheckCircle2,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
+  X,
   Info,
 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SignupPage() {
   const router = useRouter();
+  const session = authClient.useSession();
+
+  // If already authenticated with a valid session, navigate to the user's role dashboard
+  useEffect(() => {
+    if (!session.isPending && session.data?.user) {
+      const userRole = (session.data.user as any)?.role || "STUDENT";
+      const targetPath = getRoleDashboardPath(userRole);
+      router.replace(targetPath);
+    }
+  }, [session.isPending, session.data?.user, router]);
+
+
+
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<"academic" | "industry" | "alumni">("academic");
@@ -188,34 +206,16 @@ export default function SignupPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
-      {/* Top Navigation */}
-      <header className="w-full border-b bg-background/80 backdrop-blur-md px-6 py-4">
-        <div className="container mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold shadow-sm">
-              M
-            </div>
-            <div>
-              <span className="font-bold text-lg tracking-tight">MSME-Hub</span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-medium text-muted-foreground">
-                Innovation Platform
-              </span>
-            </div>
-          </Link>
-          <div className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/login" className="font-semibold text-primary hover:underline ml-1">
-              Sign in
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* Standardized Single Application Header */}
+      <PublicHeader action="login" />
 
       {/* Main Registration Content */}
       <main className="flex flex-1 items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-xl">
           <Card className="border shadow-lg">
-            <CardHeader className="text-center pb-4">
+
+
+            <CardHeader className="text-center pb-4 pt-4">
               <div className="flex justify-center mb-1">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
                   <Sparkles className="size-3.5" />
@@ -326,7 +326,7 @@ export default function SignupPage() {
                     type="button"
                     onClick={handleGoogleAcademicSignup}
                     disabled={isGoogleLoading}
-                    className="w-full h-11 font-medium bg-background border border-input text-foreground hover:bg-muted"
+                    className="w-full h-11 font-medium bg-background border border-input text-foreground hover:bg-muted text-sm shadow-xs"
                   >
                     {isGoogleLoading ? (
                       <Loader2 className="size-4 animate-spin mr-2" />

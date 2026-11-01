@@ -121,7 +121,7 @@ export function CopyIdBadge({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg font-mono font-semibold bg-slate-50 border border-slate-200/90 text-slate-800 shadow-2xs select-none",
+        "inline-flex items-center gap-1.5 rounded-[6px] font-mono font-medium bg-black/[0.04] dark:bg-white/[0.08] border border-black/[0.05] dark:border-white/[0.06] text-slate-700 dark:text-slate-300 select-none",
         sizeClasses,
         className
       )}
@@ -135,12 +135,12 @@ export function CopyIdBadge({
       <button
         type="button"
         onClick={handleCopy}
-        className="p-0.5 rounded hover:bg-slate-200/60 text-slate-400 hover:text-slate-800 transition-colors focus:outline-none"
+        className="p-0.5 rounded hover:bg-slate-200/60 text-slate-400 hover:text-slate-800 transition-all duration-120 active:scale-85 focus:outline-none cursor-pointer"
         title={`Copy ${label || "ID"} ${id}`}
         aria-label={`Copy ${label || "ID"} ${id}`}
       >
         {copied ? (
-          <Check className="size-3 text-emerald-600" />
+          <Check className="size-3 text-emerald-600 animate-in zoom-in-75 duration-150" />
         ) : (
           <Copy className="size-3" />
         )}

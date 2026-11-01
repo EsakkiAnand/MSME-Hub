@@ -22,6 +22,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { IOSSelect } from "@/components/ui/ios-select";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { toast } from "sonner";
+import { safeNavigateBack } from "@/lib/navigation-utils";
+import { ContextualBreadcrumb } from "@/components/navigation/contextual-breadcrumb";
 import { submitIndustrialProblemAction } from "@/app/actions/industry";
 
 const domainOptions = [
@@ -52,6 +54,15 @@ export default function SubmitProblemPage() {
   const [consentChecked, setConsentChecked] = useState(false);
 
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+
+  const handleCancelClick = () => {
+    if (title.trim() || description.trim()) {
+      setShowDiscardConfirm(true);
+    } else {
+      safeNavigateBack(router, "/dashboard/industry/problems");
+    }
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmitAttempt = (e: React.FormEvent) => {
@@ -99,24 +110,30 @@ export default function SubmitProblemPage() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
+      <ContextualBreadcrumb
+        items={[
+          { label: "My Problems", href: "/dashboard/industry/problems" },
+          { label: "Submit Challenge", isCurrent: true },
+        ]}
+      />
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-            <PlusCircle className="size-5 text-[#1d4ed8]" />
+          <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <PlusCircle className="size-5 text-[#007AFF]" />
             Submit Operational Challenge to Academic Pool
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             PRD §8.3 REQ-IND-01: Verified industry partners submit real-world bottlenecks. Academic staff review, claim, and assign multi-student builder teams.
           </p>
         </div>
       </div>
 
-      <Card className="border-slate-200 shadow-xs bg-white">
+      <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white">
         <CardHeader className="pb-4 border-b border-slate-100">
-          <CardTitle className="text-base font-bold text-slate-900">
+          <CardTitle className="text-base font-bold text-foreground">
             Industrial Challenge Brief
           </CardTitle>
-          <CardDescription className="text-xs text-slate-500">
+          <CardDescription className="text-xs text-muted-foreground">
             Provide comprehensive requirements, hardware constraints, and deliverable targets for student teams.
           </CardDescription>
         </CardHeader>
@@ -126,8 +143,8 @@ export default function SubmitProblemPage() {
             {/* Title & Domain */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                  <FileText className="size-3.5 text-blue-600" />
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <FileText className="size-3.5 text-[#007AFF]" />
                   Challenge Title <span className="text-rose-500">*</span>
                 </label>
                 <Input
@@ -140,7 +157,7 @@ export default function SubmitProblemPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                   <Layers className="size-3.5 text-purple-600" />
                   Engineering Domain / Sector <span className="text-rose-500">*</span>
                 </label>
@@ -152,7 +169,7 @@ export default function SubmitProblemPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                   <Clock className="size-3.5 text-amber-600" />
                   Expected Delivery Horizon
                 </label>
@@ -166,7 +183,7 @@ export default function SubmitProblemPage() {
 
             {/* Detailed Description */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">
+              <label className="text-xs font-semibold text-foreground">
                 Detailed Problem Description &amp; Industrial Context <span className="text-rose-500">*</span>
               </label>
               <Textarea
@@ -177,14 +194,14 @@ export default function SubmitProblemPage() {
                 className="text-xs"
                 required
               />
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-muted-foreground">
                 Be specific about operational context so faculty directors can assemble suitably skilled student rosters.
               </p>
             </div>
 
             {/* Constraints */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">
+              <label className="text-xs font-semibold text-foreground">
                 Technical Constraints &amp; Environment Limits (Optional)
               </label>
               <Textarea
@@ -198,7 +215,7 @@ export default function SubmitProblemPage() {
 
             {/* Expected Deliverables */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">
+              <label className="text-xs font-semibold text-foreground">
                 Expected Deliverables &amp; Output Artifacts (Optional)
               </label>
               <Textarea
@@ -218,9 +235,9 @@ export default function SubmitProblemPage() {
                   id="consent"
                   checked={consentChecked}
                   onChange={(e) => setConsentChecked(e.target.checked)}
-                  className="mt-0.5 rounded border-blue-300 text-[#1d4ed8] focus:ring-blue-500"
+                  className="mt-0.5 rounded border-blue-300 text-[#007AFF] focus:ring-blue-500"
                 />
-                <label htmlFor="consent" className="text-slate-700 font-medium cursor-pointer leading-relaxed">
+                <label htmlFor="consent" className="text-foreground font-medium cursor-pointer leading-relaxed">
                   I agree that solutions developed by student teams are governed under the{" "}
                   <strong>MIT Open Source License</strong> (ADR 0005). My enterprise retains the royalty-free commercial right to use, modify, and deploy the deliverable.
                 </label>
@@ -232,16 +249,15 @@ export default function SubmitProblemPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => router.back()}
-                className="text-xs"
+                onClick={handleCancelClick}
+                className="text-xs text-foreground hover:bg-black/[0.02] dark:bg-white/[0.03]"
               >
-                <ArrowLeft className="size-3.5 mr-1.5" />
                 Cancel
               </Button>
 
               <Button
                 type="submit"
-                className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white text-xs h-9 px-6"
+                className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs h-9 px-6"
               >
                 <Send className="size-3.5 mr-1.5" />
                 Review &amp; Submit Challenge
@@ -250,6 +266,18 @@ export default function SubmitProblemPage() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Discard Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showDiscardConfirm}
+        onOpenChange={setShowDiscardConfirm}
+        title="Discard Challenge Draft?"
+        description="Are you sure you want to discard this challenge draft? All entered requirements and deliverables will be lost."
+        confirmText="Discard Draft"
+        cancelText="Keep Editing"
+        variant="destructive"
+        onConfirm={() => safeNavigateBack(router, "/dashboard/industry/problems")}
+      />
 
       {/* Confirmation Dialog to Prevent Accidental Duplicate Submissions */}
       <ConfirmationDialog
@@ -261,7 +289,7 @@ export default function SubmitProblemPage() {
             <p className="mb-2">
               You are submitting: <strong>{title}</strong>
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Once submitted, it will be placed in the institutional domain pool where verified faculty directors will evaluate and staff multi-student project teams.
             </p>
           </div>

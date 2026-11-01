@@ -93,14 +93,14 @@ export default function SubmitIdeaPage() {
   if (formState === "success") {
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-lg border border-slate-200 p-10 text-center">
+        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-10 text-center">
           <div className="size-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto mb-4 text-emerald-600">
             <CheckCircle2 className="size-6" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-1">
+          <h3 className="text-lg font-semibold text-foreground mb-1">
             Idea Proposal Submitted
           </h3>
-          <p className="text-sm text-slate-600 max-w-md mx-auto mb-6 leading-relaxed">
+          <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6 leading-relaxed">
             Your project proposal has been submitted to the department Staff Mentors for academic review and industry feasibility screening.
           </p>
           <Button
@@ -108,7 +108,7 @@ export default function SubmitIdeaPage() {
               setForm({ title: "", problemStatement: "", proposedSolution: "", expectedImpact: "", domain: "" });
               setFormState("idle");
             }}
-            className="rounded-md bg-[#0f2744] hover:bg-[#1a385c] text-white text-sm font-medium px-4 py-2 transition-all duration-150 active:scale-[0.98]"
+            className="rounded-[10px] bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-sm font-medium px-4 py-2 transition-all duration-150 active:scale-[0.98]"
           >
             Submit Another Proposal
           </Button>
@@ -118,17 +118,17 @@ export default function SubmitIdeaPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Header Banner */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6 flex items-start gap-4">
-        <div className="size-10 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 text-slate-700">
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 flex items-start gap-4">
+        <div className="size-10 rounded-[10px] bg-slate-100 border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center shrink-0 text-foreground">
           <Lightbulb className="size-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">
             Submit Project Idea
           </h2>
-          <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
             Propose an innovative problem-solution concept for review by FXEC staff mentors and industrial partners. Approved proposals are eligible for the Sponsorship Showcase.
           </p>
         </div>
@@ -138,9 +138,9 @@ export default function SubmitIdeaPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Form Card (2 Cols) */}
         <div className="lg:col-span-2">
-          <form onSubmit={handleFormSubmit} className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200">
-              <h3 className="text-base font-semibold text-slate-900">
+          <form onSubmit={handleFormSubmit} className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden">
+            <div className="px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08]">
+              <h3 className="text-base font-semibold text-foreground">
                 Project Proposal Information
               </h3>
             </div>
@@ -148,14 +148,14 @@ export default function SubmitIdeaPage() {
             <div className="p-6 space-y-5">
               {/* Idea Title */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
                   Idea Title <span className="text-red-500">*</span>
                 </label>
                 <Input
                   placeholder="e.g. Predictive Energy Optimization Model for Small-Scale Foundries"
                   value={form.title}
                   onChange={(e) => handleChange("title", e.target.value)}
-                  className={`rounded-md border-slate-300 focus-visible:ring-blue-600 ${
+                  className={`rounded-[10px] border-black/[0.08] dark:border-white/[0.1] focus-visible:ring-[#007AFF]/25 ${
                     errors.title ? "border-red-400" : ""
                   }`}
                 />
@@ -164,7 +164,7 @@ export default function SubmitIdeaPage() {
 
               {/* Domain */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
                   Industry Domain <span className="text-red-500">*</span>
                 </label>
                 <IOSSelect
@@ -180,7 +180,7 @@ export default function SubmitIdeaPage() {
 
               {/* Problem Statement */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
                   Problem Statement <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -188,7 +188,7 @@ export default function SubmitIdeaPage() {
                   placeholder="Describe the operational challenge or engineering problem experienced by local MSMEs."
                   value={form.problemStatement}
                   onChange={(e) => handleChange("problemStatement", e.target.value)}
-                  className={`w-full text-sm border rounded-md p-3 text-slate-800 bg-white focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 resize-y transition-colors ${
+                  className={`w-full text-sm border rounded-[10px] p-3 text-foreground bg-white focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 resize-y transition-colors ${
                     errors.problemStatement ? "border-red-400" : "border-slate-300"
                   }`}
                 />
@@ -199,7 +199,7 @@ export default function SubmitIdeaPage() {
 
               {/* Proposed Solution */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
                   Proposed Solution & Methodology <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -207,7 +207,7 @@ export default function SubmitIdeaPage() {
                   placeholder="Outline the technical architecture, proposed stack, algorithms, hardware, or framework."
                   value={form.proposedSolution}
                   onChange={(e) => handleChange("proposedSolution", e.target.value)}
-                  className={`w-full text-sm border rounded-md p-3 text-slate-800 bg-white focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 resize-y transition-colors ${
+                  className={`w-full text-sm border rounded-[10px] p-3 text-foreground bg-white focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 resize-y transition-colors ${
                     errors.proposedSolution ? "border-red-400" : "border-slate-300"
                   }`}
                 />
@@ -218,7 +218,7 @@ export default function SubmitIdeaPage() {
 
               {/* Expected Impact */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
                   Target Impact & Outcome <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -226,7 +226,7 @@ export default function SubmitIdeaPage() {
                   placeholder="Expected measurable metrics (e.g., cost reduction percentage, speed improvements, reliability gains)."
                   value={form.expectedImpact}
                   onChange={(e) => handleChange("expectedImpact", e.target.value)}
-                  className={`w-full text-sm border rounded-md p-3 text-slate-800 bg-white focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 resize-y transition-colors ${
+                  className={`w-full text-sm border rounded-[10px] p-3 text-foreground bg-white focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 resize-y transition-colors ${
                     errors.expectedImpact ? "border-red-400" : "border-slate-300"
                   }`}
                 />
@@ -236,28 +236,28 @@ export default function SubmitIdeaPage() {
               </div>
 
               {/* Institutional Policy Notice */}
-              <div className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-md p-3.5">
-                <AlertCircle className="size-4 text-slate-500 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-600 leading-relaxed">
+              <div className="flex items-start gap-3 bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] rounded-[10px] p-3.5">
+                <AlertCircle className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   Approved student proposals are published to the <strong>Sponsorship Showcase</strong> for review by verified MSME industry partners. When an industry partner sponsors your idea, you will be designated as the <strong>Project Team Lead</strong>.
                 </p>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="px-6 py-4 bg-slate-50/75 border-t border-slate-200 flex items-center justify-end gap-3">
+            <div className="px-6 py-4 bg-black/[0.02] dark:bg-white/[0.03]/75 border-t border-black/[0.06] dark:border-white/[0.08] flex items-center justify-end gap-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClearClick}
-                className="rounded-md border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-medium transition-all duration-150 active:scale-[0.98]"
+                className="rounded-[10px] border-slate-300 text-foreground hover:bg-slate-100 text-xs font-medium transition-all duration-150 active:scale-[0.98]"
               >
                 Clear Fields
               </Button>
               <Button
                 type="submit"
                 disabled={formState === "submitting"}
-                className="rounded-md bg-[#0f2744] hover:bg-[#1a385c] text-white text-xs font-medium px-4 py-2 transition-all duration-150 active:scale-[0.98]"
+                className="rounded-[10px] bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs font-medium px-4 py-2 transition-all duration-150 active:scale-[0.98]"
               >
                 {formState === "submitting" ? (
                   <span className="flex items-center gap-1.5">
@@ -298,28 +298,28 @@ export default function SubmitIdeaPage() {
         </div>
 
         {/* Right Column: Proposal Guidelines & Review Process */}
-        <div className="space-y-5">
-          <div className="bg-white rounded-lg border border-slate-200 p-5 space-y-3">
-            <div className="flex items-center gap-2 text-slate-900 font-semibold text-sm">
-              <HelpCircle className="size-4 text-slate-500" />
+        <div className="space-y-6">
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 space-y-3">
+            <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+              <HelpCircle className="size-4 text-muted-foreground" />
               <span>Submission Guidelines</span>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               To expedite approval by faculty and department chairs:
             </p>
-            <ul className="text-xs text-slate-500 space-y-1.5 pt-1">
-              <li><strong className="text-slate-700">Specificity:</strong> Address an actual bottleneck in manufacturing, retail, or operations.</li>
-              <li><strong className="text-slate-700">Feasibility:</strong> Ensure the project scope can be executed within a single term.</li>
-              <li><strong className="text-slate-700">Open Source:</strong> Solutions are published under the MIT License for public auditing.</li>
+            <ul className="text-xs text-muted-foreground space-y-1.5 pt-1">
+              <li><strong className="text-foreground">Specificity:</strong> Address an actual bottleneck in manufacturing, retail, or operations.</li>
+              <li><strong className="text-foreground">Feasibility:</strong> Ensure the project scope can be executed within a single term.</li>
+              <li><strong className="text-foreground">Open Source:</strong> Solutions are published under the MIT License for public auditing.</li>
             </ul>
           </div>
 
-          <div className="bg-white rounded-lg border border-slate-200 p-5 space-y-2">
-            <div className="flex items-center gap-2 text-slate-900 font-semibold text-sm">
-              <ShieldCheck className="size-4 text-slate-500" />
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 space-y-3">
+            <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+              <ShieldCheck className="size-4 text-muted-foreground" />
               <span>Showcase Lock-In Policy</span>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Once an industry partner commits funding or sponsorship to an approved idea, the submitting student is permanently designated as the <strong>Project Team Lead</strong>.
             </p>
           </div>

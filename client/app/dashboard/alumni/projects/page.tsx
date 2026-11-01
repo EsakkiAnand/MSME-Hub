@@ -23,22 +23,22 @@ import { initialMentoredProjects, MentoredProject } from "@/lib/alumni-data";
 const statusConfig: Record<string, { label: string; badgeClass: string; icon: React.ElementType }> = {
   IN_PROGRESS: {
     label: "In Progress",
-    badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
+    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
     icon: Clock,
   },
   SOLUTION_SUBMITTED: {
     label: "Solution Submitted",
-    badgeClass: "bg-purple-50 text-purple-700 border-purple-200",
+    badgeClass: "bg-[#007AFF]/10 text-[#007AFF] border-transparent",
     icon: AlertCircle,
   },
   APPROVED: {
     label: "Approved by Admin",
-    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
     icon: CheckCircle2,
   },
   REVISION_IN_PROGRESS: {
     label: "Revision in Progress",
-    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
+    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
     icon: AlertCircle,
   },
 };
@@ -63,10 +63,10 @@ export default function MentoredProjectsPage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-slate-900">
+        <h2 className="text-xl font-bold tracking-tight text-foreground">
           Mentored Projects Directory
         </h2>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-muted-foreground mt-0.5">
           PRD §8.6: Active industry challenges where alumni mentors provide architectural critique, code quality reviews, and open-source guidance.
         </p>
       </div>
@@ -74,7 +74,7 @@ export default function MentoredProjectsPage() {
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 size-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -104,10 +104,10 @@ export default function MentoredProjectsPage() {
           const StatusIcon = cfg.icon;
 
           return (
-            <Card key={p.id} className="border-slate-200 shadow-xs hover:border-slate-300 transition-all bg-white flex flex-col justify-between">
+            <Card key={p.id} className="border-black/[0.06] dark:border-white/[0.08] shadow-xs hover:border-slate-300 transition-all bg-white flex flex-col justify-between">
               <CardHeader className="pb-3 pt-5 px-5">
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <Badge variant="outline" className="font-mono text-[11px] bg-slate-50">
+                  <Badge variant="outline" className="font-mono text-[11px] bg-black/[0.02] dark:bg-white/[0.03]">
                     {p.id}
                   </Badge>
                   <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${cfg.badgeClass}`}>
@@ -116,10 +116,10 @@ export default function MentoredProjectsPage() {
                   </span>
                 </div>
 
-                <CardTitle className="text-base font-bold text-slate-900 leading-snug">
+                <CardTitle className="text-base font-bold text-foreground leading-snug">
                   {p.title}
                 </CardTitle>
-                <div className="flex items-center gap-2 pt-1 text-xs text-slate-500">
+                <div className="flex items-center gap-2 pt-1 text-xs text-muted-foreground">
                   <span className="font-medium">{p.domain}</span>
                   <span>•</span>
                   <span>{p.lastActivity}</span>
@@ -127,31 +127,31 @@ export default function MentoredProjectsPage() {
               </CardHeader>
 
               <CardContent className="px-5 pb-5 pt-0 space-y-3">
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs space-y-1.5">
-                  <div className="flex items-center justify-between text-slate-700">
-                    <span className="flex items-center gap-1.5 text-slate-500">
+                <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-slate-100 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between text-foreground">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
                       <GraduationCap className="size-3.5 text-emerald-600" />
                       Student Team Lead:
                     </span>
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-foreground">
                       {p.teamLeadName} ({p.teamLeadUniqueId})
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-slate-700">
-                    <span className="flex items-center gap-1.5 text-slate-500">
+                  <div className="flex items-center justify-between text-foreground">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
                       <Users className="size-3.5 text-purple-600" />
                       Faculty Director:
                     </span>
-                    <span className="font-medium text-slate-800">{p.facultyMentor}</span>
+                    <span className="font-medium text-foreground">{p.facultyMentor}</span>
                   </div>
 
-                  <div className="flex items-center justify-between text-slate-700">
-                    <span className="flex items-center gap-1.5 text-slate-500">
-                      <Building2 className="size-3.5 text-blue-600" />
+                  <div className="flex items-center justify-between text-foreground">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <Building2 className="size-3.5 text-[#007AFF]" />
                       Industry Partner:
                     </span>
-                    <span className="font-medium text-slate-800">{p.industryPartner}</span>
+                    <span className="font-medium text-foreground">{p.industryPartner}</span>
                   </div>
                 </div>
 
@@ -161,14 +161,14 @@ export default function MentoredProjectsPage() {
                       href={p.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1d4ed8] hover:underline"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#007AFF] hover:underline"
                     >
                       <GitBranch className="size-3.5" />
                       Inspect Public GitHub (MIT)
                       <ExternalLink className="size-3" />
                     </a>
                   ) : (
-                    <span className="text-[11px] text-slate-400 italic">
+                    <span className="text-[11px] text-muted-foreground italic">
                       Solution repository not yet submitted
                     </span>
                   )}
@@ -177,6 +177,12 @@ export default function MentoredProjectsPage() {
             </Card>
           );
         })}
+
+        {filteredProjects.length === 0 && (
+          <div className="col-span-full rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-8 text-center text-xs text-muted-foreground">
+            No mentored projects found matching the selected filter.
+          </div>
+        )}
       </div>
     </div>
   );

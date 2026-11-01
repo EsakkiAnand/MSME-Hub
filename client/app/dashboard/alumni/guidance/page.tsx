@@ -122,10 +122,10 @@ export default function GuidanceBoardPage() {
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Page Header */}
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-slate-900">
+        <h2 className="text-xl font-bold tracking-tight text-foreground">
           Open Guidance Board
         </h2>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-muted-foreground mt-0.5">
           PRD §8.6 Hybrid Guidance Engine: Discover technical bottlenecks submitted by student project teams and post architectural advice.
         </p>
       </div>
@@ -133,7 +133,7 @@ export default function GuidanceBoardPage() {
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 size-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -167,7 +167,7 @@ export default function GuidanceBoardPage() {
             className={`px-3 py-1 rounded-full text-xs font-medium transition-colors shrink-0 ${
               selectedTag === tag
                 ? "bg-[#1d4ed8] text-white shadow-xs"
-                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                : "bg-white text-muted-foreground hover:bg-slate-100 border border-black/[0.06] dark:border-white/[0.08]"
             }`}
           >
             {tag}
@@ -178,24 +178,24 @@ export default function GuidanceBoardPage() {
       {/* Guidance Questions List */}
       <div className="space-y-4">
         {filteredRequests.length === 0 ? (
-          <Card className="border-dashed p-10 text-center text-slate-500 bg-white">
-            <HelpCircle className="size-8 text-slate-400 mx-auto mb-2" />
-            <p className="text-sm font-semibold text-slate-700">No matching guidance requests</p>
-            <p className="text-xs text-slate-400 mt-1">Try resetting your search query or tag filter.</p>
+          <Card className="border-dashed p-10 text-center text-muted-foreground bg-white">
+            <HelpCircle className="size-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm font-semibold text-foreground">No matching guidance requests</p>
+            <p className="text-xs text-muted-foreground mt-1">Try resetting your search query or tag filter.</p>
           </Card>
         ) : (
           filteredRequests.map((req) => (
             <Card
               key={req.id}
-              className="border-slate-200 shadow-xs hover:border-slate-300 transition-all bg-white"
+              className="border-black/[0.06] dark:border-white/[0.08] shadow-xs hover:border-slate-300 transition-all bg-white"
             >
               <CardHeader className="pb-3 pt-5 px-5">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-mono text-[11px] bg-slate-50">
+                    <Badge variant="outline" className="font-mono text-[11px] bg-black/[0.02] dark:bg-white/[0.03]">
                       {req.id}
                     </Badge>
-                    <span className="text-xs font-bold text-slate-800">
+                    <span className="text-xs font-bold text-foreground">
                       {req.projectTitle}
                     </span>
                     <Badge variant="secondary" className="text-[10px]">
@@ -204,7 +204,7 @@ export default function GuidanceBoardPage() {
                   </div>
 
                   {req.status === "OPEN" ? (
-                    <Badge className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-semibold flex items-center gap-1">
+                    <Badge className="bg-blue-50 text-[#007AFF] border border-blue-200 text-[10px] font-semibold flex items-center gap-1">
                       <Clock className="size-2.5" /> Open
                     </Badge>
                   ) : req.status === "RESOLVED" ? (
@@ -218,7 +218,7 @@ export default function GuidanceBoardPage() {
                   )}
                 </div>
 
-                <CardTitle className="text-sm font-semibold text-slate-900 leading-relaxed">
+                <CardTitle className="text-sm font-semibold text-foreground leading-relaxed">
                   {req.question}
                 </CardTitle>
               </CardHeader>
@@ -227,15 +227,15 @@ export default function GuidanceBoardPage() {
                 {/* Tags and Author info */}
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-xs text-slate-500 font-medium">
-                      Asked by <span className="text-slate-800 font-semibold">{req.studentName}</span> ({req.studentUniqueId}):
+                    <span className="text-xs text-muted-foreground font-medium">
+                      Asked by <span className="text-foreground font-semibold">{req.studentName}</span> ({req.studentUniqueId}):
                     </span>
                     {req.tags.map((t) => (
                       <span
                         key={t}
-                        className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700"
+                        className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-foreground"
                       >
-                        <Tag className="size-2.5 mr-1 text-slate-400" />
+                        <Tag className="size-2.5 mr-1 text-muted-foreground" />
                         {t}
                       </span>
                     ))}
@@ -244,7 +244,7 @@ export default function GuidanceBoardPage() {
                   <Button
                     size="sm"
                     onClick={() => handleOpenAnswerModal(req)}
-                    className="text-xs bg-[#1d4ed8] hover:bg-[#1e40af] text-white h-7 px-3"
+                    className="text-xs bg-[#007AFF] hover:bg-[#007AFF]/90 text-white h-7 px-3"
                   >
                     <MessageSquare className="size-3 mr-1.5" />
                     {req.status === "OPEN" ? "Provide Guidance" : "Add Further Feedback"}
@@ -253,19 +253,19 @@ export default function GuidanceBoardPage() {
 
                 {/* Existing Mentorship Responses Thread */}
                 {req.responses && req.responses.length > 0 && (
-                  <div className="mt-3 p-3.5 rounded-lg bg-slate-50 border border-slate-200/80 space-y-2">
-                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                  <div className="mt-3 p-3.5 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08]/80 space-y-2">
+                    <span className="text-[11px] font-bold text-foreground uppercase tracking-wider block">
                       Published Mentor Advice:
                     </span>
                     {req.responses.map((resp) => (
                       <div key={resp.id} className="text-xs space-y-1">
-                        <div className="flex items-center justify-between text-slate-600">
-                          <span className="font-semibold text-slate-800">{resp.authorName}</span>
+                        <div className="flex items-center justify-between text-muted-foreground">
+                          <span className="font-semibold text-foreground">{resp.authorName}</span>
                           <Badge variant="outline" className="text-[9px] bg-white">
                             {resp.category}
                           </Badge>
                         </div>
-                        <p className="text-slate-700 leading-relaxed">{resp.content}</p>
+                        <p className="text-foreground leading-relaxed">{resp.content}</p>
                       </div>
                     ))}
                   </div>
@@ -280,28 +280,28 @@ export default function GuidanceBoardPage() {
       <Dialog open={!!selectedRequest} onOpenChange={(open) => !open && setSelectedRequest(null)}>
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <MessageSquare className="size-4 text-[#1d4ed8]" />
+            <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
+              <MessageSquare className="size-4 text-[#007AFF]" />
               Respond to Guidance Request
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-muted-foreground">
               Guidance will be posted to the student team and recorded on your mentorship portfolio.
             </DialogDescription>
           </DialogHeader>
 
           {selectedRequest && (
             <div className="space-y-4 py-2">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-                <span className="text-xs font-bold text-slate-800 block">
+              <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] space-y-1">
+                <span className="text-xs font-bold text-foreground block">
                   {selectedRequest.projectTitle}
                 </span>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                <p className="text-xs text-muted-foreground leading-relaxed font-medium">
                   {selectedRequest.question}
                 </p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">
+                <label className="text-xs font-semibold text-foreground">
                   Feedback Category (PRD §8.6)
                 </label>
                 <IOSSelect
@@ -317,7 +317,7 @@ export default function GuidanceBoardPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">
+                <label className="text-xs font-semibold text-foreground">
                   Your Actionable Guidance
                 </label>
                 <Textarea
@@ -344,7 +344,7 @@ export default function GuidanceBoardPage() {
               size="sm"
               onClick={handleSubmitResponse}
               disabled={isSubmitting}
-              className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white"
+              className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white"
             >
               {isSubmitting ? (
                 <>

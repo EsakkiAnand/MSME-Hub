@@ -101,22 +101,22 @@ export default function AlumniProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] text-slate-500">
-        <Loader2 className="size-8 animate-spin text-[#1d4ed8] mb-3" />
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-muted-foreground">
+        <Loader2 className="size-8 animate-spin text-[#007AFF] mb-3" />
         <p className="text-sm font-medium">Loading Alumni Profile...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Header Profile Identity Card */}
-      <Card className="border-slate-200 shadow-xs bg-white overflow-hidden">
-        <div className="h-24 bg-gradient-to-r from-[#0f2744] via-[#1a385c] to-[#1e40af]" />
+      <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white overflow-hidden">
+        <div className="h-20 bg-black/[0.03] dark:bg-white/[0.04] border-b border-black/[0.06] dark:border-white/[0.08]" />
         <CardContent className="px-6 pb-6 pt-0 relative">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-10 mb-4">
             <div className="flex items-end gap-3.5">
-              <div className="size-20 rounded-xl bg-amber-500/20 text-amber-700 border-4 border-white shadow-md flex items-center justify-center text-2xl font-black bg-white">
+              <div className="size-16 rounded-[16px] bg-[#007AFF] text-white border-4 border-white dark:border-[#1C1C1E] shadow-sm flex items-center justify-center text-2xl font-bold">
                 {name
                   .split(" ")
                   .map((n) => n[0])
@@ -126,12 +126,12 @@ export default function AlumniProfilePage() {
               </div>
               <div className="mb-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold text-slate-900">{name}</h2>
-                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
+                  <h2 className="text-xl font-bold text-foreground">{name}</h2>
+                  <Badge variant="outline" className="bg-[#34C759]/10 text-[#34C759] border-transparent text-xs">
                     <CheckCircle2 className="size-3 mr-1" /> Verified Mentor
                   </Badge>
                 </div>
-                <p className="text-xs text-slate-500">{email}</p>
+                <p className="text-xs text-muted-foreground">{email}</p>
               </div>
             </div>
 
@@ -141,17 +141,17 @@ export default function AlumniProfilePage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-100 text-xs">
-            <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-400 block text-[11px]">Passout Batch</span>
-              <span className="font-bold text-slate-800">{passoutYear}</span>
+            <div className="p-2.5 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-slate-100">
+              <span className="text-muted-foreground block text-[11px]">Passout Batch</span>
+              <span className="font-bold text-foreground">{passoutYear}</span>
             </div>
-            <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-400 block text-[11px]">Organization</span>
-              <span className="font-bold text-slate-800 truncate block">{currentCompany}</span>
+            <div className="p-2.5 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-slate-100">
+              <span className="text-muted-foreground block text-[11px]">Organization</span>
+              <span className="font-bold text-foreground truncate block">{currentCompany}</span>
             </div>
-            <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-400 block text-[11px]">Designation</span>
-              <span className="font-bold text-slate-800 truncate block">{currentRole}</span>
+            <div className="p-2.5 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-slate-100">
+              <span className="text-muted-foreground block text-[11px]">Designation</span>
+              <span className="font-bold text-foreground truncate block">{currentRole}</span>
             </div>
             <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800">
               <span className="text-amber-600 block text-[11px]">Endorsements</span>
@@ -164,12 +164,12 @@ export default function AlumniProfilePage() {
       </Card>
 
       {/* Profile Edit Form */}
-      <Card className="border-slate-200 shadow-xs bg-white">
+      <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white">
         <CardHeader className="pb-4">
-          <CardTitle className="text-base font-bold text-slate-900">
+          <CardTitle className="text-base font-bold text-foreground">
             Professional Information &amp; Mentorship Credentials
           </CardTitle>
-          <CardDescription className="text-xs text-slate-500">
+          <CardDescription className="text-xs text-muted-foreground">
             Keep your credentials up to date so student builders and faculty can route relevant domain inquiries.
           </CardDescription>
         </CardHeader>
@@ -177,8 +177,8 @@ export default function AlumniProfilePage() {
           <form onSubmit={handleSaveProfile} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                  <GraduationCap className="size-3.5 text-blue-600" />
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <GraduationCap className="size-3.5 text-[#007AFF]" />
                   Engineering Degree
                 </label>
                 <Input
@@ -191,7 +191,7 @@ export default function AlumniProfilePage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">
+                <label className="text-xs font-semibold text-foreground">
                   Graduation Year
                 </label>
                 <Input
@@ -207,7 +207,7 @@ export default function AlumniProfilePage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                   <Building2 className="size-3.5 text-emerald-600" />
                   Current Organization / Company
                 </label>
@@ -221,7 +221,7 @@ export default function AlumniProfilePage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                   <Briefcase className="size-3.5 text-purple-600" />
                   Current Designation / Role
                 </label>
@@ -236,8 +236,8 @@ export default function AlumniProfilePage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                <Globe className="size-3.5 text-blue-600" />
+              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Globe className="size-3.5 text-[#007AFF]" />
                 LinkedIn / Professional Profile URL
               </label>
               <Input
@@ -253,7 +253,7 @@ export default function AlumniProfilePage() {
               <Button
                 type="submit"
                 disabled={saving}
-                className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white text-xs h-9 px-5"
+                className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs h-9 px-5"
               >
                 {saving ? (
                   <>

@@ -66,10 +66,9 @@ function CallbackHandler() {
               {error}
             </p>
             <div className="pt-2">
-              <Link href="/login">
-                <Button variant="outline" className="w-full">
-                  <ArrowLeft className="mr-2 size-4" />
-                  Back to Sign In
+              <Link href="/login" className="w-full">
+                <Button className="w-full font-medium">
+                  Return to Sign In
                 </Button>
               </Link>
             </div>

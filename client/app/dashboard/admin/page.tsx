@@ -16,6 +16,14 @@ import {
 } from "lucide-react";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 interface ManagedCompany {
@@ -43,30 +51,6 @@ const initialCompanies: ManagedCompany[] = [
     prefix: "NPE",
     domain: "Manufacturing & Heavy Engineering",
     udyam: "UDYAM-TN-26-0048123",
-  },
-  {
-    id: "COMP-003",
-    name: "Apex Tex Machineries",
-    companyId: "ATM001",
-    prefix: "ATM",
-    domain: "Textiles & Automated Looms",
-    udyam: "UDYAM-TN-26-0091824",
-  },
-  {
-    id: "COMP-004",
-    name: "Vagai Cottage Crafts Collective",
-    companyId: "VCC001",
-    prefix: "VCC",
-    domain: "Artisanal & Brassware Crafts",
-    udyam: "UDYAM-TN-26-0034567",
-  },
-  {
-    id: "COMP-005",
-    name: "South Star Logistics",
-    companyId: "SSL001",
-    prefix: "SSL",
-    domain: "Supply Chain & Road Transport",
-    udyam: "UDYAM-TN-26-0078912",
   },
 ];
 
@@ -125,203 +109,197 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Institutional Header Banner */}
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1">
-            <h1 className="text-2xl font-bold tracking-tight">MSME Ecosystem Administration</h1>
-            <CopyIdBadge id={adminId} label="Admin ID" />
-            <Badge variant="outline" className="text-rose-600 border-rose-500/30 bg-rose-500/10">
+            <h1 className="text-xl font-bold tracking-tight text-foreground dark:text-foreground">
+              MSME Ecosystem Administration
+            </h1>
+            <CopyIdBadge id={adminId} label="Admin ID" size="xs" />
+            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#FF3B30]/10 text-[#FF3B30] dark:bg-[#FF453A]/15 dark:text-[#FF453A] border-transparent">
               Super Admin
-            </Badge>
+            </span>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground dark:text-muted-foreground mt-0.5">
             Welcome, {user?.name || "Administrator"}. Manage industry approvals, configure company unique prefixes, and govern MSME project deliverables.
           </p>
         </div>
       </div>
 
-      {/* Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium">Pending MSMEs</CardDescription>
-            <CardTitle className="text-3xl font-extrabold flex items-center justify-between">
-              <span>0</span>
-              <Building2 className="size-5 text-blue-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">Industry registrations needing verification</p>
-          </CardContent>
-        </Card>
+      {/* Standardized Metrics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full ios-card-interactive">
+          <div className="flex items-center justify-between text-muted-foreground dark:text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
+            <span>Pending MSMEs</span>
+            <Building2 className="size-4 text-[#007AFF] dark:text-blue-400" />
+          </div>
+          <div className="text-2xl font-bold text-foreground dark:text-foreground">0</div>
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">
+            Industry registrations needing verification
+          </p>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium">Solution Gate</CardDescription>
-            <CardTitle className="text-3xl font-extrabold flex items-center justify-between">
-              <span>0</span>
-              <GitBranch className="size-5 text-purple-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">GitHub solutions submitted for admin sign-off</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full ios-card-interactive">
+          <div className="flex items-center justify-between text-muted-foreground dark:text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
+            <span>Solution Gate</span>
+            <GitBranch className="size-4 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div className="text-2xl font-bold text-foreground dark:text-foreground">0</div>
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">
+            GitHub solutions submitted for admin sign-off
+          </p>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium">Rating Moderation</CardDescription>
-            <CardTitle className="text-3xl font-extrabold flex items-center justify-between">
-              <span>0</span>
-              <Star className="size-5 text-amber-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">Ratings &le; 2 stars queued for mediation</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full ios-card-interactive">
+          <div className="flex items-center justify-between text-muted-foreground dark:text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
+            <span>Rating Moderation</span>
+            <Star className="size-4 text-amber-500" />
+          </div>
+          <div className="text-2xl font-bold text-foreground dark:text-foreground">0</div>
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">
+            Ratings &le; 2 stars queued for mediation
+          </p>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium">System Health</CardDescription>
-            <CardTitle className="text-3xl font-extrabold flex items-center justify-between">
-              <span className="text-emerald-500 text-xl font-bold">Optimal</span>
-              <ShieldCheck className="size-5 text-emerald-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">Atomic unique ID sequences active</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full ios-card-interactive">
+          <div className="flex items-center justify-between text-muted-foreground dark:text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
+            <span>System Health</span>
+            <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">Optimal</div>
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">
+            Atomic unique ID sequences active
+          </p>
+        </div>
       </div>
 
       {/* Company Unique ID & Prefix Configuration Management Console */}
-      <Card>
-        <CardHeader className="pb-3 border-b border-border/40">
-          <div className="flex items-center justify-between">
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden shadow-xs">
+        <div className="p-5 sm:px-6 border-b border-black/[0.06] dark:border-white/[0.08] dark:border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
             <div className="flex items-center gap-2">
-              <Settings2 className="size-4 text-blue-600" />
-              <CardTitle className="text-base font-semibold">
+              <Settings2 className="size-4 text-[#007AFF]" />
+              <h2 className="text-base font-semibold text-foreground dark:text-foreground">
                 Company Unique ID &amp; Prefix Registry
-              </CardTitle>
+              </h2>
             </div>
-            <span className="text-xs text-muted-foreground font-mono">
-              Prefixes &middot; Concurrency-Safe
-            </span>
+            <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">
+              Permanent unique IDs generated for registered companies. Administrators may configure or correct company prefixes when necessary while preserving database uniqueness constraints.
+            </p>
           </div>
-          <CardDescription className="text-xs mt-1">
-            Permanent unique IDs generated for registered companies. Administrators may configure or correct company prefixes when necessary while preserving database uniqueness constraints.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-4">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/75 border-b border-slate-200 text-slate-500 font-medium uppercase tracking-wider">
-                <tr>
-                  <th className="px-4 py-3">Company Name</th>
-                  <th className="px-3 py-3">Udyam Reg No</th>
-                  <th className="px-3 py-3">Prefix</th>
-                  <th className="px-4 py-3">Company Unique ID</th>
-                  <th className="px-3 py-3 text-right">Admin Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {companies.map((comp) => (
-                  <tr key={comp.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-slate-800">
-                      <div>{comp.name}</div>
-                      <div className="text-[11px] font-normal text-slate-400">{comp.domain}</div>
-                    </td>
-                    <td className="px-3 py-3 font-mono text-slate-600">{comp.udyam}</td>
-                    <td className="px-3 py-3">
-                      <span className="font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700">
-                        {comp.prefix}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <CopyIdBadge id={comp.companyId} label="Company ID" />
-                    </td>
-                    <td className="px-3 py-3 text-right">
-                      <button
-                        onClick={() => handleOpenEdit(comp)}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors"
-                      >
-                        <Edit2 className="size-3 text-slate-500" />
-                        <span>Configure Prefix</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Edit Company Prefix Modal */}
-      {editingCompany && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 text-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="font-semibold text-sm text-slate-900">
-                Configure Company Prefix
-              </h3>
-              <button
-                onClick={() => setEditingCompany(null)}
-                className="text-slate-400 hover:text-slate-700"
-              >
-                Cancel
-              </button>
-            </div>
-
-            <div>
-              <p className="text-slate-500 mb-1">Company Name</p>
-              <p className="font-semibold text-slate-900 text-sm">{editingCompany.name}</p>
-            </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Custom Unique Prefix (2 to 5 Letters)
-              </label>
-              <input
-                type="text"
-                value={newPrefixInput}
-                onChange={(e) => setNewPrefixInput(e.target.value.toUpperCase())}
-                placeholder="e.g. HTMP, NPE, ATM"
-                className="w-full text-xs font-mono font-bold border border-slate-200 rounded-md p-2.5 text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
-              />
-              <p className="text-[11px] text-slate-400 mt-1">
-                Example: <strong className="text-slate-700">HTMP</strong> for Hexaware Technology yields <strong className="font-mono text-slate-700">HTMP001</strong>.
-              </p>
-            </div>
-
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setEditingCompany(null)}
-                className="px-3 py-1.5 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handlePreSave}
-                className="px-4 py-1.5 rounded-md bg-[#0f2744] hover:bg-[#1a385c] text-white font-semibold shadow-xs"
-              >
-                Apply Prefix
-              </button>
-            </div>
-          </div>
+          <span className="text-xs text-muted-foreground font-mono bg-slate-100 dark:bg-muted px-2.5 py-1 rounded-md self-start sm:self-auto">
+            Prefixes &middot; Concurrency-Safe
+          </span>
         </div>
-      )}
 
-      {/* Confirmation Dialog */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-black/[0.02] dark:bg-white/[0.03] dark:bg-muted/40 border-b border-black/[0.06] dark:border-white/[0.08] dark:border-border text-muted-foreground dark:text-muted-foreground font-semibold">
+              <tr>
+                <th className="px-4 sm:px-6 py-3">Company &amp; Industry</th>
+                <th className="px-4 sm:px-6 py-3">Udyam Registration</th>
+                <th className="px-4 sm:px-6 py-3">Assigned Unique ID</th>
+                <th className="px-4 sm:px-6 py-3">Current Prefix</th>
+                <th className="px-4 sm:px-6 py-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06] dark:divide-border/60">
+              {companies.map((comp) => (
+                <tr key={comp.id} className="hover:bg-black/[0.02] dark:bg-white/[0.03]/70 dark:hover:bg-muted/30 transition-colors">
+                  <td className="px-4 sm:px-6 py-3.5 font-medium text-foreground dark:text-foreground">
+                    <div>{comp.name}</div>
+                    <div className="text-[11px] text-muted-foreground font-normal">{comp.domain}</div>
+                  </td>
+                  <td className="px-4 sm:px-6 py-3.5 font-mono text-muted-foreground dark:text-muted-foreground">
+                    {comp.udyam}
+                  </td>
+                  <td className="px-4 sm:px-6 py-3.5">
+                    <CopyIdBadge id={comp.companyId} label="Company ID" size="xs" />
+                  </td>
+                  <td className="px-4 sm:px-6 py-3.5">
+                    <span className="font-mono font-bold px-2 py-0.5 rounded bg-blue-50 text-[#007AFF] dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/40 text-[11px]">
+                      {comp.prefix}
+                    </span>
+                  </td>
+                  <td className="px-4 sm:px-6 py-3.5 text-right">
+                    <button
+                      onClick={() => handleOpenEdit(comp)}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-black/[0.06] dark:border-white/[0.08] dark:border-border hover:bg-black/[0.02] dark:bg-white/[0.03] dark:hover:bg-muted text-foreground dark:text-foreground transition-all duration-150 cursor-pointer active:scale-[0.98]">
+                      <Edit2 className="size-3 text-muted-foreground" />
+                      <span>Configure Prefix</span>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {companies.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-xs text-muted-foreground">
+                    No registered companies found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Edit Company Prefix Accessible Dialog */}
+      <Dialog open={!!editingCompany} onOpenChange={(open) => !open && setEditingCompany(null)}>
+        {editingCompany && (
+          <DialogContent className="max-w-md p-6 rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-base font-semibold text-foreground dark:text-foreground">
+                Configure Company Prefix
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground dark:text-muted-foreground">
+                Update the prefix for <strong>{editingCompany.name}</strong>.
+              </DialogDescription>
+            </DialogHeader>
+
+            <form onSubmit={handlePreSave} className="space-y-4 mt-2">
+              <div>
+                <label className="block text-xs font-semibold text-foreground dark:text-muted-foreground mb-1.5">
+                  Custom Unique Prefix (2 to 5 Letters)
+                </label>
+                <input
+                  type="text"
+                  value={newPrefixInput}
+                  onChange={(e) => setNewPrefixInput(e.target.value.toUpperCase())}
+                  placeholder="e.g. HTMP, NPE, ATM"
+                  className="w-full text-xs font-mono font-bold border border-black/[0.06] dark:border-white/[0.08] dark:border-border rounded-lg p-2.5 text-foreground dark:text-foreground bg-white dark:bg-background uppercase focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all"
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Example: <strong className="text-foreground dark:text-slate-300">HTMP</strong> yields unique ID <strong className="font-mono text-foreground dark:text-slate-300">HTMP001</strong>.
+                </p>
+              </div>
+
+              <DialogFooter className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setEditingCompany(null)}
+                  className="px-4 py-2 rounded-lg border border-black/[0.06] dark:border-white/[0.08] dark:border-border text-foreground dark:text-foreground hover:bg-black/[0.02] dark:bg-white/[0.03] dark:hover:bg-muted text-xs font-medium transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-[#007AFF] hover:bg-[#007AFF]/90 text-white font-medium text-xs shadow-xs transition-all active:scale-[0.98]"
+                >
+                  Apply Prefix
+                </button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        )}
+      </Dialog>
+
+      {/* iOS-Inspired Confirmation Dialog */}
       <ConfirmationDialog
         open={showConfirm}
         onOpenChange={setShowConfirm}
-        title="Confirm Company Prefix Correction"
+        title="Confirm Company Prefix Update"
         description={`Do you want to apply the prefix "${newPrefixInput}" to ${editingCompany?.name}? This will allocate a new unique ID while maintaining database uniqueness.`}
         itemName={editingCompany?.name}
         confirmText="Confirm Prefix"

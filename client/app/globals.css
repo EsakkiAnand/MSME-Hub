@@ -117,6 +117,75 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ===========================================================================
+   Scoped iOS Design System for Authenticated Dashboards (.ios-theme)
+   =========================================================================== */
+.ios-theme {
+  --background: #f2f2f7;
+  --foreground: #1c1c1e;
+  --card: #ffffff;
+  --card-foreground: #1c1c1e;
+  --popover: #ffffff;
+  --popover-foreground: #1c1c1e;
+  --primary: #007aff;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f2f7;
+  --secondary-foreground: #1c1c1e;
+  --muted: #f2f2f7;
+  --muted-foreground: #8e8e93;
+  --accent: #f2f2f7;
+  --accent-foreground: #007aff;
+  --destructive: #ff3b30;
+  --border: rgba(60, 60, 67, 0.12);
+  --input: rgba(60, 60, 67, 0.15);
+  --ring: rgba(0, 122, 255, 0.35);
+  --radius: 0.75rem;
+
+  --sidebar: #f8f9fb;
+  --sidebar-foreground: #1c1c1e;
+  --sidebar-primary: #007aff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(0, 0, 0, 0.05);
+  --sidebar-accent-foreground: #007aff;
+  --sidebar-border: rgba(60, 60, 67, 0.1);
+  --sidebar-ring: rgba(0, 122, 255, 0.35);
+
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-sans), system-ui, sans-serif;
+}
+
+.dark .ios-theme,
+.ios-theme.dark,
+.ios-theme .dark {
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #1c1c1e;
+  --card-foreground: #ffffff;
+  --popover: #1c1c1e;
+  --popover-foreground: #ffffff;
+  --primary: #0a84ff;
+  --primary-foreground: #ffffff;
+  --secondary: #2c2c2e;
+  --secondary-foreground: #ffffff;
+  --muted: #2c2c2e;
+  --muted-foreground: #98989d;
+  --accent: #2c2c2e;
+  --accent-foreground: #0a84ff;
+  --destructive: #ff453a;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.16);
+  --ring: rgba(10, 132, 255, 0.4);
+  --radius: 0.75rem;
+
+  --sidebar: #151516;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #0a84ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255, 255, 255, 0.08);
+  --sidebar-accent-foreground: #0a84ff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: rgba(10, 132, 255, 0.4);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -127,6 +196,18 @@
   html {
     @apply font-sans;
   }
+}
+
+/* ===========================================================================
+   Standardized Apple iOS-Inspired Motion System
+   =========================================================================== */
+:root {
+  --ease-ios: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --duration-micro: 120ms;
+  --duration-fast: 180ms;
+  --duration-normal: 260ms;
+  --duration-medium: 360ms;
 }
 
 @keyframes pageFadeIn {
@@ -140,18 +221,77 @@
   }
 }
 
-.animate-page-enter {
-  animation: pageFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+@keyframes modalFadeScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
+@keyframes drawerSlideIn {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-page-enter {
+  animation: pageFadeIn var(--duration-fast) var(--ease-ios) forwards;
+}
+
+.animate-modal-enter {
+  animation: modalFadeScaleIn var(--duration-fast) var(--ease-ios) forwards;
+}
+
+.animate-drawer-enter {
+  animation: drawerSlideIn var(--duration-normal) var(--ease-ios) forwards;
+}
+
+/* Tactile press feedback for buttons, chips, and list items */
+.ios-press {
+  transition: transform var(--duration-micro) var(--ease-ios), opacity var(--duration-micro) ease;
+}
+.ios-press:active {
+  transform: scale(0.98);
+}
+
+/* Subtle elevation lift for interactive cards */
+.ios-card-interactive {
+  transition: transform var(--duration-fast) var(--ease-ios),
+              box-shadow var(--duration-fast) var(--ease-ios),
+              border-color var(--duration-fast) ease;
+}
+.ios-card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+}
+.dark .ios-card-interactive:hover {
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.4), 0 2px 8px -1px rgba(0, 0, 0, 0.3);
+}
+.ios-card-interactive:active {
+  transform: scale(0.99) translateY(0);
+}
+
+/* Reduced motion accessibility */
 @media (prefers-reduced-motion: reduce) {
-  .animate-page-enter {
+  .animate-page-enter,
+  .animate-modal-enter,
+  .animate-drawer-enter,
+  .ios-press,
+  .ios-card-interactive {
     animation: none !important;
     transform: none !important;
+    transition: none !important;
   }
   *, *::before, *::after {
-    animation-duration: 0.01ms !important;
+    animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0.001ms !important;
   }
 }

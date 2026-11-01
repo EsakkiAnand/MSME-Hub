@@ -50,8 +50,8 @@ export default function IndustryOverviewPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] text-slate-500">
-        <Loader2 className="size-8 animate-spin text-[#1d4ed8] mb-3" />
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-muted-foreground">
+        <Loader2 className="size-8 animate-spin text-[#007AFF] mb-3" />
         <p className="text-sm font-medium">Loading Industry Partner Portal...</p>
       </div>
     );
@@ -72,22 +72,22 @@ export default function IndustryOverviewPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Welcome & Identity Banner */}
-      <div className="bg-gradient-to-r from-[#0f2744] via-[#163357] to-[#1e40af] rounded-xl p-6 text-white shadow-xs">
+      <div className="bg-white dark:bg-card rounded-xl border border-black/[0.06] dark:border-white/[0.08] dark:border-border p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-400/20 text-blue-300 border border-blue-400/30">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-[#007AFF] border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50">
                 Verified MSME Partner
               </span>
               <CopyIdBadge id={profile?.companyId || "HTMP001"} label="Company ID" size="xs" />
               <CopyIdBadge id={data?.user?.uniqueId || "IND0001"} label="Partner ID" size="xs" />
             </div>
 
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className="text-xl font-bold tracking-tight text-foreground dark:text-foreground">
               {profile?.companyName || "MSME Enterprise"}
             </h2>
-            <p className="text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
-              Udyam No: <span className="font-mono text-white font-medium">{profile?.udyamRegNo || "UDYAM-TN-01-XXXX"}</span> • Sector: {profile?.domain || "General Industry"}.
+            <p className="text-xs sm:text-sm text-muted-foreground dark:text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+              Udyam No: <span className="font-mono text-foreground dark:text-foreground font-semibold">{profile?.udyamRegNo || "UDYAM-TN-01-XXXX"}</span> • Sector: {profile?.domain || "General Industry"}.
               Submit authentic engineering bottlenecks and collaborate with student project teams under faculty supervision.
             </p>
           </div>
@@ -95,7 +95,7 @@ export default function IndustryOverviewPage() {
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link href="/dashboard/industry/submit-problem">
               <Button
-                className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white text-xs h-9"
+                className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs h-9 shadow-xs transition-all active:scale-[0.98]"
               >
                 <PlusCircle className="size-3.5 mr-1.5" />
                 Submit New Challenge
@@ -129,39 +129,39 @@ export default function IndustryOverviewPage() {
 
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        <Card className="border-slate-200 shadow-xs bg-white">
+        <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white">
           <CardHeader className="pb-1.5 pt-4 px-4">
-            <CardDescription className="text-[11px] uppercase font-semibold text-slate-500">
+            <CardDescription className="text-[11px] uppercase font-semibold text-muted-foreground">
               Submitted
             </CardDescription>
-            <CardTitle className="text-2xl font-black text-slate-900 flex items-center justify-between">
+            <CardTitle className="text-2xl font-black text-foreground flex items-center justify-between">
               <span>{stats.totalSubmitted}</span>
-              <FileText className="size-4 text-slate-400" />
+              <FileText className="size-4 text-muted-foreground" />
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-3">
-            <p className="text-[11px] text-slate-500">Total operational challenges</p>
+            <p className="text-[11px] text-muted-foreground">Total operational challenges</p>
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 shadow-xs bg-white">
+        <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white">
           <CardHeader className="pb-1.5 pt-4 px-4">
-            <CardDescription className="text-[11px] uppercase font-semibold text-slate-500">
+            <CardDescription className="text-[11px] uppercase font-semibold text-muted-foreground">
               In Domain Pool
             </CardDescription>
-            <CardTitle className="text-2xl font-black text-blue-600 flex items-center justify-between">
+            <CardTitle className="text-2xl font-black text-[#007AFF] flex items-center justify-between">
               <span>{stats.availableInPool}</span>
               <Clock className="size-4 text-blue-500" />
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-3">
-            <p className="text-[11px] text-slate-500">Open for faculty claiming</p>
+            <p className="text-[11px] text-muted-foreground">Open for faculty claiming</p>
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 shadow-xs bg-white">
+        <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white">
           <CardHeader className="pb-1.5 pt-4 px-4">
-            <CardDescription className="text-[11px] uppercase font-semibold text-slate-500">
+            <CardDescription className="text-[11px] uppercase font-semibold text-muted-foreground">
               Claimed by Staff
             </CardDescription>
             <CardTitle className="text-2xl font-black text-purple-600 flex items-center justify-between">
@@ -170,13 +170,13 @@ export default function IndustryOverviewPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-3">
-            <p className="text-[11px] text-slate-500">Assigned into project teams</p>
+            <p className="text-[11px] text-muted-foreground">Assigned into project teams</p>
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 shadow-xs bg-white">
+        <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white">
           <CardHeader className="pb-1.5 pt-4 px-4">
-            <CardDescription className="text-[11px] uppercase font-semibold text-slate-500">
+            <CardDescription className="text-[11px] uppercase font-semibold text-muted-foreground">
               Active Projects
             </CardDescription>
             <CardTitle className="text-2xl font-black text-amber-600 flex items-center justify-between">
@@ -185,13 +185,13 @@ export default function IndustryOverviewPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-3">
-            <p className="text-[11px] text-slate-500">Under student development</p>
+            <p className="text-[11px] text-muted-foreground">Under student development</p>
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 shadow-xs bg-white col-span-2 sm:col-span-1">
+        <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white col-span-2 sm:col-span-1">
           <CardHeader className="pb-1.5 pt-4 px-4">
-            <CardDescription className="text-[11px] uppercase font-semibold text-slate-500">
+            <CardDescription className="text-[11px] uppercase font-semibold text-muted-foreground">
               Completed &amp; Rated
             </CardDescription>
             <CardTitle className="text-2xl font-black text-emerald-600 flex items-center justify-between">
@@ -200,7 +200,7 @@ export default function IndustryOverviewPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-3">
-            <p className="text-[11px] text-slate-500">Approved MIT solutions</p>
+            <p className="text-[11px] text-muted-foreground">Approved MIT solutions</p>
           </CardContent>
         </Card>
       </div>
@@ -208,20 +208,20 @@ export default function IndustryOverviewPage() {
       {/* Two Column Layout: Submitted Problems vs Active Deliverables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: Submitted Problems */}
-        <Card className="border-slate-200 shadow-xs bg-white">
+        <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <FileText className="size-4 text-[#1d4ed8]" />
+              <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
+                <FileText className="size-4 text-[#007AFF]" />
                 Recent Submitted Challenges
               </CardTitle>
-              <CardDescription className="text-xs text-slate-500">
+              <CardDescription className="text-xs text-muted-foreground">
                 Problems submitted to the institutional domain pool.
               </CardDescription>
             </div>
             <Link
               href="/dashboard/industry/problems"
-              className="text-xs font-semibold text-[#1d4ed8] hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1"
             >
               View All
               <ArrowRight className="size-3" />
@@ -231,7 +231,7 @@ export default function IndustryOverviewPage() {
             {problems.slice(0, 3).map((prob) => (
               <div
                 key={prob.id}
-                className="p-3.5 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors space-y-1.5"
+                className="p-3.5 rounded-lg border border-slate-100 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.02] dark:bg-white/[0.03] transition-colors space-y-1.5"
               >
                 <div className="flex items-center justify-between gap-2">
                   <Badge variant="outline" className="font-mono text-[10px] bg-white">
@@ -241,17 +241,17 @@ export default function IndustryOverviewPage() {
                     variant="outline"
                     className={
                       prob.status === "CLAIMED"
-                        ? "bg-purple-50 text-purple-700 border-purple-200 text-[10px]"
-                        : "bg-blue-50 text-blue-700 border-blue-200 text-[10px]"
+                        ? "bg-[#007AFF]/10 text-[#007AFF] border-transparent text-[10px]"
+                        : "bg-blue-50 text-[#007AFF] border-blue-200 text-[10px]"
                     }
                   >
                     {prob.status === "CLAIMED" ? "Claimed by Staff" : "Available in Pool"}
                   </Badge>
                 </div>
-                <h4 className="text-xs font-bold text-slate-900 leading-snug">
+                <h4 className="text-xs font-bold text-foreground leading-snug">
                   {prob.title}
                 </h4>
-                <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
                   <span>Domain: {prob.domain}</span>
                   {prob.claimedByFacultyName && (
                     <span className="text-purple-700 font-medium">
@@ -265,20 +265,20 @@ export default function IndustryOverviewPage() {
         </Card>
 
         {/* Right: Active Projects & Deliverables */}
-        <Card className="border-slate-200 shadow-xs bg-white">
+        <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
                 <FolderKanban className="size-4 text-emerald-600" />
                 Collaborative Student Projects
               </CardTitle>
-              <CardDescription className="text-xs text-slate-500">
+              <CardDescription className="text-xs text-muted-foreground">
                 Student development teams building solutions under staff supervision.
               </CardDescription>
             </div>
             <Link
               href="/dashboard/industry/projects"
-              className="text-xs font-semibold text-[#1d4ed8] hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1"
             >
               Track Deliverables
               <ArrowRight className="size-3" />
@@ -288,7 +288,7 @@ export default function IndustryOverviewPage() {
             {projects.slice(0, 3).map((prj) => (
               <div
                 key={prj.id}
-                className="p-3.5 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors space-y-2"
+                className="p-3.5 rounded-lg border border-slate-100 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.02] dark:bg-white/[0.03] transition-colors space-y-2"
               >
                 <div className="flex items-center justify-between gap-2">
                   <Badge variant="outline" className="font-mono text-[10px] bg-white">
@@ -298,19 +298,19 @@ export default function IndustryOverviewPage() {
                     variant="outline"
                     className={
                       prj.status === "APPROVED"
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]"
+                        ? "bg-[#34C759]/10 text-[#34C759] border-transparent text-[10px]"
                         : prj.status === "SOLUTION_SUBMITTED"
-                        ? "bg-purple-50 text-purple-700 border-purple-200 text-[10px]"
-                        : "bg-blue-50 text-blue-700 border-blue-200 text-[10px]"
+                        ? "bg-[#007AFF]/10 text-[#007AFF] border-transparent text-[10px]"
+                        : "bg-blue-50 text-[#007AFF] border-blue-200 text-[10px]"
                     }
                   >
                     {prj.status}
                   </Badge>
                 </div>
-                <h4 className="text-xs font-bold text-slate-900 leading-snug">
+                <h4 className="text-xs font-bold text-foreground leading-snug">
                   {prj.problemTitle}
                 </h4>
-                <div className="flex items-center justify-between text-[11px] text-slate-500">
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                   <span>Lead: {prj.studentTeamLeadName} ({prj.studentTeamLeadId})</span>
                   <span>Target: {prj.targetDeadline}</span>
                 </div>

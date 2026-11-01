@@ -59,35 +59,9 @@ export async function getIndustryOverviewAction() {
     const { error, user, profile } = await getAuthenticatedIndustry();
 
     if (error || !user) {
-      // Mock / Preview Mode
       return {
-        success: true,
-        isGuestOrMock: true,
-        user: {
-          id: "mock-user-id",
-          name: "Mohamed Anand",
-          email: "partner@hexaware.com",
-          uniqueId: "IND0001",
-          isVerified: true,
-        },
-        profile: {
-          id: "mock-profile-id",
-          companyName: "Hexaware Technologies",
-          companyId: "HTMP001",
-          companyPrefix: "HTMP",
-          udyamRegNo: "UDYAM-TN-01-0023456",
-          domain: "Software & Cloud",
-          websiteUrl: "https://hexaware.com",
-        },
-        stats: {
-          totalSubmitted: 4,
-          availableInPool: 1,
-          claimedByFaculty: 3,
-          activeProjects: 2,
-          completedProjects: 1,
-        },
-        recentProblems: initialIndustryProblems,
-        recentProjects: initialIndustryProjects,
+        success: false,
+        error: error || "Authentication required. Please sign in as an Industry Partner.",
       };
     }
 
