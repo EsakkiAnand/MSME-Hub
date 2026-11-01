@@ -23,19 +23,19 @@ import { toast } from "sonner";
 const statusConfig: Record<string, { label: string; badgeClass: string }> = {
   PENDING_REVIEW: {
     label: "Awaiting Faculty Review",
-    badgeClass: "bg-amber-50 text-amber-700 border-amber-200",
+    badgeClass: "bg-[#FF9500]/10 text-[#FF9500] border-transparent",
   },
   ACCEPTED: {
     label: "Approved & Recommended",
-    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
   },
   REVISION_REQUESTED: {
     label: "Changes Requested",
-    badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
+    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
   },
   REJECTED: {
     label: "Rejected",
-    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
+    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
   },
 };
 
@@ -122,40 +122,40 @@ export default function FacultyIdeaSubmissionsPage() {
   return (
     <div className="space-y-6">
       {/* Header Info */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Lightbulb className="size-4 text-blue-600" />
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <Lightbulb className="size-4 text-[#007AFF]" />
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Student Innovation Evaluator
             </span>
           </div>
-          <h2 className="text-xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">
             Student Idea Submissions
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Review independent problem pitches submitted by engineering students for MSME incubation.
           </p>
         </div>
-        <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-slate-200 bg-slate-50 text-slate-700 self-start sm:self-auto">
+        <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] text-foreground self-start sm:self-auto">
           {ideas.filter((i) => i.status === "PENDING_REVIEW").length} Pending Evaluations
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Search by idea title, student name, register number, or sector..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 text-xs sm:text-sm rounded-md border-slate-200 focus-visible:ring-blue-600"
+            className="pl-9 text-xs sm:text-sm rounded-md border-black/[0.06] dark:border-white/[0.08] focus-visible:ring-blue-600"
           />
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Filter className="size-4 text-slate-400 shrink-0 hidden sm:block" />
+          <Filter className="size-4 text-muted-foreground shrink-0 hidden sm:block" />
           <IOSSelect
             size="sm"
             options={filterOptions}
@@ -169,7 +169,7 @@ export default function FacultyIdeaSubmissionsPage() {
       {/* Idea Cards List */}
       <div className="space-y-5">
         {filteredIdeas.length === 0 ? (
-          <div className="bg-white rounded-lg border border-slate-200 p-12 text-center text-slate-400 text-sm">
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-12 text-center text-muted-foreground text-sm">
             No student ideas match the current filter.
           </div>
         ) : (
@@ -179,12 +179,12 @@ export default function FacultyIdeaSubmissionsPage() {
             return (
               <div
                 key={idea.id}
-                className="bg-white rounded-lg border border-slate-200 p-6 hover:border-slate-300 hover:shadow-xs transition-all"
+                className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 hover:border-slate-300 hover:shadow-xs transition-all"
               >
                 {/* Header row */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-mono font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                    <span className="text-xs font-mono font-medium text-muted-foreground bg-slate-100 px-2 py-0.5 rounded">
                       {idea.id}
                     </span>
                     <span
@@ -192,11 +192,11 @@ export default function FacultyIdeaSubmissionsPage() {
                     >
                       {st.label}
                     </span>
-                    <span className="text-xs text-slate-400">·</span>
-                    <span className="text-xs font-medium text-slate-600">{idea.domain}</span>
+                    <span className="text-xs text-muted-foreground">·</span>
+                    <span className="text-xs font-medium text-muted-foreground">{idea.domain}</span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Calendar className="size-3.5" />
                     <span>Submitted: {idea.submissionDate}</span>
                   </div>
@@ -205,33 +205,33 @@ export default function FacultyIdeaSubmissionsPage() {
                 {/* Submitter & Title */}
                 <div className="py-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="size-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-semibold text-slate-700 text-[11px]">
+                    <div className="size-6 rounded-full bg-slate-100 border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center font-semibold text-foreground text-[11px]">
                       {idea.studentName.charAt(0)}
                     </div>
-                    <span className="text-xs font-semibold text-slate-800">
+                    <span className="text-xs font-semibold text-foreground">
                       {idea.studentName}
                     </span>
-                    <span className="text-[11px] font-mono text-slate-400">
+                    <span className="text-[11px] font-mono text-muted-foreground">
                       ({idea.studentRegNo})
                     </span>
                     <span className="text-slate-300">·</span>
-                    <span className="text-[11px] text-slate-500">{idea.department}</span>
+                    <span className="text-[11px] text-muted-foreground">{idea.department}</span>
                   </div>
 
-                  <h3 className="text-base font-semibold text-slate-900 tracking-tight">
+                  <h3 className="text-base font-semibold text-foreground tracking-tight">
                     {idea.title}
                   </h3>
 
-                  <div className="mt-2.5 text-xs text-slate-700 leading-relaxed bg-slate-50/70 p-3.5 rounded-md border border-slate-100">
-                    <p className="font-semibold text-slate-800 mb-1">Problem &amp; Proposed Solution:</p>
+                  <div className="mt-2.5 text-xs text-foreground leading-relaxed bg-black/[0.02] dark:bg-white/[0.03]/70 p-3.5 rounded-md border border-slate-100">
+                    <p className="font-semibold text-foreground mb-1">Problem &amp; Proposed Solution:</p>
                     <p>{idea.description}</p>
 
-                    <p className="font-semibold text-slate-800 mt-3 mb-1">Expected Deliverables:</p>
-                    <p className="text-slate-600">{idea.expectedOutcome}</p>
+                    <p className="font-semibold text-foreground mt-3 mb-1">Expected Deliverables:</p>
+                    <p className="text-muted-foreground">{idea.expectedOutcome}</p>
 
-                    <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex items-center gap-2 text-[11px] text-slate-500">
-                      <Building className="size-3.5 text-slate-400" />
-                      <span>Target MSME Cluster: <strong className="text-slate-700">{idea.targetSector}</strong></span>
+                    <div className="mt-3 pt-2.5 border-t border-black/[0.06] dark:border-white/[0.08]/60 flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <Building className="size-3.5 text-muted-foreground" />
+                      <span>Target MSME Cluster: <strong className="text-foreground">{idea.targetSector}</strong></span>
                     </div>
                   </div>
 
@@ -245,7 +245,7 @@ export default function FacultyIdeaSubmissionsPage() {
 
                 {/* Action Controls */}
                 <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-muted-foreground">
                     Faculty authority: Accept for MSME sponsorship, request improvements, or reject
                   </span>
 
@@ -262,7 +262,7 @@ export default function FacultyIdeaSubmissionsPage() {
                     <button
                       onClick={() => handleOpenAction(idea, "REQUEST_CHANGES")}
                       disabled={idea.status === "REVISION_REQUESTED"}
-                      className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 disabled:opacity-50 transition-all active:scale-[0.98]"
+                      className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md bg-white border border-blue-200 text-[#007AFF] hover:bg-blue-50 disabled:opacity-50 transition-all active:scale-[0.98]"
                     >
                       <RotateCcw className="size-3.5" />
                       <span>Request Changes</span>
@@ -307,7 +307,7 @@ export default function FacultyIdeaSubmissionsPage() {
           actionType === "APPROVE"
             ? "Approve Idea"
             : actionType === "REQUEST_CHANGES"
-            ? "Send Improvement Request"
+            ? "Send Improvement"
             : "Reject Idea"
         }
         variant={actionType === "REJECT" ? "destructive" : actionType === "REQUEST_CHANGES" ? "update" : "default"}

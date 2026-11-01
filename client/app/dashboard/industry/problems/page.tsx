@@ -32,22 +32,22 @@ import { initialIndustryProblems, IndustryProblemItem } from "@/lib/industry-dat
 const statusConfig: Record<string, { label: string; badgeClass: string; icon: React.ElementType }> = {
   DRAFT: {
     label: "Draft",
-    badgeClass: "bg-slate-100 text-slate-700 border-slate-200",
+    badgeClass: "bg-slate-100 text-foreground border-black/[0.06] dark:border-white/[0.08]",
     icon: Clock,
   },
   POOL_AVAILABLE: {
     label: "In Domain Pool",
-    badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
+    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
     icon: Clock,
   },
   CLAIMED: {
     label: "Claimed by Staff",
-    badgeClass: "bg-purple-50 text-purple-700 border-purple-200",
+    badgeClass: "bg-[#007AFF]/10 text-[#007AFF] border-transparent",
     icon: CheckCircle2,
   },
   REJECTED: {
     label: "Rejected / Scope Revision",
-    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
+    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
     icon: AlertCircle,
   },
 };
@@ -75,16 +75,16 @@ export default function MySubmittedProblemsPage() {
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">
             My Submitted Challenges
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             PRD §8.3: Review operational challenges submitted by your company, monitor faculty claiming status, and inspect assigned student projects.
           </p>
         </div>
 
         <Link href="/dashboard/industry/submit-problem">
-          <Button size="sm" className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white text-xs h-9">
+          <Button size="sm" className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs h-9">
             <PlusCircle className="size-3.5 mr-1.5" />
             Submit New Challenge
           </Button>
@@ -94,7 +94,7 @@ export default function MySubmittedProblemsPage() {
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 size-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -133,10 +133,10 @@ export default function MySubmittedProblemsPage() {
       </div>
 
       {/* Problems Data Table */}
-      <Card className="border-slate-200 shadow-xs bg-white overflow-hidden">
+      <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+            <thead className="bg-black/[0.02] dark:bg-white/[0.03] border-b border-black/[0.06] dark:border-white/[0.08] text-muted-foreground font-semibold">
               <tr>
                 <th className="py-3 px-4">Problem ID</th>
                 <th className="py-3 px-4">Challenge Title</th>
@@ -146,10 +146,10 @@ export default function MySubmittedProblemsPage() {
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06] text-foreground">
               {filteredProblems.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-10 text-slate-400">
+                  <td colSpan={6} className="text-center py-10 text-muted-foreground">
                     No matching industrial challenges found.
                   </td>
                 </tr>
@@ -159,11 +159,11 @@ export default function MySubmittedProblemsPage() {
                   const StatusIcon = cfg.icon;
 
                   return (
-                    <tr key={prob.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">
+                    <tr key={prob.id} className="hover:bg-black/[0.02] dark:bg-white/[0.03]/80 transition-colors">
+                      <td className="py-3 px-4 font-mono font-bold text-foreground whitespace-nowrap">
                         {prob.id}
                       </td>
-                      <td className="py-3 px-4 font-semibold text-slate-900 max-w-sm truncate">
+                      <td className="py-3 px-4 font-semibold text-foreground max-w-sm truncate">
                         {prob.title}
                         {prob.claimedByFacultyName && (
                           <span className="block text-[11px] font-normal text-purple-700">
@@ -172,11 +172,11 @@ export default function MySubmittedProblemsPage() {
                         )}
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
-                        <Badge variant="outline" className="text-[10px] bg-slate-50">
+                        <Badge variant="outline" className="text-[10px] bg-black/[0.02] dark:bg-white/[0.03]">
                           {prob.domain}
                         </Badge>
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap text-slate-500">
+                      <td className="py-3 px-4 whitespace-nowrap text-muted-foreground">
                         {new Date(prob.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
@@ -190,7 +190,7 @@ export default function MySubmittedProblemsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => setSelectedProblem(prob)}
-                          className="h-7 px-2.5 text-xs text-[#1d4ed8] hover:text-[#1e40af] hover:bg-blue-50"
+                          className="h-7 px-2.5 text-xs text-[#007AFF] hover:text-[#1e40af] hover:bg-blue-50"
                         >
                           <Eye className="size-3.5 mr-1" />
                           View Details
@@ -209,13 +209,13 @@ export default function MySubmittedProblemsPage() {
       <Dialog open={!!selectedProblem} onOpenChange={(open) => !open && setSelectedProblem(null)}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 flex items-center justify-between">
+            <DialogTitle className="text-base font-bold text-foreground flex items-center justify-between">
               <span>{selectedProblem?.title}</span>
               <Badge variant="outline" className="font-mono text-xs">
                 {selectedProblem?.id}
               </Badge>
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-muted-foreground">
               Submitted on {selectedProblem && new Date(selectedProblem.createdAt).toLocaleDateString()} • Sector: {selectedProblem?.domain}
             </DialogDescription>
           </DialogHeader>
@@ -223,10 +223,10 @@ export default function MySubmittedProblemsPage() {
           {selectedProblem && (
             <div className="space-y-4 py-2 text-xs">
               {/* Lifecycle Progress Banner */}
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between">
                 <div>
-                  <span className="text-slate-500 block text-[11px]">Current Lifecycle State</span>
-                  <span className="font-bold text-slate-900 text-sm">
+                  <span className="text-muted-foreground block text-[11px]">Current Lifecycle State</span>
+                  <span className="font-bold text-foreground text-sm">
                     {selectedProblem.status === "CLAIMED"
                       ? "Claimed by Faculty (Project Assigned)"
                       : "Available in Academic Pool"}
@@ -234,7 +234,7 @@ export default function MySubmittedProblemsPage() {
                 </div>
                 {selectedProblem.claimedByFacultyName && (
                   <div className="text-right">
-                    <span className="text-slate-500 block text-[11px]">Project Director</span>
+                    <span className="text-muted-foreground block text-[11px]">Project Director</span>
                     <span className="font-semibold text-purple-700">
                       {selectedProblem.claimedByFacultyName}
                     </span>
@@ -244,8 +244,8 @@ export default function MySubmittedProblemsPage() {
 
               {/* Description */}
               <div className="space-y-1">
-                <span className="font-bold text-slate-800 block">Problem Statement &amp; Context:</span>
-                <p className="text-slate-700 leading-relaxed bg-white p-3 rounded-md border border-slate-100">
+                <span className="font-bold text-foreground block">Problem Statement &amp; Context:</span>
+                <p className="text-foreground leading-relaxed bg-white p-3 rounded-md border border-slate-100">
                   {selectedProblem.description}
                 </p>
               </div>
@@ -253,8 +253,8 @@ export default function MySubmittedProblemsPage() {
               {/* Constraints */}
               {selectedProblem.constraints && (
                 <div className="space-y-1">
-                  <span className="font-bold text-slate-800 block">Technical Constraints:</span>
-                  <p className="text-slate-600 leading-relaxed bg-white p-3 rounded-md border border-slate-100">
+                  <span className="font-bold text-foreground block">Technical Constraints:</span>
+                  <p className="text-muted-foreground leading-relaxed bg-white p-3 rounded-md border border-slate-100">
                     {selectedProblem.constraints}
                   </p>
                 </div>
@@ -263,8 +263,8 @@ export default function MySubmittedProblemsPage() {
               {/* Expected Deliverables */}
               {selectedProblem.expectedDeliverables && (
                 <div className="space-y-1">
-                  <span className="font-bold text-slate-800 block">Expected Deliverables:</span>
-                  <p className="text-slate-600 leading-relaxed bg-white p-3 rounded-md border border-slate-100">
+                  <span className="font-bold text-foreground block">Expected Deliverables:</span>
+                  <p className="text-muted-foreground leading-relaxed bg-white p-3 rounded-md border border-slate-100">
                     {selectedProblem.expectedDeliverables}
                   </p>
                 </div>
@@ -273,7 +273,7 @@ export default function MySubmittedProblemsPage() {
               {/* Connected Project Link */}
               {selectedProblem.assignedProjectId && (
                 <div className="p-3 rounded-md bg-blue-50/70 border border-blue-200 flex items-center justify-between">
-                  <span className="text-slate-700 font-medium">
+                  <span className="text-foreground font-medium">
                     Formal Collaborative Project Active: <strong>{selectedProblem.assignedProjectId}</strong>
                   </span>
                   <Link href="/dashboard/industry/projects">

@@ -106,24 +106,24 @@ export default function FacultyFeedbackPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Header Info */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <MessageSquare className="size-4 text-blue-600" />
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <MessageSquare className="size-4 text-[#007AFF]" />
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Academic Supervision &amp; Grading
             </span>
           </div>
-          <h2 className="text-xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">
             Project Feedback &amp; Evaluation
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Log formative milestone feedback, evaluate code deliverables, and grade student teams.
           </p>
         </div>
-        <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-slate-200 bg-slate-50 text-slate-700 self-start sm:self-auto">
+        <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] text-foreground self-start sm:self-auto">
           Logged Evaluations: {feedbacks.length} Entries
         </div>
       </div>
@@ -131,16 +131,16 @@ export default function FacultyFeedbackPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Column: Form (2 Cols) */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-lg border border-slate-200 p-6">
-            <h3 className="text-sm font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
               <span>Submit Formative Milestone Evaluation</span>
-              <span className="text-xs text-slate-400 font-normal">All fields required</span>
+              <span className="text-xs text-muted-foreground font-normal">All fields required</span>
             </h3>
 
             {/* Select Target Project */}
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
                   Select Supervised Project
                 </label>
                 <IOSSelect
@@ -152,12 +152,12 @@ export default function FacultyFeedbackPage() {
               </div>
 
               {/* Project Quick Overview */}
-              <div className="p-3.5 bg-slate-50 rounded-md border border-slate-100 text-xs space-y-1">
+              <div className="p-3.5 bg-black/[0.02] dark:bg-white/[0.03] rounded-md border border-slate-100 text-xs space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-slate-800">{selectedProject.name}</span>
-                  <span className="font-mono text-slate-500 font-medium">{selectedProject.id}</span>
+                  <span className="font-semibold text-foreground">{selectedProject.name}</span>
+                  <span className="font-mono text-muted-foreground font-medium">{selectedProject.id}</span>
                 </div>
-                <div className="text-slate-500 flex items-center gap-2">
+                <div className="text-muted-foreground flex items-center gap-2">
                   <span>Client: {selectedProject.msmeCompany}</span>
                   <span>·</span>
                   <span>Lead: {selectedProject.team.find((m) => m.isLead)?.name}</span>
@@ -166,7 +166,7 @@ export default function FacultyFeedbackPage() {
 
               {/* 4 Rubric Metrics */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">
+                <label className="block text-xs font-semibold text-foreground mb-2">
                   Rubric Assessment (1 to 5 Stars)
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -178,9 +178,9 @@ export default function FacultyFeedbackPage() {
                   ].map((dim) => (
                     <div
                       key={dim.key}
-                      className="p-3 bg-white border border-slate-200 rounded-md flex items-center justify-between"
+                      className="p-3 bg-white border border-black/[0.06] dark:border-white/[0.08] rounded-md flex items-center justify-between"
                     >
-                      <span className="text-xs text-slate-700 font-medium pr-2">{dim.label}</span>
+                      <span className="text-xs text-foreground font-medium pr-2">{dim.label}</span>
                       <div className="flex items-center gap-1 shrink-0">
                         {[1, 2, 3, 4, 5].map((val) => (
                           <button
@@ -207,7 +207,7 @@ export default function FacultyFeedbackPage() {
 
               {/* Formative Feedback Text */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-foreground mb-1.5">
                   Detailed Faculty Critique &amp; Technical Recommendations
                 </label>
                 <textarea
@@ -215,7 +215,7 @@ export default function FacultyFeedbackPage() {
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
                   placeholder="Provide concrete academic and engineering guidance for the student team (e.g., test cases to add, performance bottlenecks, architecture advice)..."
-                  className="w-full text-xs sm:text-sm border border-slate-200 rounded-md p-3 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all resize-y"
+                  className="w-full text-xs sm:text-sm border border-black/[0.06] dark:border-white/[0.08] rounded-md p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all resize-y"
                 />
               </div>
 
@@ -224,14 +224,14 @@ export default function FacultyFeedbackPage() {
                 <button
                   type="button"
                   onClick={() => setFeedbackText("")}
-                  className="px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 border border-slate-200 rounded-md bg-white hover:bg-slate-50 transition-all"
+                  className="px-3.5 py-2 text-xs font-medium text-muted-foreground hover:text-foreground border border-black/[0.06] dark:border-white/[0.08] rounded-md bg-white hover:bg-black/[0.02] dark:bg-white/[0.03] transition-all"
                 >
                   Clear Form
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowConfirm(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#0f2744] hover:bg-[#1a385c] rounded-md transition-all shadow-xs active:scale-[0.98]"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#007AFF] hover:bg-[#007AFF]/90 rounded-md transition-all shadow-xs active:scale-[0.98]"
                 >
                   <Send className="size-3.5" />
                   <span>Submit Evaluation</span>
@@ -243,8 +243,8 @@ export default function FacultyFeedbackPage() {
 
         {/* Right Column: Historical Feedback Stream */}
         <div className="space-y-4">
-          <div className="bg-white rounded-lg border border-slate-200 p-5">
-            <h3 className="text-sm font-semibold text-slate-900 mb-3 pb-2 border-b border-slate-100 flex items-center gap-1.5">
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5">
+            <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-slate-100 flex items-center gap-1.5">
               <FileCheck className="size-4 text-emerald-600" />
               <span>Logged Evaluations</span>
             </h3>
@@ -253,14 +253,14 @@ export default function FacultyFeedbackPage() {
               {feedbacks.map((item) => (
                 <div
                   key={item.id}
-                  className="p-3.5 bg-slate-50/70 border border-slate-200/80 rounded-md space-y-2 text-xs"
+                  className="p-3.5 bg-black/[0.02] dark:bg-white/[0.03]/70 border border-black/[0.06] dark:border-white/[0.08]/80 rounded-md space-y-2 text-xs"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <span className="font-mono text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 px-1.5 py-0.2 rounded">
+                      <span className="font-mono text-[10px] font-semibold text-muted-foreground bg-white border border-black/[0.06] dark:border-white/[0.08] px-1.5 py-0.2 rounded">
                         {item.projectId}
                       </span>
-                      <h4 className="font-semibold text-slate-900 mt-1 line-clamp-1">
+                      <h4 className="font-semibold text-foreground mt-1 line-clamp-1">
                         {item.projectName}
                       </h4>
                     </div>
@@ -270,16 +270,22 @@ export default function FacultyFeedbackPage() {
                     </div>
                   </div>
 
-                  <p className="text-slate-600 text-[11px] leading-relaxed line-clamp-3">
+                  <p className="text-muted-foreground text-[11px] leading-relaxed line-clamp-3">
                     &ldquo;{item.comments}&rdquo;
                   </p>
 
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-200/50">
+                  <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-black/[0.06] dark:border-white/[0.08]/50">
                     <span>Lead: {item.studentLead}</span>
                     <span>{item.date}</span>
                   </div>
                 </div>
               ))}
+
+              {feedbacks.length === 0 && (
+                <div className="p-6 text-center text-xs text-muted-foreground">
+                  No logged evaluations recorded yet.
+                </div>
+              )}
             </div>
           </div>
         </div>

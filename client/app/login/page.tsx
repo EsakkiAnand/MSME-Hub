@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { authClient } from "@/lib/auth-client";
 import { getRoleDashboardPath } from "@/lib/auth-utils";
+import { PublicHeader } from "@/components/navigation/public-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,14 +30,23 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const session = authClient.useSession();
+
+  const isLoggedOut = searchParams.get("logged_out") === "1";
+  const redirectParam = searchParams.get("redirect");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  // Secure Login: Visiting /login must NEVER automatically authenticate or redirect the user.
+  // The login form is always presented and requires valid user credentials.
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,19 +64,31 @@ export default function LoginPage() {
       });
 
       if (response.error) {
-        toast.error(response.error.message || "Invalid credentials. Please check your email and password.");
+        toast.error(
+          response.error.message ||
+            "Invalid credentials. Please check your email and password."
+        );
         setIsLoading(false);
         return;
       }
 
       toast.success("Signed in successfully. Redirecting to your workspace...");
 
-      // Fetch active session to extract user role for targeted dashboard routing
       const sessionRes = await authClient.getSession();
       const userRole = (sessionRes?.data?.user as any)?.role || "STUDENT";
-      const targetPath = getRoleDashboardPath(userRole);
+      const authorizedDefault = getRoleDashboardPath(userRole);
 
-      router.push(targetPath);
+      // Never trust an arbitrary redirect parameter from the client.
+      // Only permit redirects that strictly match the authenticated user's role portal.
+      let targetPath = authorizedDefault;
+      if (redirectParam && redirectParam.startsWith("/dashboard")) {
+        if (redirectParam === authorizedDefault || redirectParam.startsWith(authorizedDefault + "/")) {
+          targetPath = redirectParam;
+        }
+      }
+
+      router.refresh();
+      window.location.href = targetPath;
     } catch (err: any) {
       toast.error(err?.message || "An unexpected error occurred during sign in.");
       setIsLoading(false);
@@ -87,34 +110,14 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
-      {/* Top Navigation Bar */}
-      <header className="w-full border-b bg-background/80 backdrop-blur-md px-6 py-4">
-        <div className="container mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold shadow-sm">
-              M
-            </div>
-            <div>
-              <span className="font-bold text-lg tracking-tight">MSME-Hub</span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-medium text-muted-foreground">
-                Innovation Platform
-              </span>
-            </div>
-          </Link>
-          <div className="text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="font-semibold text-primary hover:underline ml-1">
-              Sign up
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* Standardized Single Application Header */}
+      <PublicHeader action="signup" />
 
-      {/* Main Login Card */}
+      {/* Main Login Card - Clean, Uncluttered, Minimalist */}
       <main className="flex flex-1 items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-md">
           <Card className="border shadow-lg">
-            <CardHeader className="space-y-1.5 text-center pb-6">
+            <CardHeader className="space-y-1.5 text-center pb-6 pt-6">
               <CardTitle className="text-2xl font-bold tracking-tight">
                 Welcome back
               </CardTitle>
@@ -207,7 +210,9 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        toast.info("Password reset instructions will be sent to your verified email address.")
+                        toast.info(
+                          "Password reset instructions will be sent to your verified email address."
+                        )
                       }
                       className="text-xs text-primary hover:underline"
                     >
@@ -257,6 +262,7 @@ export default function LoginPage() {
                   </label>
                 </div>
 
+                {/* Single, Unambiguous Primary Action */}
                 <Button
                   type="submit"
                   className="w-full h-10 mt-2 font-semibold"
@@ -293,5 +299,18 @@ export default function LoginPage() {
         </div>
       </main>
     </div>
+  );
+}
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-muted/30">
+          <Loader2 className="size-8 text-[#007AFF] animate-spin" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

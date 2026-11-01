@@ -104,8 +104,8 @@ export default function AlumniOverviewPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] text-slate-500">
-        <Loader2 className="size-8 animate-spin text-[#1d4ed8] mb-3" />
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-muted-foreground">
+        <Loader2 className="size-8 animate-spin text-[#007AFF] mb-3" />
         <p className="text-sm font-medium">Loading Alumni Mentor Workspace...</p>
       </div>
     );
@@ -125,27 +125,27 @@ export default function AlumniOverviewPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-[#0f2744] to-[#1e3a5f] rounded-xl p-6 text-white shadow-xs">
+      <div className="bg-white dark:bg-card rounded-xl border border-black/[0.06] dark:border-white/[0.08] dark:border-border p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50">
                 Alumni Expert Mentor
               </span>
               <CopyIdBadge id={data?.user?.uniqueId || "ALU0001"} label="Alumni ID" size="xs" />
             </div>
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className="text-xl font-bold tracking-tight text-foreground dark:text-foreground">
               Welcome back, {data?.user?.name || "Mentor"}
             </h2>
-            <p className="text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
-              {profile?.currentRole} at <span className="text-white font-medium">{profile?.currentCompany}</span>.
+            <p className="text-xs sm:text-sm text-muted-foreground dark:text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+              {profile?.currentRole} at <span className="text-foreground dark:text-foreground font-semibold">{profile?.currentCompany}</span>.
               Share architectural advice, answer student queries, and help students ship production-grade open-source solutions.
             </p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
             <Link href="/dashboard/alumni/guidance">
-              <Button className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white text-xs h-9">
+              <Button className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs h-9">
                 <HelpCircle className="size-3.5 mr-1.5" />
                 Browse Guidance Board
               </Button>
@@ -157,30 +157,30 @@ export default function AlumniOverviewPage() {
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Open Requests */}
-        <Card className="border-slate-200 shadow-xs">
+        <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs">
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium text-slate-500">
+            <CardDescription className="text-xs uppercase font-medium text-muted-foreground">
               Open Guidance Requests
             </CardDescription>
-            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-slate-900">
+            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-foreground">
               <span>{stats.openRequestsCount}</span>
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-md">
+              <div className="p-2 bg-blue-50 text-[#007AFF] rounded-md">
                 <HelpCircle className="size-4" />
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-slate-500">Awaiting expert architectural guidance</p>
+            <p className="text-xs text-muted-foreground">Awaiting expert architectural guidance</p>
           </CardContent>
         </Card>
 
         {/* Answers Provided */}
-        <Card className="border-slate-200 shadow-xs">
+        <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs">
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium text-slate-500">
+            <CardDescription className="text-xs uppercase font-medium text-muted-foreground">
               Mentorship Responses
             </CardDescription>
-            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-slate-900">
+            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-foreground">
               <span>{stats.myAnswersCount}</span>
               <div className="p-2 bg-purple-50 text-purple-600 rounded-md">
                 <MessageSquare className="size-4" />
@@ -188,17 +188,17 @@ export default function AlumniOverviewPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-slate-500">Architectural &amp; security answers provided</p>
+            <p className="text-xs text-muted-foreground">Architectural &amp; security answers provided</p>
           </CardContent>
         </Card>
 
         {/* Helpful Endorsements */}
-        <Card className="border-slate-200 shadow-xs">
+        <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs">
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium text-slate-500">
+            <CardDescription className="text-xs uppercase font-medium text-muted-foreground">
               Helpful Endorsements
             </CardDescription>
-            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-slate-900">
+            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-foreground">
               <span className="text-amber-600">{stats.helpfulEndorsements}</span>
               <div className="p-2 bg-amber-50 text-amber-600 rounded-md">
                 <Award className="size-4" />
@@ -206,17 +206,17 @@ export default function AlumniOverviewPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-slate-500">Awarded by students for solving bottlenecks</p>
+            <p className="text-xs text-muted-foreground">Awarded by students for solving bottlenecks</p>
           </CardContent>
         </Card>
 
         {/* Projects Mentored */}
-        <Card className="border-slate-200 shadow-xs">
+        <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs">
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium text-slate-500">
+            <CardDescription className="text-xs uppercase font-medium text-muted-foreground">
               Mentored Projects
             </CardDescription>
-            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-slate-900">
+            <CardTitle className="text-2xl font-extrabold flex items-center justify-between text-foreground">
               <span>{stats.projectsMentored}</span>
               <div className="p-2 bg-emerald-50 text-emerald-600 rounded-md">
                 <FolderKanban className="size-4" />
@@ -224,7 +224,7 @@ export default function AlumniOverviewPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-slate-500">Active industry challenges supported</p>
+            <p className="text-xs text-muted-foreground">Active industry challenges supported</p>
           </CardContent>
         </Card>
       </div>
@@ -235,17 +235,17 @@ export default function AlumniOverviewPage() {
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <HelpCircle className="size-4 text-[#1d4ed8]" />
+              <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                <HelpCircle className="size-4 text-[#007AFF]" />
                 Open Student Guidance Requests
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 Recent questions posted by student project teams seeking architectural advice.
               </p>
             </div>
             <Link
               href="/dashboard/alumni/guidance"
-              className="text-xs font-semibold text-[#1d4ed8] hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1"
             >
               View All Board Requests
               <ArrowRight className="size-3" />
@@ -254,47 +254,47 @@ export default function AlumniOverviewPage() {
 
           <div className="space-y-3">
             {openRequests.length === 0 ? (
-              <Card className="border-dashed p-8 text-center text-slate-500">
+              <Card className="border-dashed p-8 text-center text-muted-foreground">
                 <CheckCircle2 className="size-8 text-emerald-500 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-slate-800">All questions answered!</p>
-                <p className="text-xs text-slate-500 mt-1">No open student queries on the board right now.</p>
+                <p className="text-sm font-semibold text-foreground">All questions answered!</p>
+                <p className="text-xs text-muted-foreground mt-1">No open student queries on the board right now.</p>
               </Card>
             ) : (
               openRequests.map((req) => (
                 <Card
                   key={req.id}
-                  className="border-slate-200 hover:border-blue-300 transition-all shadow-xs"
+                  className="border-black/[0.06] dark:border-white/[0.08] hover:border-blue-300 transition-all shadow-xs"
                 >
                   <CardHeader className="pb-3 pt-4 px-4 sm:px-5">
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[11px] font-mono text-slate-700 bg-slate-50">
+                        <Badge variant="outline" className="text-[11px] font-mono text-foreground bg-black/[0.02] dark:bg-white/[0.03]">
                           {req.id}
                         </Badge>
-                        <span className="text-xs font-semibold text-slate-900">
+                        <span className="text-xs font-semibold text-foreground">
                           {req.projectTitle}
                         </span>
                       </div>
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-[11px] text-muted-foreground">
                         {new Date(req.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                    <CardTitle className="text-sm font-semibold text-slate-900 leading-snug">
+                    <CardTitle className="text-sm font-semibold text-foreground leading-snug">
                       {req.question}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="px-4 sm:px-5 pb-4 pt-0">
                     <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-[11px] text-slate-500 font-medium mr-1">
+                        <span className="text-[11px] text-muted-foreground font-medium mr-1">
                           Asked by {req.studentName} ({req.studentUniqueId}):
                         </span>
                         {req.tags.map((t) => (
                           <span
                             key={t}
-                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700"
+                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-foreground"
                           >
-                            <Tag className="size-2.5 mr-1 text-slate-400" />
+                            <Tag className="size-2.5 mr-1 text-muted-foreground" />
                             {t}
                           </span>
                         ))}
@@ -303,7 +303,7 @@ export default function AlumniOverviewPage() {
                       <Button
                         size="sm"
                         onClick={() => handleOpenAnswerModal(req)}
-                        className="text-xs bg-[#1d4ed8] hover:bg-[#1e40af] text-white h-7 px-3"
+                        className="text-xs bg-[#007AFF] hover:bg-[#007AFF]/90 text-white h-7 px-3"
                       >
                         <MessageSquare className="size-3 mr-1.5" />
                         Provide Guidance
@@ -319,17 +319,17 @@ export default function AlumniOverviewPage() {
         {/* Right Column (1 Col): Mentored Projects & Endorsements */}
         <div className="space-y-6">
           {/* Alumni Reputation & Endorsements Card */}
-          <Card className="border-slate-200 shadow-xs bg-gradient-to-br from-amber-500/5 to-transparent">
+          <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-black/[0.02] dark:bg-white/[0.02] dark:bg-muted/30">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-md bg-amber-100 text-amber-700">
                   <Award className="size-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm font-bold text-slate-900">
+                  <CardTitle className="text-sm font-bold text-foreground">
                     Mentorship Endorsements
                   </CardTitle>
-                  <CardDescription className="text-xs text-slate-500">
+                  <CardDescription className="text-xs text-muted-foreground">
                     PRD §8.6 Helpful Recognition
                   </CardDescription>
                 </div>
@@ -338,7 +338,7 @@ export default function AlumniOverviewPage() {
             <CardContent className="space-y-3">
               <div className="p-3 rounded-lg bg-white border border-amber-200 flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-slate-600 block">Total Endorsements</span>
+                  <span className="text-xs text-muted-foreground block">Total Endorsements</span>
                   <span className="text-xl font-black text-amber-600">
                     {stats.helpfulEndorsements}
                   </span>
@@ -347,23 +347,23 @@ export default function AlumniOverviewPage() {
                   <Sparkles className="size-5" />
                 </div>
               </div>
-              <p className="text-xs text-slate-500 leading-normal">
+              <p className="text-xs text-muted-foreground leading-normal">
                 When student teams resolve an architectural bottleneck with your advice, they award a Helpful Endorsement to your profile.
               </p>
             </CardContent>
           </Card>
 
           {/* Mentored Projects Mini Tracker */}
-          <Card className="border-slate-200 shadow-xs">
+          <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
                   <FolderKanban className="size-4 text-emerald-600" />
                   Active Projects
                 </CardTitle>
                 <Link
                   href="/dashboard/alumni/projects"
-                  className="text-[11px] text-[#1d4ed8] hover:underline"
+                  className="text-[11px] text-[#007AFF] hover:underline"
                 >
                   View All
                 </Link>
@@ -373,19 +373,19 @@ export default function AlumniOverviewPage() {
               {projects.map((p) => (
                 <div
                   key={p.id}
-                  className="p-2.5 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                  className="p-2.5 rounded-lg border border-slate-100 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.02] dark:bg-white/[0.03] transition-colors"
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-slate-900 truncate max-w-[180px]">
+                    <span className="text-xs font-semibold text-foreground truncate max-w-[180px]">
                       {p.title}
                     </span>
                     <Badge variant="outline" className="text-[10px] bg-white">
                       {p.status}
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                     <span>Lead: {p.teamLeadName}</span>
-                    <span className="text-[10px] text-slate-400">{p.domain}</span>
+                    <span className="text-[10px] text-muted-foreground">{p.domain}</span>
                   </div>
                 </div>
               ))}
@@ -398,32 +398,32 @@ export default function AlumniOverviewPage() {
       <Dialog open={!!selectedRequest} onOpenChange={(open) => !open && setSelectedRequest(null)}>
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <MessageSquare className="size-4 text-[#1d4ed8]" />
+            <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
+              <MessageSquare className="size-4 text-[#007AFF]" />
               Provide Architectural Guidance
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-muted-foreground">
               Your feedback is published directly to the student builder team and faculty advisor.
             </DialogDescription>
           </DialogHeader>
 
           {selectedRequest && (
             <div className="space-y-4 py-2">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
+              <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-semibold text-foreground">
                   <span>{selectedRequest.projectTitle}</span>
                   <Badge variant="outline" className="text-[10px] font-mono">
                     {selectedRequest.id}
                   </Badge>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                <p className="text-xs text-muted-foreground leading-relaxed font-medium">
                   {selectedRequest.question}
                 </p>
                 <div className="flex items-center gap-1.5 pt-1">
                   {selectedRequest.tags.map((t) => (
                     <span
                       key={t}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-white border text-slate-600"
+                      className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-white border text-muted-foreground"
                     >
                       {t}
                     </span>
@@ -432,7 +432,7 @@ export default function AlumniOverviewPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-700">
+                <label className="text-xs font-semibold text-foreground">
                   Guidance Category (PRD §8.6)
                 </label>
                 <IOSSelect
@@ -448,7 +448,7 @@ export default function AlumniOverviewPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-700">
+                <label className="text-xs font-semibold text-foreground">
                   Your Actionable Guidance
                 </label>
                 <Textarea
@@ -458,7 +458,7 @@ export default function AlumniOverviewPage() {
                   rows={5}
                   className="text-xs"
                 />
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-muted-foreground">
                   Clear, production-tested guidance helps students resolve bottlenecks quickly.
                 </p>
               </div>
@@ -478,7 +478,7 @@ export default function AlumniOverviewPage() {
               size="sm"
               onClick={handleSubmitResponse}
               disabled={isSubmitting}
-              className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white"
+              className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white"
             >
               {isSubmitting ? (
                 <>

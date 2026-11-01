@@ -43,33 +43,9 @@ export async function getAlumniOverviewAction() {
   try {
     const { error, user } = await getAuthenticatedAlumni();
     if (error || !user) {
-      // Fallback for preview
       return {
-        success: true,
-        isGuestOrMock: true,
-        user: {
-          id: "mock-alumni-id",
-          name: "Venkatesh R",
-          email: "venkatesh.alumni@francisxavier.ac.in",
-          uniqueId: "ALU0001",
-          isVerified: true,
-        },
-        profile: {
-          degree: "B.E. Computer Science & Engineering",
-          passoutYear: 2020,
-          currentCompany: "Zoho Corporation",
-          currentRole: "Principal Architect",
-          linkedinUrl: "https://linkedin.com/in/venkatesh-alumni-fxec",
-          helpfulCount: 14,
-        },
-        stats: {
-          openRequestsCount: 2,
-          myAnswersCount: 8,
-          helpfulEndorsements: 14,
-          projectsMentored: 3,
-        },
-        openRequests: initialGuidanceRequests.filter((r) => r.status === "OPEN"),
-        recentMentoredProjects: initialMentoredProjects,
+        success: false,
+        error: error || "Authentication required. Please sign in as an Alumni Mentor.",
       };
     }
 
@@ -90,7 +66,7 @@ export async function getAlumniOverviewAction() {
     const dbGuidanceRequests = await prisma.guidanceRequest.findMany({
       where: { status: GuidanceStatus.OPEN },
       include: {
-        project: { select: { id: true, title: true, domain: true } },
+        project: { select: { id: true, title: true, problem: { select: { domain: true } } } },
         requestedByStudent: { select: { id: true, name: true, uniqueId: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -103,7 +79,7 @@ export async function getAlumniOverviewAction() {
             id: req.id,
             projectId: req.project.id,
             projectTitle: req.project.title,
-            projectDomain: req.project.domain,
+            projectDomain: req.project.problem?.domain || "General Engineering",
             studentName: req.requestedByStudent.name,
             studentUniqueId: req.requestedByStudent.uniqueId || "STU0001",
             studentDepartment: "Engineering",
@@ -131,7 +107,7 @@ export async function getAlumniOverviewAction() {
         currentCompany: "Technology Services",
         currentRole: "Senior Engineer",
         linkedinUrl: null,
-        helpfulCount: user.alumniProfile?.helpfulCount ?? 0,
+        helpfulCount: (user.alumniProfile as any)?.helpfulCount ?? 0,
       },
       stats: {
         openRequestsCount: Math.max(openRequestsCount, initialGuidanceRequests.filter((r) => r.status === "OPEN").length),

@@ -65,38 +65,6 @@ export const initialIndustryProblems: IndustryProblemItem[] = [
   },
   {
     id: "PRB-2024-002",
-    title: "Vibration Anomaly Detection Edge Gateway for CNC Machinery",
-    domain: "IoT & Analytics",
-    description:
-      "Develop an ESP32/Raspberry Pi gateway with edge FFT analysis to detect bearing wear in high-speed spinning CNC lathe machinery prior to catastrophic spindle failure.",
-    constraints:
-      "Sampling frequency >= 100Hz, local alert trigger < 50ms, MQTT telemetry transmission to dashboard.",
-    expectedDeliverables:
-      "C++/Python edge firmware, dashboard visualization widget, circuit schematic, and GitHub documentation.",
-    targetTimeline: "14 Weeks",
-    status: "CLAIMED",
-    createdAt: "2026-10-18T11:00:00Z",
-    claimedByFacultyName: "Prof. Kavitha R (ECE)",
-    assignedProjectId: "PRJ-2024-007",
-  },
-  {
-    id: "PRB-2024-003",
-    title: "GST-Compliant Automated E-Invoice & Credit Ledger Generator",
-    domain: "FinTech & Web",
-    description:
-      "Automate monthly e-invoice generation and customer credit reconciliation for small engineering machine-tool vendors.",
-    constraints:
-      "Must support Indian GST format, secure PDF generation, and export to tally-compatible formats.",
-    expectedDeliverables:
-      "Web interface, encrypted PDF export engine, verified MIT open source repository.",
-    targetTimeline: "8 Weeks",
-    status: "CLAIMED",
-    createdAt: "2026-09-01T10:15:00Z",
-    claimedByFacultyName: "Dr. Anand V (IT)",
-    assignedProjectId: "PRJ-2023-042",
-  },
-  {
-    id: "PRB-2024-004",
     title: "Automated Yarn Defect Vision Inspection System for Powerlooms",
     domain: "Manufacturing & AI",
     description:
@@ -123,7 +91,7 @@ export const initialIndustryProjects: IndustryProjectItem[] = [
     facultyMentorName: "Dr. Selvaraj M",
     studentTeamLeadName: "Mohamed Farhan",
     studentTeamLeadId: "STU0001",
-    studentTeamCount: 3,
+    studentTeamCount: 2,
     targetDeadline: "2026-12-15",
     githubUrl: "https://github.com/fxec-students/smart-inventory-msme",
     hasRated: false,
@@ -132,37 +100,21 @@ export const initialIndustryProjects: IndustryProjectItem[] = [
   {
     id: "PRJ-2024-007",
     problemId: "PRB-2024-002",
-    problemTitle: "Vibration Anomaly Detection Edge Gateway for CNC Machinery",
-    domain: "IoT & Analytics",
-    status: "SOLUTION_SUBMITTED",
+    problemTitle: "Automated Yarn Defect Vision Inspection System",
+    domain: "Manufacturing & AI",
+    status: "APPROVED",
     facultyMentorName: "Prof. Kavitha R",
     studentTeamLeadName: "Santhosh G",
-    studentTeamLeadId: "STU0007",
-    studentTeamCount: 4,
+    studentTeamLeadId: "STU0002",
+    studentTeamCount: 2,
     targetDeadline: "2026-11-30",
     githubUrl: "https://github.com/fxec-students/iot-predictive-maintenance",
-    hasRated: false,
-    rating: null,
-  },
-  {
-    id: "PRJ-2023-042",
-    problemId: "PRB-2024-003",
-    problemTitle: "GST-Compliant Automated E-Invoice & Credit Ledger Generator",
-    domain: "FinTech & Web",
-    status: "APPROVED",
-    facultyMentorName: "Dr. Anand V",
-    studentTeamLeadName: "Deepika S",
-    studentTeamLeadId: "STU0012",
-    studentTeamCount: 2,
-    targetDeadline: "2025-09-10",
-    githubUrl: "https://github.com/fxec-students/sme-digital-invoice",
     hasRated: true,
     rating: {
       stars: 5,
       feedbackText:
-        "Outstanding delivery by the student team! The GST PDF invoice generation works seamlessly and reduced our billing time from 15 minutes to under 30 seconds. Code is cleanly documented with MIT license.",
-      createdAt: "2025-09-14T11:20:00Z",
+        "Outstanding delivery by the student team! The defect identification algorithm works reliably under mill vibrations and reduced our manual inspection downtime significantly.",
+      createdAt: "2026-10-30T11:20:00Z",
     },
   },
 ];
-

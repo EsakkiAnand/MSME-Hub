@@ -25,27 +25,27 @@ import { initialIndustryProjects, IndustryProjectItem } from "@/lib/industry-dat
 const statusConfig: Record<string, { label: string; badgeClass: string; icon: React.ElementType }> = {
   ASSIGNED: {
     label: "Team Assigned",
-    badgeClass: "bg-slate-100 text-slate-700 border-slate-200",
+    badgeClass: "bg-slate-100 text-foreground border-black/[0.06] dark:border-white/[0.08]",
     icon: Clock,
   },
   IN_PROGRESS: {
     label: "Under Development",
-    badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
+    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
     icon: Clock,
   },
   SOLUTION_SUBMITTED: {
     label: "Solution Submitted for Admin Review",
-    badgeClass: "bg-purple-50 text-purple-700 border-purple-200",
+    badgeClass: "bg-[#007AFF]/10 text-[#007AFF] border-transparent",
     icon: AlertCircle,
   },
   REVISION_IN_PROGRESS: {
     label: "Revision Requested by Admin",
-    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
+    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
     icon: AlertCircle,
   },
   APPROVED: {
     label: "Solution Approved by MSME Admin",
-    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
     icon: CheckCircle2,
   },
   COMPLETED: {
@@ -75,10 +75,10 @@ export default function IndustryProjectsPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-slate-900">
+        <h2 className="text-xl font-bold tracking-tight text-foreground">
           Collaborative Project Deliverables
         </h2>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-muted-foreground mt-0.5">
           PRD §8.3 REQ-IND-02 &amp; REQ-IND-03: Track project progression from faculty assignment to public GitHub solution delivery and admin validation.
         </p>
       </div>
@@ -86,7 +86,7 @@ export default function IndustryProjectsPage() {
       {/* Search and Status Filters */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 size-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -118,15 +118,15 @@ export default function IndustryProjectsPage() {
           return (
             <Card
               key={prj.id}
-              className="border-slate-200 shadow-xs hover:border-slate-300 transition-all bg-white flex flex-col justify-between"
+              className="border-black/[0.06] dark:border-white/[0.08] shadow-xs hover:border-slate-300 transition-all bg-white flex flex-col justify-between"
             >
               <CardHeader className="pb-3 pt-5 px-5">
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-mono text-[11px] bg-slate-50 font-bold">
+                    <Badge variant="outline" className="font-mono text-[11px] bg-black/[0.02] dark:bg-white/[0.03] font-bold">
                       {prj.id}
                     </Badge>
-                    <span className="text-[11px] text-slate-400 font-mono">
+                    <span className="text-[11px] text-muted-foreground font-mono">
                       Ref: {prj.problemId}
                     </span>
                   </div>
@@ -136,11 +136,11 @@ export default function IndustryProjectsPage() {
                   </span>
                 </div>
 
-                <CardTitle className="text-base font-bold text-slate-900 leading-snug">
+                <CardTitle className="text-base font-bold text-foreground leading-snug">
                   {prj.problemTitle}
                 </CardTitle>
-                <div className="flex items-center gap-2 pt-1 text-xs text-slate-500">
-                  <span className="font-medium text-slate-700">{prj.domain}</span>
+                <div className="flex items-center gap-2 pt-1 text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">{prj.domain}</span>
                   <span>•</span>
                   <span>Target Deadline: <strong>{prj.targetDeadline}</strong></span>
                 </div>
@@ -148,33 +148,33 @@ export default function IndustryProjectsPage() {
 
               <CardContent className="px-5 pb-5 pt-0 space-y-3">
                 {/* Team & Faculty Details */}
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs space-y-1.5">
-                  <div className="flex items-center justify-between text-slate-700">
-                    <span className="flex items-center gap-1.5 text-slate-500">
+                <div className="p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-slate-100 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between text-foreground">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
                       <GraduationCap className="size-3.5 text-emerald-600" />
                       Student Team Lead:
                     </span>
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-foreground">
                       {prj.studentTeamLeadName} ({prj.studentTeamLeadId})
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-slate-700">
-                    <span className="flex items-center gap-1.5 text-slate-500">
+                  <div className="flex items-center justify-between text-foreground">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
                       <Users className="size-3.5 text-purple-600" />
                       Student Roster:
                     </span>
-                    <span className="font-medium text-slate-800">
+                    <span className="font-medium text-foreground">
                       {prj.studentTeamCount} Assigned Engineers
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-slate-700">
-                    <span className="flex items-center gap-1.5 text-slate-500">
-                      <ShieldCheck className="size-3.5 text-blue-600" />
+                  <div className="flex items-center justify-between text-foreground">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <ShieldCheck className="size-3.5 text-[#007AFF]" />
                       Faculty Project Director:
                     </span>
-                    <span className="font-medium text-slate-800">{prj.facultyMentorName}</span>
+                    <span className="font-medium text-foreground">{prj.facultyMentorName}</span>
                   </div>
                 </div>
 
@@ -185,14 +185,14 @@ export default function IndustryProjectsPage() {
                       href={prj.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1d4ed8] hover:underline"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#007AFF] hover:underline"
                     >
                       <GitBranch className="size-3.5" />
                       Inspect Public GitHub (MIT)
                       <ExternalLink className="size-3" />
                     </a>
                   ) : (
-                    <span className="text-[11px] text-slate-400 italic">
+                    <span className="text-[11px] text-muted-foreground italic">
                       Solution repository in active development
                     </span>
                   )}
@@ -218,6 +218,12 @@ export default function IndustryProjectsPage() {
             </Card>
           );
         })}
+
+        {filteredProjects.length === 0 && (
+          <div className="col-span-full rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-8 text-center text-xs text-muted-foreground">
+            No collaborative projects found matching the selected filter.
+          </div>
+        )}
       </div>
     </div>
   );

@@ -23,26 +23,28 @@ import {
 import { initialProjects, FacultyProject } from "@/lib/faculty-data";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { toast } from "sonner";
+import { ContextualBreadcrumb } from "@/components/navigation/contextual-breadcrumb";
+import { ContextualBack } from "@/components/navigation/contextual-back";
 
 const statusConfig: Record<string, { label: string; badgeClass: string; icon: React.ElementType }> = {
   IN_PROGRESS: {
     label: "In Progress",
-    badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
+    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
     icon: Clock,
   },
   SOLUTION_SUBMITTED: {
     label: "Under Faculty Review",
-    badgeClass: "bg-amber-50 text-amber-700 border-amber-200",
+    badgeClass: "bg-[#FF9500]/10 text-[#FF9500] border-transparent",
     icon: AlertCircle,
   },
   APPROVED: {
     label: "Approved & Sign-off Complete",
-    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
     icon: CheckCircle2,
   },
   REVISION_IN_PROGRESS: {
     label: "Revision Needed",
-    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
+    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
     icon: AlertCircle,
   },
 };
@@ -63,14 +65,15 @@ function FacultyProjectDetailsContent() {
   if (!project) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg border border-slate-200 p-12 text-center">
-          <p className="text-slate-500 text-sm">Project details not found.</p>
-          <Link
-            href="/dashboard/faculty/projects"
-            className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#0f2744] text-white text-xs font-medium hover:bg-[#1a385c]"
-          >
-            <ArrowLeft className="size-3.5" /> Back to Assigned Projects
-          </Link>
+        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-12 text-center">
+          <p className="text-muted-foreground text-sm">Project details not found.</p>
+          <div className="mt-4 flex justify-center">
+            <ContextualBack
+              label="Back to Assigned Projects"
+              fallbackHref="/dashboard/faculty/projects"
+              className="px-3 py-1.5 rounded-md bg-[#0f2744] text-white text-xs hover:bg-[#1a385c]"
+            />
+          </div>
         </div>
       </div>
     );
@@ -147,26 +150,21 @@ function FacultyProjectDetailsContent() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Breadcrumb Header */}
-      <div className="flex items-center gap-2 text-xs">
-        <Link
-          href="/dashboard/faculty/projects"
-          className="flex items-center gap-1 font-medium text-slate-500 hover:text-slate-800"
-        >
-          <ArrowLeft className="size-3.5" />
-          Assigned Projects
-        </Link>
-        <span className="text-slate-300">/</span>
-        <span className="font-mono text-slate-700 font-semibold">{project.id}</span>
-      </div>
+    <div className="w-full max-w-5xl mx-auto space-y-6">
+      {/* Contextual Breadcrumb */}
+      <ContextualBreadcrumb
+        items={[
+          { label: "Assigned Projects", href: "/dashboard/faculty/projects" },
+          { label: project.id, isCurrent: true },
+        ]}
+      />
 
       {/* Main Project Header Card */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6">
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-mono font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+              <span className="text-xs font-mono font-medium text-muted-foreground bg-slate-100 px-2 py-0.5 rounded">
                 {project.id}
               </span>
               <span
@@ -175,27 +173,27 @@ function FacultyProjectDetailsContent() {
                 {st.label}
               </span>
             </div>
-            <h2 className="text-xl font-semibold text-slate-900 tracking-tight">
+            <h2 className="text-xl font-semibold text-foreground tracking-tight">
               {project.name}
             </h2>
-            <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-slate-500">
-              <span>Domain: <strong className="text-slate-700">{project.domain}</strong></span>
+            <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+              <span>Domain: <strong className="text-foreground">{project.domain}</strong></span>
               <span>·</span>
               <span className="flex items-center gap-1">
-                <Building2 className="size-3.5 text-slate-400" />
-                Client: <strong className="text-slate-700">{project.msmeCompany}</strong>
+                <Building2 className="size-3.5 text-muted-foreground" />
+                Client: <strong className="text-foreground">{project.msmeCompany}</strong>
               </span>
             </div>
           </div>
 
           <div className="sm:text-right shrink-0">
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Project Director / Mentor
             </p>
-            <p className="text-sm font-semibold text-slate-800 mt-0.5">{project.mentor}</p>
-            <div className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-500 sm:justify-end">
+            <p className="text-sm font-semibold text-foreground mt-0.5">{project.mentor}</p>
+            <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground sm:justify-end">
               <Calendar className="size-3.5" />
-              <span>Target Deadline: <strong className="text-slate-800">{project.deadline}</strong></span>
+              <span>Target Deadline: <strong className="text-foreground">{project.deadline}</strong></span>
             </div>
           </div>
         </div>
@@ -230,14 +228,14 @@ function FacultyProjectDetailsContent() {
         {/* Left Column: Scope + Milestones + Faculty Supervision Controls */}
         <div className="lg:col-span-2 space-y-6">
           {/* Faculty Review Decision Console (when solution submitted or revision active) */}
-          <div className="bg-white rounded-lg border border-slate-200 p-6">
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6">
             <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-100">
-              <ShieldCheck className="size-4 text-blue-600" />
-              <h3 className="text-sm font-semibold text-slate-900">
+              <ShieldCheck className="size-4 text-[#007AFF]" />
+              <h3 className="text-sm font-semibold text-foreground">
                 Faculty Evaluation &amp; Approval Console
               </h3>
             </div>
-            <p className="text-xs text-slate-600 mb-4 leading-relaxed">
+            <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
               As the designated faculty project director, review the submitted deliverable against the MSME problem statement. You have the authority to grant final academic sign-off or return it for itemized revision.
             </p>
 
@@ -262,7 +260,7 @@ function FacultyProjectDetailsContent() {
 
               <Link
                 href="/dashboard/faculty/feedback"
-                className="inline-flex items-center gap-1.5 text-xs font-medium px-4 py-2 rounded-md bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all"
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-4 py-2 rounded-md bg-white border border-black/[0.06] dark:border-white/[0.08] text-foreground hover:bg-black/[0.02] dark:bg-white/[0.03] transition-all"
               >
                 <FileText className="size-3.5" />
                 <span>Log Rubric Feedback</span>
@@ -271,29 +269,29 @@ function FacultyProjectDetailsContent() {
           </div>
 
           {/* Project Description */}
-          <div className="bg-white rounded-lg border border-slate-200">
-            <div className="px-6 py-4 border-b border-slate-200">
-              <h3 className="text-sm font-semibold text-slate-900">
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+            <div className="px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08]">
+              <h3 className="text-sm font-semibold text-foreground">
                 Problem Statement &amp; Industrial Scope
               </h3>
             </div>
             <div className="p-6">
-              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              <p className="text-xs sm:text-sm text-foreground leading-relaxed">
                 {project.description}
               </p>
             </div>
           </div>
 
           {/* Milestones & Progress Tracker */}
-          <div className="bg-white rounded-lg border border-slate-200">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+            <div className="px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-slate-900">Project Milestones</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h3 className="text-sm font-semibold text-foreground">Project Milestones</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {completedMilestones} of {project.milestones.length} milestones verified ({progressPct}%)
                 </p>
               </div>
-              <span className="text-xs font-medium px-2 py-0.5 rounded border bg-slate-50 text-slate-700 border-slate-200">
+              <span className="text-xs font-medium px-2 py-0.5 rounded border bg-black/[0.02] dark:bg-white/[0.03] text-foreground border-black/[0.06] dark:border-white/[0.08]">
                 {progressPct}% Done
               </span>
             </div>
@@ -301,7 +299,7 @@ function FacultyProjectDetailsContent() {
             <div className="p-6">
               <div className="w-full h-2 bg-slate-100 rounded-full mb-6 overflow-hidden">
                 <div
-                  className="h-full bg-blue-600 rounded-full transition-all"
+                  className="h-full bg-[#007AFF] rounded-full transition-all"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
@@ -321,12 +319,12 @@ function FacultyProjectDetailsContent() {
                     <div className="flex-1 min-w-0">
                       <p
                         className={`text-xs sm:text-sm ${
-                          m.done ? "text-slate-500 line-through" : "text-slate-800 font-medium"
+                          m.done ? "text-muted-foreground line-through" : "text-foreground font-medium"
                         }`}
                       >
                         {m.label}
                       </p>
-                      <p className="text-[11px] text-slate-400 font-mono mt-0.5">{m.date}</p>
+                      <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{m.date}</p>
                     </div>
                   </li>
                 ))}
@@ -338,20 +336,20 @@ function FacultyProjectDetailsContent() {
         {/* Right Column: Student Team, Repository, Documents */}
         <div className="space-y-6">
           {/* Team Members */}
-          <div className="bg-white rounded-lg border border-slate-200">
-            <div className="px-5 py-4 border-b border-slate-200 flex items-center gap-2">
-              <Users className="size-4 text-slate-500" />
-              <h3 className="text-sm font-semibold text-slate-900">Assigned Student Roster</h3>
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+            <div className="px-5 py-4 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center gap-2">
+              <Users className="size-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Assigned Student Roster</h3>
             </div>
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
               {project.team.map((member, i) => (
                 <li key={i} className="px-5 py-3 flex items-center gap-3">
-                  <div className="size-8 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-semibold text-slate-700 shrink-0">
+                  <div className="size-8 rounded-md bg-slate-100 border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center text-xs font-semibold text-foreground shrink-0">
                     {member.name.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-xs font-semibold text-slate-900 truncate">
+                      <p className="text-xs font-semibold text-foreground truncate">
                         {member.name}
                       </p>
                       {member.isLead && (
@@ -361,8 +359,8 @@ function FacultyProjectDetailsContent() {
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-500">{member.role}</p>
-                    <p className="text-[10px] font-mono text-slate-400 mt-0.5">{member.regNo}</p>
+                    <p className="text-[11px] text-muted-foreground">{member.role}</p>
+                    <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{member.regNo}</p>
                   </div>
                 </li>
               ))}
@@ -370,10 +368,10 @@ function FacultyProjectDetailsContent() {
           </div>
 
           {/* GitHub Repository */}
-          <div className="bg-white rounded-lg border border-slate-200">
-            <div className="px-5 py-4 border-b border-slate-200 flex items-center gap-2">
-              <GitBranch className="size-4 text-slate-500" />
-              <h3 className="text-sm font-semibold text-slate-900">Code Deliverable</h3>
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+            <div className="px-5 py-4 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center gap-2">
+              <GitBranch className="size-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Code Deliverable</h3>
             </div>
             <div className="p-5">
               {project.githubUrl ? (
@@ -382,17 +380,17 @@ function FacultyProjectDetailsContent() {
                     href={project.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 hover:text-blue-800 break-all"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[#007AFF] hover:underline break-all"
                   >
                     <ExternalLink className="size-3.5 shrink-0" />
                     <span>{project.githubUrl}</span>
                   </a>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-muted-foreground">
                     Submitted by Team Lead for MSME technical audit and code review.
                   </p>
                 </div>
               ) : (
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   Repository URL will be linked once the Project Team Lead submits the official solution link.
                 </p>
               )}
@@ -400,16 +398,16 @@ function FacultyProjectDetailsContent() {
           </div>
 
           {/* Documents */}
-          <div className="bg-white rounded-lg border border-slate-200">
-            <div className="px-5 py-4 border-b border-slate-200 flex items-center gap-2">
-              <FileText className="size-4 text-slate-500" />
-              <h3 className="text-sm font-semibold text-slate-900">Attached Documents</h3>
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+            <div className="px-5 py-4 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center gap-2">
+              <FileText className="size-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Attached Documents</h3>
             </div>
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
               {project.documents.map((doc, i) => (
                 <li key={i} className="px-5 py-2.5 flex items-center justify-between gap-2">
-                  <span className="text-xs font-medium text-slate-700 truncate">{doc.name}</span>
-                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
+                  <span className="text-xs font-medium text-foreground truncate">{doc.name}</span>
+                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-muted-foreground border border-black/[0.06] dark:border-white/[0.08] shrink-0">
                     {doc.type}
                   </span>
                 </li>
@@ -465,7 +463,7 @@ export default function FacultyProjectDetailsPage() {
   return (
     <Suspense
       fallback={
-        <div className="p-12 text-center text-sm text-slate-500">
+        <div className="p-12 text-center text-sm text-muted-foreground">
           Loading project details...
         </div>
       }

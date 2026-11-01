@@ -2,7 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { UserRole } from "@prisma/client";
 import {
   IndustrySignupSchema,
@@ -32,7 +33,7 @@ export async function validateInstitutionalEmail(email: string): Promise<{
 
   // In development or if unconfigured, permit all domains with notice
   if (!allowedConfig || process.env.NODE_ENV !== "production") {
-    return { isValid: true, domain };
+    return { isValid: true, domain }; 
   }
 
   const allowedList = allowedConfig
@@ -341,5 +342,87 @@ export async function syncOAuthRoleAction(intendedRole?: "STUDENT" | "STAFF") {
       success: false,
       error: error?.message || "Failed to process role synchronization.",
     };
+  }
+}
+
+/**
+ * Invalidate server session, delete database record, expire all auth cookies,
+ * and purge Next.js router cache.
+ */
+export async function signOutAction() {
+  try {
+    const reqHeaders = await headers();
+    const cookieStore = await cookies();
+
+    // 1. Fetch current session to identify the exact session token and user ID
+    let sessionToken: string | null = null;
+    let userId: string | null = null;
+
+    try {
+      const session = await auth.api.getSession({
+        headers: reqHeaders,
+      });
+      if (session?.session?.token) {
+        sessionToken = session.session.token;
+      }
+      if (session?.user?.id) {
+        userId = session.user.id;
+      }
+    } catch (err) {
+      console.warn("Could not retrieve session prior to signout:", err);
+    }
+
+    // 2. Call Better-Auth API signOut to trigger library hooks
+    try {
+      await auth.api.signOut({
+        headers: reqHeaders,
+      });
+    } catch (err) {
+      console.warn("Better-Auth API signOut warning:", err);
+    }
+
+    // 3. Atomically purge session(s) from database
+    if (sessionToken) {
+      await prisma.session.deleteMany({
+        where: { token: sessionToken },
+      });
+    }
+    if (userId) {
+      await prisma.session.deleteMany({
+        where: { userId },
+      });
+    }
+
+    // 4. Force-expire all possible Better-Auth cookie names across both secure and standard prefixes
+    const authCookieNames = [
+      "better-auth.session_token",
+      "__Secure-better-auth.session_token",
+      "better-auth.session_data",
+      "__Secure-better-auth.session_data",
+      "better-auth.csrf_token",
+      "__Secure-better-auth.csrf_token",
+      "better-auth.dont_remember",
+    ];
+
+    for (const name of authCookieNames) {
+      cookieStore.delete(name);
+      cookieStore.set(name, "", {
+        path: "/",
+        maxAge: 0,
+        expires: new Date(0),
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
+    }
+
+    // 5. Revalidate all cached layouts
+    revalidatePath("/", "layout");
+    revalidatePath("/dashboard", "layout");
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error in signOutAction:", error);
+    return { success: false, error: error?.message || "Failed to sign out." };
   }
 }

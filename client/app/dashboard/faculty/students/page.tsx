@@ -33,19 +33,19 @@ const statusOptions = [
 const statusBadge: Record<string, { label: string; badgeClass: string }> = {
   IN_PROGRESS: {
     label: "In Progress",
-    badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
+    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
   },
   SOLUTION_SUBMITTED: {
     label: "Under Review",
-    badgeClass: "bg-amber-50 text-amber-700 border-amber-200",
+    badgeClass: "bg-[#FF9500]/10 text-[#FF9500] border-transparent",
   },
   APPROVED: {
     label: "Approved",
-    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
   },
   REVISION_IN_PROGRESS: {
     label: "Revision Needed",
-    badgeClass: "bg-rose-50 text-rose-700 border-rose-200",
+    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
   },
 };
 
@@ -70,40 +70,40 @@ export default function MyStudentsPage() {
   return (
     <div className="space-y-6">
       {/* Header Info Banner */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <GraduationCap className="size-4 text-blue-600" />
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <GraduationCap className="size-4 text-[#007AFF]" />
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Mentored Student Directory
             </span>
           </div>
-          <h2 className="text-xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">
             Assigned Students
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Browse and monitor students enrolled in projects under your faculty supervision.
           </p>
         </div>
-        <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-slate-200 bg-slate-50 text-slate-700 self-start sm:self-auto">
+        <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] text-foreground self-start sm:self-auto">
           Total Assigned: {initialStudents.length} Students
         </div>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Search by student name, register number, email, or project..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 text-xs sm:text-sm rounded-md border-slate-200 focus-visible:ring-blue-600"
+            className="pl-9 text-xs sm:text-sm rounded-md border-black/[0.06] dark:border-white/[0.08] focus-visible:ring-blue-600"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <Filter className="size-4 text-slate-400 shrink-0 hidden sm:block" />
+          <Filter className="size-4 text-muted-foreground shrink-0 hidden sm:block" />
           <IOSSelect
             size="sm"
             options={departmentOptions}
@@ -122,10 +122,10 @@ export default function MyStudentsPage() {
       </div>
 
       {/* Students Table / Grid */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50/75 border-b border-slate-200 text-slate-500 font-medium uppercase tracking-wider">
+            <thead className="bg-black/[0.02] dark:bg-white/[0.03]/75 border-b border-black/[0.06] dark:border-white/[0.08] text-muted-foreground font-medium uppercase tracking-wider">
               <tr>
                 <th className="px-5 py-3.5">Student Information</th>
                 <th className="px-4 py-3.5">Register Number</th>
@@ -135,10 +135,10 @@ export default function MyStudentsPage() {
                 <th className="px-4 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-400 text-sm">
+                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground text-sm">
                     No assigned students match the current search or filters.
                   </td>
                 </tr>
@@ -146,16 +146,16 @@ export default function MyStudentsPage() {
                 filteredStudents.map((student) => {
                   const st = statusBadge[student.projectStatus] ?? statusBadge.IN_PROGRESS;
                   return (
-                    <tr key={student.id} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={student.id} className="hover:bg-black/[0.02] dark:bg-white/[0.02] transition-colors">
                       {/* Name & Role */}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2.5">
-                          <div className="size-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-semibold text-slate-700 text-xs shrink-0">
+                          <div className="size-8 rounded-full bg-slate-100 border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center font-semibold text-foreground text-xs shrink-0">
                             {student.name.charAt(0)}
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <span className="font-semibold text-slate-900 truncate">
+                              <span className="font-semibold text-foreground truncate">
                                 {student.name}
                               </span>
                               {student.isLead && (
@@ -165,8 +165,8 @@ export default function MyStudentsPage() {
                                 </span>
                               )}
                             </div>
-                            <span className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                              <Mail className="size-3 text-slate-400" />
+                            <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                              <Mail className="size-3 text-muted-foreground" />
                               {student.email}
                             </span>
                           </div>
@@ -174,22 +174,22 @@ export default function MyStudentsPage() {
                       </td>
 
                       {/* Register Number */}
-                      <td className="px-4 py-3.5 font-mono text-slate-700 font-medium">
+                      <td className="px-4 py-3.5 font-mono text-foreground font-medium">
                         {student.regNo}
                       </td>
 
                       {/* Dept & Academic Standing */}
                       <td className="px-4 py-3.5">
-                        <span className="font-semibold text-slate-800">{student.department}</span>
-                        <p className="text-[11px] text-slate-400 mt-0.5">CGPA: {student.cgpa}</p>
+                        <span className="font-semibold text-foreground">{student.department}</span>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">CGPA: {student.cgpa}</p>
                       </td>
 
                       {/* Assigned Project */}
                       <td className="px-4 py-3.5">
-                        <span className="text-[11px] font-mono font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                        <span className="text-[11px] font-mono font-medium text-muted-foreground bg-slate-100 px-1.5 py-0.5 rounded">
                           {student.projectId}
                         </span>
-                        <p className="font-medium text-slate-800 truncate max-w-[220px] mt-1">
+                        <p className="font-medium text-foreground truncate max-w-[220px] mt-1">
                           {student.projectName}
                         </p>
                       </td>
@@ -207,7 +207,7 @@ export default function MyStudentsPage() {
                       <td className="px-4 py-3.5 text-right">
                         <Link
                           href={`/dashboard/faculty/project-details?id=${student.projectId}`}
-                          className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-md bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-blue-700 transition-colors shadow-2xs"
+                          className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-md bg-white border border-black/[0.06] dark:border-white/[0.08] text-foreground hover:bg-black/[0.02] dark:bg-white/[0.03] hover:text-[#007AFF] transition-colors shadow-2xs"
                         >
                           <span>View Project</span>
                           <ChevronRight className="size-3" />

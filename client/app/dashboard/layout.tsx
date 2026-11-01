@@ -1,10 +1,14 @@
-export default function DashboardLayout({
+import { requireAuth } from "@/lib/auth-server";
+
+export const instant = false;
+
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Role-specific sub-layouts (student, staff, industry, alumni, admin)
-  // manage their own full-page UI shell (sidebar + header).
-  // This parent layout is a transparent pass-through.
+  // Enforce server-side authentication for all /dashboard routes
+  await requireAuth();
+
   return <>{children}</>;
 }

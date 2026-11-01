@@ -121,7 +121,7 @@ export function CopyIdBadge({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg font-mono font-semibold bg-slate-50 border border-slate-200/90 text-slate-800 shadow-2xs select-none",
+        "inline-flex items-center gap-1.5 rounded-[6px] font-mono font-medium bg-black/[0.04] dark:bg-white/[0.08] border border-black/[0.05] dark:border-white/[0.06] text-slate-700 dark:text-slate-300 select-none",
         sizeClasses,
         className
       )}
