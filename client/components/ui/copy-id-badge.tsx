@@ -135,12 +135,12 @@ export function CopyIdBadge({
       <button
         type="button"
         onClick={handleCopy}
-        className="p-0.5 rounded hover:bg-slate-200/60 text-slate-400 hover:text-slate-800 transition-colors focus:outline-none"
+        className="p-0.5 rounded hover:bg-slate-200/60 text-slate-400 hover:text-slate-800 transition-all duration-120 active:scale-85 focus:outline-none cursor-pointer"
         title={`Copy ${label || "ID"} ${id}`}
         aria-label={`Copy ${label || "ID"} ${id}`}
       >
         {copied ? (
-          <Check className="size-3 text-emerald-600" />
+          <Check className="size-3 text-emerald-600 animate-in zoom-in-75 duration-150" />
         ) : (
           <Copy className="size-3" />
         )}

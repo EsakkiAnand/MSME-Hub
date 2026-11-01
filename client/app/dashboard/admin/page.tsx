@@ -130,7 +130,7 @@ export default function AdminDashboardPage() {
 
       {/* Standardized Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
-        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full transition-all duration-150">
+        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full ios-card-interactive">
           <div className="flex items-center justify-between text-muted-foreground dark:text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
             <span>Pending MSMEs</span>
             <Building2 className="size-4 text-[#007AFF] dark:text-blue-400" />
@@ -141,7 +141,7 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full transition-all duration-150">
+        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full ios-card-interactive">
           <div className="flex items-center justify-between text-muted-foreground dark:text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
             <span>Solution Gate</span>
             <GitBranch className="size-4 text-purple-600 dark:text-purple-400" />
@@ -152,7 +152,7 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full transition-all duration-150">
+        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full ios-card-interactive">
           <div className="flex items-center justify-between text-muted-foreground dark:text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
             <span>Rating Moderation</span>
             <Star className="size-4 text-amber-500" />
@@ -163,7 +163,7 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full transition-all duration-150">
+        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 flex flex-col justify-between h-full ios-card-interactive">
           <div className="flex items-center justify-between text-muted-foreground dark:text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
             <span>System Health</span>
             <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400" />

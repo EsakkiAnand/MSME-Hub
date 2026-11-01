@@ -12,6 +12,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import { StaggerContainer, StaggerItem } from "@/components/motion/stagger-group";
 
 const myProjects = [
   {
@@ -123,7 +124,7 @@ export default function StudentDashboardPage() {
       </div>
 
       {/* Summary Metrics - Native iOS Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <StaggerContainer className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           {
             label: "Enrolled Projects",
@@ -144,25 +145,26 @@ export default function StudentDashboardPage() {
             icon: CheckCircle2,
           },
         ].map((metric) => (
-          <div
-            key={metric.label}
-            className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-all"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                {metric.label}
-              </span>
-              <metric.icon className="size-4 text-muted-foreground" />
+          <StaggerItem key={metric.label}>
+            <div
+              className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] ios-card-interactive"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  {metric.label}
+                </span>
+                <metric.icon className="size-4 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-foreground tracking-tight">
+                  {metric.value}
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-1">{metric.subtext}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-semibold text-foreground tracking-tight">
-                {metric.value}
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-1">{metric.subtext}</p>
-            </div>
-          </div>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerContainer>
 
       {/* Main Grid: Projects List + Right Column */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">

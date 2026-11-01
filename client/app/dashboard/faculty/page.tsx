@@ -15,6 +15,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import { StaggerContainer, StaggerItem } from "@/components/motion/stagger-group";
 import {
   initialStudents,
   initialProjects,
@@ -125,75 +126,83 @@ export default function FacultyDashboardPage() {
         </div>
       </div>
 
-      {/* 2. Standardized Equal-Height Statistics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+      {/* 2. Standardized Equal-Height Statistics Grid with Stagger Motion */}
+      <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
         {/* Assigned Students */}
-        <div className="h-full rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-          <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-            Assigned Students
-          </span>
-          <div className="mt-3">
-            <div className="text-2xl font-semibold tracking-tight text-foreground">
-              {assignedStudentsCount}
+        <StaggerItem className="h-full">
+          <div className="h-full rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] ios-card-interactive">
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Assigned Students
+            </span>
+            <div className="mt-3">
+              <div className="text-2xl font-semibold tracking-tight text-foreground">
+                {assignedStudentsCount}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Across 4 project teams
+              </p>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Across 4 project teams
-            </p>
           </div>
-        </div>
+        </StaggerItem>
 
         {/* Active Projects */}
-        <div className="h-full rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-          <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-            Active Projects
-          </span>
-          <div className="mt-3">
-            <div className="text-2xl font-semibold tracking-tight text-foreground">
-              {activeProjectsCount}
+        <StaggerItem className="h-full">
+          <div className="h-full rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] ios-card-interactive">
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Active Projects
+            </span>
+            <div className="mt-3">
+              <div className="text-2xl font-semibold tracking-tight text-foreground">
+                {activeProjectsCount}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                In active development
+              </p>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              In active development
-            </p>
           </div>
-        </div>
+        </StaggerItem>
 
         {/* Pending Review */}
-        <Link
-          href="/dashboard/faculty/projects"
-          className="h-full rounded-[16px] border border-[#FF9500]/30 bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#FF9500]/60 transition-all group cursor-pointer"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-medium text-[#FF9500] uppercase tracking-wider">
-              Pending Reviews
-            </span>
-            <span className="size-2 rounded-full bg-[#FF9500] animate-pulse" />
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-semibold tracking-tight text-[#FF9500]">
-              {underReviewCount}
+        <StaggerItem className="h-full">
+          <Link
+            href="/dashboard/faculty/projects"
+            className="h-full rounded-[16px] border border-[#FF9500]/30 bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#FF9500]/60 transition-all duration-150 group cursor-pointer active:scale-[0.99] block"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-medium text-[#FF9500] uppercase tracking-wider">
+                Pending Reviews
+              </span>
+              <span className="size-2 rounded-full bg-[#FF9500] animate-pulse" />
             </div>
-            <p className="text-[11px] font-medium text-[#FF9500] mt-1 flex items-center gap-0.5">
-              <span>Awaiting evaluation</span>
-              <ChevronRight className="size-3 transition-transform group-hover:translate-x-0.5" />
-            </p>
-          </div>
-        </Link>
+            <div className="mt-3">
+              <div className="text-2xl font-semibold tracking-tight text-[#FF9500]">
+                {underReviewCount}
+              </div>
+              <p className="text-[11px] font-medium text-[#FF9500] mt-1 flex items-center gap-0.5">
+                <span>Awaiting evaluation</span>
+                <ChevronRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+              </p>
+            </div>
+          </Link>
+        </StaggerItem>
 
         {/* Approved Projects */}
-        <div className="h-full rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-          <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-            Approved Projects
-          </span>
-          <div className="mt-3">
-            <div className="text-2xl font-semibold tracking-tight text-foreground">
-              {approvedProjectsCount}
+        <StaggerItem className="h-full">
+          <div className="h-full rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] ios-card-interactive">
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Approved Projects
+            </span>
+            <div className="mt-3">
+              <div className="text-2xl font-semibold tracking-tight text-foreground">
+                {approvedProjectsCount}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                MSME sign-off completed
+              </p>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              MSME sign-off completed
-            </p>
           </div>
-        </div>
-      </div>
+        </StaggerItem>
+      </StaggerContainer>
 
       {/* 3. Actionable Pending Work Notice */}
       {underReviewCount > 0 && (
