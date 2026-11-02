@@ -65,7 +65,7 @@ export default function Home() {
       badge: "Ecosystem Governance",
       description:
         "Verify industry business credentials, inspect submitted GitHub repositories, manage revisions, and moderate satisfaction ratings.",
-      accent: "border-rose-500/20 hover:border-rose-500/40",
+      accent: "border-rose-500/30 hover:border-rose-500/50 shadow-xs",
       iconBg: "bg-rose-500/10 text-rose-500",
     },
   ];
@@ -114,13 +114,23 @@ export default function Home() {
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/sign-in">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/login">
               <Button variant="ghost" size="sm">
                 Sign In
               </Button>
             </Link>
-            <Link href="/register">
+            <Link href="/admin/login">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-400"
+              >
+                <ShieldCheck className="size-3.5 mr-1 text-rose-500" />
+                <span>Admin Login</span>
+              </Button>
+            </Link>
+            <Link href="/signup">
               <Button size="sm">
                 Get Started
                 <ArrowRight className="ml-1.5 size-4" />
@@ -145,16 +155,20 @@ export default function Home() {
               A role-governed ecosystem where verified MSMEs submit operational bottlenecks, university teams build MIT-licensed open-source solutions, alumni mentor, and admins validate quality.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register">
+              <Link href="/signup">
                 <Button size="lg" className="w-full sm:w-auto h-12 px-8 text-base">
                   Register Your Organization
                   <ArrowRight className="ml-2 size-4" />
                 </Button>
               </Link>
-              <Link href="/showcase">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 text-base">
-                  <Lightbulb className="mr-2 size-4 text-amber-500" />
-                  Explore Sponsorship Showcase
+              <Link href="/admin/login">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto h-12 px-8 text-base border-rose-200 text-rose-700 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-300"
+                >
+                  <ShieldCheck className="mr-2 size-4 text-rose-500" />
+                  MSME Admin Governance Portal
                 </Button>
               </Link>
             </div>
@@ -168,6 +182,9 @@ export default function Home() {
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="size-4 text-emerald-500" /> MIT Open Source
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="size-4 text-rose-500" /> Central Governance
               </span>
             </div>
           </div>
@@ -188,7 +205,7 @@ export default function Home() {
               return (
                 <Card
                   key={role.title}
-                  className={`border transition-all duration-200 hover:shadow-md ${role.accent}`}
+                  className={`border transition-all duration-200 hover:shadow-md flex flex-col justify-between ${role.accent}`}
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between mb-3">
@@ -204,6 +221,21 @@ export default function Home() {
                       {role.description}
                     </CardDescription>
                   </CardHeader>
+
+                  {role.title === "MSME Admin" && (
+                    <CardContent className="pt-0 pb-4">
+                      <Link href="/admin/login">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs font-semibold text-rose-600 border-rose-200 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-400"
+                        >
+                          <ShieldCheck className="size-3.5 mr-1.5" />
+                          Access MSME Admin Portal &rarr;
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  )}
                 </Card>
               );
             })}
@@ -252,7 +284,12 @@ export default function Home() {
               <GitBranch className="size-3.5" /> Public GitHub Deliverables
             </span>
             <span>•</span>
-            <span>Protected by Admin Moderation</span>
+            <Link
+              href="/admin/login"
+              className="hover:underline flex items-center gap-1 text-rose-600 dark:text-rose-400 font-medium"
+            >
+              <ShieldCheck className="size-3.5" /> MSME Admin Portal
+            </Link>
           </div>
         </div>
       </footer>

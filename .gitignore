@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+client/node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+client/.next/
+out/
+client/out/
+.vite/
+client/.vite/
+
+# Cache & Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment variables
+.env
+.env.*
+!.env.example
+client/.env
+client/.env.*
+!client/.env.example
+
+# Temporary notes & scratch files
+combined_doc_summary.txt
+workflow_summary.txt
+*.pdf
+
+# OS files
+.DS_Store
+Thumbs.db

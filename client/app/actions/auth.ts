@@ -426,3 +426,66 @@ export async function signOutAction() {
     return { success: false, error: error?.message || "Failed to sign out." };
   }
 }
+
+
+/**
+ * Dedicated server action for MSME Admin login with security verification
+ */
+export async function adminLoginAction(input: {
+  email: string;
+  password: string;
+  securityKey?: string;
+}) {
+  try {
+    const reqHeaders = await headers();
+    const cleanEmail = input.email.trim().toLowerCase();
+
+    // 1. Verify that user exists and strictly holds the MSME_ADMIN role
+    const user = await prisma.user.findUnique({
+      where: { email: cleanEmail },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: "No administrator account found with this email. MSME Admin accounts must be pre-seeded.",
+      };
+    }
+
+    if (user.role !== UserRole.MSME_ADMIN) {
+      return {
+        success: false,
+        error: "Access Denied: This account is not provisioned as an MSME Administrator.",
+      };
+    }
+
+    // 2. Authenticate credentials via Better-Auth
+    const authRes = await auth.api.signInEmail({
+      body: {
+        email: cleanEmail,
+        password: input.password,
+      },
+      headers: reqHeaders,
+    });
+
+    if (!authRes || !authRes.user) {
+      return {
+        success: false,
+        error: "Invalid administrator credentials. Please check your password.",
+      };
+    }
+
+    revalidatePath("/dashboard/admin", "layout");
+
+    return {
+      success: true,
+      redirectUrl: "/dashboard/admin",
+    };
+  } catch (error: any) {
+    console.error("Error in adminLoginAction:", error);
+    return {
+      success: false,
+      error: error?.message || "An unexpected error occurred during admin authentication.",
+    };
+  }
+}
