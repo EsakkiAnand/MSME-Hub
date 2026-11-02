@@ -32,6 +32,7 @@ import {
   HelpCircle,
   History,
   Loader2,
+  GitBranch,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -107,6 +108,7 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleConfig> = {
     },
     navItems: [
       { href: "/dashboard/faculty", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { href: "/dashboard/faculty/problem-bank", label: "Problem Bank", icon: Building2 },
       { href: "/dashboard/faculty/students", label: "My Students", icon: Users },
       { href: "/dashboard/faculty/projects", label: "Projects", icon: FolderKanban },
       { href: "/dashboard/faculty/project-details", label: "Project Details", icon: FileText },
@@ -160,13 +162,19 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleConfig> = {
     portalSubtitle: "Governance & Policy Portal",
     portalIcon: ShieldCheck,
     defaultIdPrefix: "ADM",
+    profileHref: "/dashboard/admin/profile",
     badge: {
       label: "Super Admin",
       icon: ShieldCheck,
       className: "bg-rose-50 text-rose-700 border-rose-200",
     },
     navItems: [
-      { href: "/dashboard/admin", label: "Administration", icon: ShieldCheck, exact: true },
+      { href: "/dashboard/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { href: "/dashboard/admin/problem-bank", label: "Problem Bank", icon: Building2 },
+      { href: "/dashboard/admin/industry-verification", label: "Industry Verification", icon: ShieldCheck },
+      { href: "/dashboard/admin/github-review", label: "GitHub Review", icon: GitBranch },
+      { href: "/dashboard/admin/rating-moderation", label: "Rating Moderation", icon: Star },
+      { href: "/dashboard/admin/users", label: "User Management", icon: Users },
     ],
   },
 };

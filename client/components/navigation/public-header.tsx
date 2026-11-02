@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { ShieldCheck } from "lucide-react";
 
 export interface PublicHeaderProps {
   action?: "login" | "signup" | "home" | "none";
@@ -41,7 +42,7 @@ export function PublicHeader({ action = "none", className }: PublicHeaderProps) 
           </div>
         </Link>
 
-        {/* Single Contextual Navigation Control */}
+        {/* Navigation Controls */}
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           {action === "signup" && (
             <span>
@@ -75,6 +76,16 @@ export function PublicHeader({ action = "none", className }: PublicHeaderProps) 
               Return to Home
             </Link>
           )}
+
+          <div className="h-4 w-px bg-border mx-0.5" />
+
+          <Link
+            href="/admin/login"
+            className="text-xs font-medium text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 transition-colors"
+          >
+            <ShieldCheck className="size-3.5" />
+            <span>Admin Portal</span>
+          </Link>
         </div>
       </div>
     </header>
