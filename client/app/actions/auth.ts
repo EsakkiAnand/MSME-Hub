@@ -1,3 +1,5 @@
+"use server";
+
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers, cookies } from "next/headers";
