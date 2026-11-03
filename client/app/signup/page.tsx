@@ -13,7 +13,6 @@ import {
 } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IOSSelect } from "@/components/ui/ios-select";
 import {
   Card,
   CardHeader,
@@ -34,14 +33,10 @@ import {
   Eye,
   EyeOff,
   Briefcase,
-  FileText,
   Globe,
   Loader2,
-  CheckCircle2,
   Sparkles,
   ArrowRight,
-  ArrowLeft,
-  X,
   Info,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -59,9 +54,6 @@ export default function SignupPage() {
     }
   }, [session.isPending, session.data?.user, router]);
 
-
-
-
   // Active Tab
   const [activeTab, setActiveTab] = useState<"academic" | "industry" | "alumni">("academic");
 
@@ -69,14 +61,12 @@ export default function SignupPage() {
   const [academicRole, setAcademicRole] = useState<"STUDENT" | "STAFF">("STUDENT");
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  // Industry State
-  const [industryName, setIndustryName] = useState("");
-  const [industryEmail, setIndustryEmail] = useState("");
-  const [industryPassword, setIndustryPassword] = useState("");
+  // Industry State - Initial Registration collects only essential details
   const [industryCompanyName, setIndustryCompanyName] = useState("");
-  const [industryUdyam, setIndustryUdyam] = useState("");
-  const [industryDomain, setIndustryDomain] = useState("Software & IT");
-  const [industryWebsite, setIndustryWebsite] = useState("");
+  const [industryEmail, setIndustryEmail] = useState("");
+  const [industryContactName, setIndustryContactName] = useState("");
+  const [industryDesignation, setIndustryDesignation] = useState("");
+  const [industryPassword, setIndustryPassword] = useState("");
   const [isIndustrySubmitting, setIsIndustrySubmitting] = useState(false);
   const [showIndustryPassword, setShowIndustryPassword] = useState(false);
 
@@ -91,19 +81,6 @@ export default function SignupPage() {
   const [alumniLinkedin, setAlumniLinkedin] = useState("");
   const [isAlumniSubmitting, setIsAlumniSubmitting] = useState(false);
   const [showAlumniPassword, setShowAlumniPassword] = useState(false);
-
-  // Industry Domains
-  const industryDomains = [
-    "Software & IT Services",
-    "Manufacturing & Heavy Engineering",
-    "Textiles & Apparel",
-    "Renewable Energy & Cleantech",
-    "Healthcare & Pharmaceuticals",
-    "Automotive & Electric Vehicles",
-    "Agri-tech & Food Processing",
-    "Electronics & Semiconductor",
-    "Other Specialized MSME",
-  ];
 
   // Handlers
   const handleGoogleAcademicSignup = async () => {
@@ -121,8 +98,14 @@ export default function SignupPage() {
 
   const handleIndustrySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!industryName || !industryEmail || !industryPassword || !industryCompanyName || !industryUdyam) {
-      toast.error("Please fill in all mandatory business fields.");
+    if (
+      !industryCompanyName.trim() ||
+      !industryEmail.trim() ||
+      !industryContactName.trim() ||
+      !industryDesignation.trim() ||
+      !industryPassword
+    ) {
+      toast.error("Please fill in all essential industry registration details.");
       return;
     }
 
@@ -134,13 +117,12 @@ export default function SignupPage() {
     setIsIndustrySubmitting(true);
     try {
       const res = await registerIndustryAction({
-        name: industryName,
-        email: industryEmail,
+        name: industryCompanyName.trim(),
+        companyName: industryCompanyName.trim(),
+        contactName: industryContactName.trim(),
+        designation: industryDesignation.trim(),
+        email: industryEmail.trim().toLowerCase(),
         password: industryPassword,
-        companyName: industryCompanyName,
-        udyamRegNo: industryUdyam,
-        domain: industryDomain,
-        websiteUrl: industryWebsite || undefined,
       });
 
       if (!res.success) {
@@ -149,7 +131,7 @@ export default function SignupPage() {
         return;
       }
 
-      toast.success("Industry partner registered successfully! Redirecting...");
+      toast.success("Industry partner registered successfully! Redirecting to workspace...");
       router.push(res.redirectUrl || "/dashboard/industry");
     } catch (err: any) {
       toast.error(err?.message || "An unexpected error occurred.");
@@ -206,15 +188,11 @@ export default function SignupPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
-      {/* Standardized Single Application Header */}
       <PublicHeader action="login" />
 
-      {/* Main Registration Content */}
       <main className="flex flex-1 items-center justify-center p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-xl">
           <Card className="border shadow-lg">
-
-
             <CardHeader className="text-center pb-4 pt-4">
               <div className="flex justify-center mb-1">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
@@ -260,63 +238,57 @@ export default function SignupPage() {
                   </TabsTrigger>
                 </TabsList>
 
-                {/* ---------------- Tab 1: Academic ---------------- */}
-                <TabsContent value="academic" className="space-y-5 pt-4">
-                  <div className="rounded-lg border bg-card p-4 space-y-3">
-                    <span className="text-xs font-semibold text-foreground uppercase tracking-wider block">
-                      Choose Academic Role
-                    </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div
+                {/* ---------------- Tab 1: Academic (Students & Faculty) ---------------- */}
+                <TabsContent value="academic" className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-foreground">
+                      Select your institutional academic role
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
                         onClick={() => setAcademicRole("STUDENT")}
-                        className={`cursor-pointer rounded-lg border p-3.5 transition-all ${
+                        className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
                           academicRole === "STUDENT"
-                            ? "border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500"
-                            : "border-border hover:border-emerald-500/40"
+                            ? "border-emerald-500 bg-emerald-500/10 shadow-xs"
+                            : "border-border hover:bg-muted/50"
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <GraduationCap className="size-4 text-emerald-500" />
-                            <span className="font-semibold text-sm">Student Builder</span>
-                          </div>
-                          {academicRole === "STUDENT" && (
-                            <CheckCircle2 className="size-4 text-emerald-500" />
-                          )}
+                          <span className="font-semibold text-sm">Student Builder</span>
+                          <GraduationCap className="size-4 text-emerald-500" />
                         </div>
-                        <p className="text-xs text-muted-foreground leading-normal">
-                          Solve MSME challenges, build GitHub deliverables, and pitch ideas.
-                        </p>
-                      </div>
+                        <span className="text-[11px] text-muted-foreground">
+                          Solve industrial problems &amp; build portfolio
+                        </span>
+                      </button>
 
-                      <div
+                      <button
+                        type="button"
                         onClick={() => setAcademicRole("STAFF")}
-                        className={`cursor-pointer rounded-lg border p-3.5 transition-all ${
+                        className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
                           academicRole === "STAFF"
-                            ? "border-purple-500 bg-purple-500/5 ring-1 ring-purple-500"
-                            : "border-border hover:border-purple-500/40"
+                            ? "border-emerald-500 bg-emerald-500/10 shadow-xs"
+                            : "border-border hover:bg-muted/50"
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <Users className="size-4 text-purple-500" />
-                            <span className="font-semibold text-sm">Faculty / Staff</span>
-                          </div>
-                          {academicRole === "STAFF" && (
-                            <CheckCircle2 className="size-4 text-purple-500" />
-                          )}
+                          <span className="font-semibold text-sm">Faculty Supervisor</span>
+                          <Users className="size-4 text-emerald-500" />
                         </div>
-                        <p className="text-xs text-muted-foreground leading-normal">
-                          Claim domain problems, assign multi-student teams, and direct projects.
-                        </p>
-                      </div>
+                        <span className="text-[11px] text-muted-foreground">
+                          Direct student teams &amp; claim problem pool
+                        </span>
+                      </button>
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-border/80 bg-muted/40 p-3.5 flex items-start gap-3">
-                    <Info className="size-4 text-primary mt-0.5 shrink-0" />
-                    <div className="text-xs text-muted-foreground leading-relaxed">
-                      <strong className="text-foreground font-medium">Institutional Domain Requirement:</strong>{" "}
+                  <div className="rounded-lg bg-muted/60 p-3.5 border text-xs text-muted-foreground space-y-1">
+                    <div className="font-semibold text-foreground flex items-center gap-1.5">
+                      <ShieldCheck className="size-4 text-emerald-500" />
+                      Institutional Whitelist Verification
+                    </div>
+                    <div>
                       Academic sign-up requires Google Workspace OAuth using your official institutional email
                       (e.g., <code className="text-[11px] bg-muted px-1 py-0.5 rounded">@college.edu</code>).
                     </div>
@@ -354,40 +326,78 @@ export default function SignupPage() {
                   </Button>
                 </TabsContent>
 
-                {/* ---------------- Tab 2: Industry Partner ---------------- */}
+                {/* ---------------- Tab 2: Industry Partner (Streamlined Essential Details) ---------------- */}
                 <TabsContent value="industry" className="space-y-4 pt-4">
                   <form onSubmit={handleIndustrySubmit} className="space-y-3.5">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Field 1: Name (Company / Organization Name) */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                        <Building2 className="size-3.5 text-muted-foreground" />
+                        Company / Organization Name *
+                      </label>
+                      <Input
+                        placeholder="e.g. Hexaware Technologies / Apex Tex Machineries"
+                        value={industryCompanyName}
+                        onChange={(e) => setIndustryCompanyName(e.target.value)}
+                        required
+                        className="h-10 text-sm"
+                        autoComplete="organization"
+                      />
+                    </div>
+
+                    {/* Field 2: Email Address (Allows any email address) */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                        <Mail className="size-3.5 text-muted-foreground" />
+                        Email Address *
+                      </label>
+                      <Input
+                        type="email"
+                        placeholder="name@company.com or name@gmail.com"
+                        value={industryEmail}
+                        onChange={(e) => setIndustryEmail(e.target.value)}
+                        required
+                        className="h-10 text-sm"
+                        autoComplete="email"
+                      />
+                      <p className="text-[11px] text-muted-foreground">
+                        You can register using any valid email address (corporate, business, or personal).
+                      </p>
+                    </div>
+
+                    {/* Fields 3 & 4: Contact Name & Designation */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-0.5">
                       <div className="space-y-1.5">
                         <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                           <Users className="size-3.5 text-muted-foreground" />
-                          Representative Name *
+                          Contact Name *
                         </label>
                         <Input
-                          placeholder="John Doe"
-                          value={industryName}
-                          onChange={(e) => setIndustryName(e.target.value)}
+                          placeholder="e.g. K. Ramanathan"
+                          value={industryContactName}
+                          onChange={(e) => setIndustryContactName(e.target.value)}
                           required
-                          className="h-9 text-sm"
+                          className="h-10 text-sm"
+                          autoComplete="name"
                         />
                       </div>
 
                       <div className="space-y-1.5">
                         <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                          <Mail className="size-3.5 text-muted-foreground" />
-                          Business Email *
+                          <Briefcase className="size-3.5 text-muted-foreground" />
+                          Designation *
                         </label>
                         <Input
-                          type="email"
-                          placeholder="contact@company.com"
-                          value={industryEmail}
-                          onChange={(e) => setIndustryEmail(e.target.value)}
+                          placeholder="e.g. Managing Director / Operations Head"
+                          value={industryDesignation}
+                          onChange={(e) => setIndustryDesignation(e.target.value)}
                           required
-                          className="h-9 text-sm"
+                          className="h-10 text-sm"
                         />
                       </div>
                     </div>
 
+                    {/* Field 5: Password */}
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                         <Lock className="size-3.5 text-muted-foreground" />
@@ -401,85 +411,29 @@ export default function SignupPage() {
                           onChange={(e) => setIndustryPassword(e.target.value)}
                           required
                           minLength={8}
-                          className="h-9 text-sm pr-9"
+                          className="h-10 text-sm pr-10"
+                          autoComplete="new-password"
                         />
                         <button
                           type="button"
                           onClick={() => setShowIndustryPassword(!showIndustryPassword)}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label={showIndustryPassword ? "Hide password" : "Show password"}
                         >
                           {showIndustryPassword ? (
-                            <EyeOff className="size-3.5" />
+                            <EyeOff className="size-4" />
                           ) : (
-                            <Eye className="size-3.5" />
+                            <Eye className="size-4" />
                           )}
                         </button>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                          <Building2 className="size-3.5 text-muted-foreground" />
-                          Company / Enterprise Name *
-                        </label>
-                        <Input
-                          placeholder="Apex Tech Industries"
-                          value={industryCompanyName}
-                          onChange={(e) => setIndustryCompanyName(e.target.value)}
-                          required
-                          className="h-9 text-sm"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                          <FileText className="size-3.5 text-muted-foreground" />
-                          Udyam Registration No. *
-                        </label>
-                        <Input
-                          placeholder="UDYAM-TN-01-0012345"
-                          value={industryUdyam}
-                          onChange={(e) => setIndustryUdyam(e.target.value)}
-                          required
-                          className="h-9 text-sm font-mono uppercase"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                          <Briefcase className="size-3.5 text-muted-foreground" />
-                          Industry Domain *
-                        </label>
-                        <IOSSelect
-                          value={industryDomain}
-                          onChange={(val) => setIndustryDomain(val)}
-                          options={industryDomains}
-                          placeholder="Select industry domain..."
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                          <Globe className="size-3.5 text-muted-foreground" />
-                          Official Website (Optional)
-                        </label>
-                        <Input
-                          type="url"
-                          placeholder="https://company.com"
-                          value={industryWebsite}
-                          onChange={(e) => setIndustryWebsite(e.target.value)}
-                          className="h-9 text-sm"
-                        />
-                      </div>
-                    </div>
-
+                    {/* Streamlined Onboarding Notice */}
                     <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3 text-xs text-blue-900 dark:text-blue-200 flex items-start gap-2">
                       <Info className="size-4 text-blue-500 mt-0.5 shrink-0" />
                       <span>
-                        <strong>Verification Note:</strong> Your official Udyam registration PDF certificate will be requested on your company dashboard after registration. MSME Admins verify all certificates before problem posting unlocks.
+                        <strong>Streamlined MSME Onboarding:</strong> Initial registration collects only your essential entity and contact details. Secondary credentials like your Udyam PDF can be updated later from your company dashboard.
                       </span>
                     </div>
 

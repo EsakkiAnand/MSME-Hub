@@ -276,6 +276,11 @@ function LoginForm() {
                     <div className="w-full border-t border-border" />
                   </div>
 
+                  <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+                    <Building2 className="size-3 text-blue-500" />
+                    <span>Industry &amp; Alumni Sign In</span>
+                  </div>
+
                   {/* Email & Password Form */}
                   <form onSubmit={handleEmailSignIn} className="space-y-3.5">
                     <div className="space-y-1.5">
@@ -289,7 +294,7 @@ function LoginForm() {
                       <Input
                         id="email"
                         type="email"
-                        placeholder="name@organization.com"
+                        placeholder="name@company.com or name@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
