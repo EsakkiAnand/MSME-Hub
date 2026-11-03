@@ -60,6 +60,8 @@ export async function validateInstitutionalEmail(email: string): Promise<{
 
 /**
  * Register an Industry Partner with credentials and IndustryProfile
+ * Per MSME meeting: collects essential details (Name, Email address, Contact name, Designation)
+ * and allows registration using any valid email address.
  */
 export async function registerIndustryAction(input: IndustrySignupInput) {
   const validated = IndustrySignupSchema.safeParse(input);
@@ -70,8 +72,21 @@ export async function registerIndustryAction(input: IndustrySignupInput) {
     };
   }
 
-  const { name, email, password, companyName, udyamRegNo, domain, websiteUrl } =
-    validated.data;
+  const {
+    name,
+    email,
+    password,
+    contactName,
+    designation,
+    companyName,
+    udyamRegNo,
+    domain,
+    websiteUrl,
+  } = validated.data;
+
+  const actualCompanyName = (companyName || name).trim();
+  const actualContactName = (contactName || name).trim();
+  const actualDesignation = designation?.trim() || "Industry Representative";
 
   // Check existing user
   const existingUser = await prisma.user.findUnique({
@@ -81,20 +96,22 @@ export async function registerIndustryAction(input: IndustrySignupInput) {
   if (existingUser) {
     return {
       success: false,
-      error: "An account with this business email already exists. Please sign in.",
+      error: "An account with this email address already exists. Please sign in.",
     };
   }
 
-  // Check unique Udyam registration
-  const existingUdyam = await prisma.industryProfile.findUnique({
-    where: { udyamRegNo },
-  });
+  // Check unique Udyam registration if provided
+  if (udyamRegNo && udyamRegNo.trim() !== "") {
+    const existingUdyam = await prisma.industryProfile.findUnique({
+      where: { udyamRegNo: udyamRegNo.trim().toUpperCase() },
+    });
 
-  if (existingUdyam) {
-    return {
-      success: false,
-      error: "This Udyam Registration Number is already registered in MSME-Hub.",
-    };
+    if (existingUdyam) {
+      return {
+        success: false,
+        error: "This Udyam Registration Number is already registered in MSME-Hub.",
+      };
+    }
   }
 
   try {
@@ -103,7 +120,7 @@ export async function registerIndustryAction(input: IndustrySignupInput) {
     // Call Better Auth to create user with credentials
     const authResult = await auth.api.signUpEmail({
       body: {
-        name,
+        name: actualContactName,
         email: email.toLowerCase(),
         password,
       },
@@ -125,7 +142,12 @@ export async function registerIndustryAction(input: IndustrySignupInput) {
       const userUniqueId = await allocateUserUniqueId(UserRole.INDUSTRY, tx);
       
       // Allocate permanent Company ID (e.g. HTMP001 or derived company prefix)
-      const { companyId, prefix } = await allocateCompanyId(companyName, undefined, tx);
+      const { companyId, prefix } = await allocateCompanyId(actualCompanyName, undefined, tx);
+
+      // Safe unique Udyam fallback for initial registration if not provided upfront
+      const finalUdyam = udyamRegNo && udyamRegNo.trim() !== ""
+        ? udyamRegNo.trim().toUpperCase()
+        : `UDYAM-PENDING-${userUniqueId}`;
 
       await tx.user.update({
         where: { id: userId },
@@ -140,11 +162,11 @@ export async function registerIndustryAction(input: IndustrySignupInput) {
       await tx.industryProfile.create({
         data: {
           userId,
-          companyName,
-          udyamRegNo,
+          companyName: actualCompanyName,
+          udyamRegNo: finalUdyam,
           companyId,
           companyPrefix: prefix,
-          domain,
+          domain: domain?.trim() || "General Engineering & Technology",
           websiteUrl: websiteUrl || null,
         },
       });
@@ -426,7 +448,6 @@ export async function signOutAction() {
     return { success: false, error: error?.message || "Failed to sign out." };
   }
 }
-
 
 /**
  * Dedicated server action for MSME Admin login with security verification

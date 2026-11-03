@@ -5,15 +5,15 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 
 export const IndustrySignupSchema = z.object({
-  name: z.string().min(2, "Representative name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid corporate/business email"),
+  name: z.string().min(2, "Company or organization name is required"),
+  email: z.string().email("Please enter a valid email address"),
+  contactName: z.string().min(2, "Contact name is required"),
+  designation: z.string().min(2, "Designation is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  companyName: z.string().min(2, "Company name is required"),
-  udyamRegNo: z
-    .string()
-    .min(5, "Udyam registration number is required")
-    .transform((val) => val.trim().toUpperCase()),
-  domain: z.string().min(2, "Industry domain is required"),
+  // Optional / backward-compatible fields:
+  companyName: z.string().optional(),
+  udyamRegNo: z.string().optional().or(z.literal("")),
+  domain: z.string().optional().or(z.literal("")),
   websiteUrl: z
     .string()
     .url("Please enter a valid website URL")
