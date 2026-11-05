@@ -14,51 +14,31 @@ import {
   AlertCircle,
   Star,
   ShieldCheck,
+  ChevronRight,
+  XCircle,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { IOSSelect } from "@/components/ui/ios-select";
+import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { initialIndustryProjects, IndustryProjectItem } from "@/lib/industry-data";
-
-const statusConfig: Record<string, { label: string; badgeClass: string; icon: React.ElementType }> = {
-  ASSIGNED: {
-    label: "Team Assigned",
-    badgeClass: "bg-slate-100 text-foreground border-black/[0.06] dark:border-white/[0.08]",
-    icon: Clock,
-  },
-  IN_PROGRESS: {
-    label: "Under Development",
-    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
-    icon: Clock,
-  },
-  SOLUTION_SUBMITTED: {
-    label: "Solution Submitted for Admin Review",
-    badgeClass: "bg-[#007AFF]/10 text-[#007AFF] border-transparent",
-    icon: AlertCircle,
-  },
-  REVISION_IN_PROGRESS: {
-    label: "Revision Requested by Admin",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
-    icon: AlertCircle,
-  },
-  APPROVED: {
-    label: "Solution Approved by MSME Admin",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
-    icon: CheckCircle2,
-  },
-  COMPLETED: {
-    label: "Project Closed & Rated",
-    badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
-    icon: CheckCircle2,
-  },
-};
+import { ProjectCategoryTabs } from "@/components/projects/project-category-tabs";
+import { ProjectStatusCategoryBadge } from "@/components/projects/project-status-category-badge";
+import { ProjectStatusCategory, getProjectStatusCategory } from "@/lib/project-data";
 
 export default function IndustryProjectsPage() {
   const [projects] = useState<IndustryProjectItem[]>(initialIndustryProjects);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [activeCategory, setActiveCategory] = useState<ProjectStatusCategory>("ALL");
+
+  // Compute category counts
+  const counts = {
+    all: projects.length,
+    inProgressLive: projects.filter((p) => getProjectStatusCategory(p.status) === "IN_PROGRESS_LIVE").length,
+    completed: projects.filter((p) => getProjectStatusCategory(p.status) === "COMPLETED").length,
+    rejected: projects.filter((p) => getProjectStatusCategory(p.status) === "REJECTED").length,
+  };
 
   const filteredProjects = projects.filter((prj) => {
     const matchesSearch =
@@ -67,25 +47,35 @@ export default function IndustryProjectsPage() {
       prj.studentTeamLeadName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       prj.facultyMentorName.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = statusFilter === "ALL" || prj.status === statusFilter;
+    const projCategory = getProjectStatusCategory(prj.status);
+    const matchesCategory = activeCategory === "ALL" || projCategory === activeCategory;
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesCategory;
   });
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          Collaborative Project Deliverables
-        </h2>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          PRD §8.3 REQ-IND-02 &amp; REQ-IND-03: Track project progression from faculty assignment to public GitHub solution delivery and admin validation.
-        </p>
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight text-foreground">
+            Collaborative Project Deliverables &amp; History
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            PRD §8.3: Track engineering progress across lifecycle categories (In Progress, Completed, Rejected), review audit histories, and inspect public GitHub deliverables.
+          </p>
+        </div>
       </div>
 
-      {/* Search and Status Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="relative w-full sm:w-80">
+      {/* Category Tabs: In Progress / Live | Completed | Rejected */}
+      <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+        <ProjectCategoryTabs
+          activeCategory={activeCategory}
+          onSelectCategory={setActiveCategory}
+          counts={counts}
+        />
+
+        <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
           <Input
             value={searchQuery}
@@ -94,27 +84,11 @@ export default function IndustryProjectsPage() {
             className="pl-9 text-xs h-9 bg-white"
           />
         </div>
-
-        <div className="w-full sm:w-48">
-          <IOSSelect
-            value={statusFilter}
-            onChange={setStatusFilter}
-            options={[
-              { value: "ALL", label: "All Project Statuses" },
-              { value: "IN_PROGRESS", label: "Under Development" },
-              { value: "SOLUTION_SUBMITTED", label: "Solution Submitted" },
-              { value: "APPROVED", label: "Approved by Admin" },
-            ]}
-          />
-        </div>
       </div>
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredProjects.map((prj) => {
-          const cfg = statusConfig[prj.status] || statusConfig.IN_PROGRESS;
-          const StatusIcon = cfg.icon;
-
           return (
             <Card
               key={prj.id}
@@ -123,17 +97,12 @@ export default function IndustryProjectsPage() {
               <CardHeader className="pb-3 pt-5 px-5">
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-mono text-[11px] bg-black/[0.02] dark:bg-white/[0.03] font-bold">
-                      {prj.id}
-                    </Badge>
+                    <CopyIdBadge id={prj.id} label="ID" />
                     <span className="text-[11px] text-muted-foreground font-mono">
                       Ref: {prj.problemId}
                     </span>
                   </div>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${cfg.badgeClass}`}>
-                    <StatusIcon className="size-3" />
-                    {cfg.label}
-                  </span>
+                  <ProjectStatusCategoryBadge status={prj.status} size="sm" />
                 </div>
 
                 <CardTitle className="text-base font-bold text-foreground leading-snug">
@@ -178,41 +147,63 @@ export default function IndustryProjectsPage() {
                   </div>
                 </div>
 
-                {/* GitHub Code Deliverable Link (ADR 0002) */}
+                {/* Rejection Note if Rejected */}
+                {prj.status === "REJECTED" && prj.rejectionReason && (
+                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-900 flex items-start gap-2">
+                    <XCircle className="size-3.5 text-rose-600 shrink-0 mt-0.5" />
+                    <p className="line-clamp-2">
+                      <strong>Rejection Note:</strong> {prj.rejectionReason}
+                    </p>
+                  </div>
+                )}
+
+                {/* GitHub Code Deliverable Link & Rating / Actions */}
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
-                  {prj.githubUrl ? (
-                    <a
-                      href={prj.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#007AFF] hover:underline"
+                  <div>
+                    {prj.githubUrl ? (
+                      <a
+                        href={prj.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#007AFF] hover:underline"
+                      >
+                        <GitBranch className="size-3.5" />
+                        <span>Public GitHub (MIT)</span>
+                        <ExternalLink className="size-3" />
+                      </a>
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground italic">
+                        Solution repo in development
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* Rating Call-to-Action for Approved Solutions */}
+                    {prj.status === "APPROVED" && !prj.hasRated && (
+                      <Link href="/dashboard/industry/ratings">
+                        <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white text-xs h-7 px-2.5">
+                          <Star className="size-3 mr-1 fill-white" />
+                          Rate
+                        </Button>
+                      </Link>
+                    )}
+
+                    {prj.hasRated && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                        <Star className="size-3 text-amber-500 fill-amber-500" />
+                        {prj.rating?.stars}/5 Stars
+                      </span>
+                    )}
+
+                    <Link
+                      href={`/dashboard/industry/project-details?id=${prj.id}`}
+                      className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md bg-black/[0.03] hover:bg-black/[0.06] text-foreground transition-all"
                     >
-                      <GitBranch className="size-3.5" />
-                      Inspect Public GitHub (MIT)
-                      <ExternalLink className="size-3" />
-                    </a>
-                  ) : (
-                    <span className="text-[11px] text-muted-foreground italic">
-                      Solution repository in active development
-                    </span>
-                  )}
-
-                  {/* Rating Call-to-Action for Approved Solutions */}
-                  {prj.status === "APPROVED" && !prj.hasRated && (
-                    <Link href="/dashboard/industry/ratings">
-                      <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white text-xs h-7 px-3">
-                        <Star className="size-3 mr-1 fill-white" />
-                        Rate Deliverable
-                      </Button>
+                      <span>Details &amp; History</span>
+                      <ChevronRight className="size-3" />
                     </Link>
-                  )}
-
-                  {prj.hasRated && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700">
-                      <Star className="size-3 text-amber-500 fill-amber-500" />
-                      Rated {prj.rating?.stars}/5 Stars
-                    </span>
-                  )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -220,12 +211,11 @@ export default function IndustryProjectsPage() {
         })}
 
         {filteredProjects.length === 0 && (
-          <div className="col-span-full rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-8 text-center text-xs text-muted-foreground">
-            No collaborative projects found matching the selected filter.
+          <div className="col-span-full rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-12 text-center text-xs text-muted-foreground">
+            No projects found matching the category and search criteria.
           </div>
         )}
       </div>
     </div>
   );
 }
-

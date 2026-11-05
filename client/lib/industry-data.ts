@@ -31,7 +31,7 @@ export interface IndustryProjectItem {
   problemId: string;
   problemTitle: string;
   domain: string;
-  status: "ASSIGNED" | "IN_PROGRESS" | "SOLUTION_SUBMITTED" | "REVISION_IN_PROGRESS" | "APPROVED" | "COMPLETED";
+  status: "ASSIGNED" | "IN_PROGRESS" | "SOLUTION_SUBMITTED" | "REVISION_IN_PROGRESS" | "APPROVED" | "COMPLETED" | "REJECTED";
   facultyMentorName: string;
   studentTeamLeadName: string;
   studentTeamLeadId: string;
@@ -44,6 +44,7 @@ export interface IndustryProjectItem {
     feedbackText: string;
     createdAt: string;
   } | null;
+  rejectionReason?: string | null;
 }
 
 export const initialIndustryProblems: IndustryProblemItem[] = [
@@ -116,5 +117,37 @@ export const initialIndustryProjects: IndustryProjectItem[] = [
         "Outstanding delivery by the student team! The defect identification algorithm works reliably under mill vibrations and reduced our manual inspection downtime significantly.",
       createdAt: "2026-10-30T11:20:00Z",
     },
+  },
+  {
+    id: "PRJ-2024-003",
+    problemId: "PRB-2024-003",
+    problemTitle: "Solar Pump Telemetry & Cloud Controller for Micro-Irrigation",
+    domain: "IoT & Analytics",
+    status: "SOLUTION_SUBMITTED",
+    facultyMentorName: "Dr. Arulalan V",
+    studentTeamLeadName: "Karthik S",
+    studentTeamLeadId: "STU0005",
+    studentTeamCount: 2,
+    targetDeadline: "2026-11-15",
+    githubUrl: "https://github.com/fxec-students/solar-pump-telemetry",
+    hasRated: false,
+    rating: null,
+  },
+  {
+    id: "PRJ-2024-009",
+    problemId: "PRB-2024-005",
+    problemTitle: "High-Frequency Acoustic Crack Detection for Foundries",
+    domain: "Acoustics & Signal Processing",
+    status: "REJECTED",
+    facultyMentorName: "Dr. S. Ramanathan",
+    studentTeamLeadName: "Vigneshwaran R",
+    studentTeamLeadId: "STU0009",
+    studentTeamCount: 2,
+    targetDeadline: "2026-09-30",
+    githubUrl: "https://github.com/fxec-students/acoustic-crack-detection",
+    hasRated: false,
+    rating: null,
+    rejectionReason:
+      "Deliverable failed environmental ambient noise isolation on the foundry floor with 65% false alarm rate. Repository lacked required MIT license compliance.",
   },
 ];

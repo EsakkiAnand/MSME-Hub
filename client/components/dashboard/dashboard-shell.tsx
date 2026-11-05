@@ -171,6 +171,7 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleConfig> = {
     navItems: [
       { href: "/dashboard/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
       { href: "/dashboard/admin/problem-bank", label: "Problem Bank", icon: Building2 },
+      { href: "/dashboard/admin/projects", label: "Project Governance", icon: FolderKanban },
       { href: "/dashboard/admin/industry-verification", label: "Industry Verification", icon: ShieldCheck },
       { href: "/dashboard/admin/github-review", label: "GitHub Review", icon: GitBranch },
       { href: "/dashboard/admin/rating-moderation", label: "Rating Moderation", icon: Star },

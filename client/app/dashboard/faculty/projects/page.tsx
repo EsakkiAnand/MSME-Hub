@@ -13,51 +13,38 @@ import {
   GitBranch,
   Building2,
   Crown,
+  XCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { IOSSelect } from "@/components/ui/ios-select";
+import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { initialProjects, FacultyProject } from "@/lib/faculty-data";
-
-const statusConfig: Record<string, { label: string; badgeClass: string }> = {
-  IN_PROGRESS: {
-    label: "In Progress",
-    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
-  },
-  SOLUTION_SUBMITTED: {
-    label: "Under Review",
-    badgeClass: "bg-[#FF9500]/10 text-[#FF9500] border-transparent",
-  },
-  APPROVED: {
-    label: "Approved",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
-  },
-  REVISION_IN_PROGRESS: {
-    label: "Revision Needed",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
-  },
-};
-
-const statusFilterOptions = [
-  { value: "All", label: "All Project Statuses" },
-  { value: "IN_PROGRESS", label: "In Progress" },
-  { value: "SOLUTION_SUBMITTED", label: "Under Review" },
-  { value: "APPROVED", label: "Approved" },
-];
+import { ProjectCategoryTabs } from "@/components/projects/project-category-tabs";
+import { ProjectStatusCategoryBadge } from "@/components/projects/project-status-category-badge";
+import { ProjectStatusCategory, getProjectStatusCategory } from "@/lib/project-data";
 
 const domainFilterOptions = [
   { value: "All", label: "All Tech Domains" },
   { value: "Software", label: "Software / Web" },
-  { value: "IoT", label: "IoT / Embedded" },
-  { value: "Enterprise", label: "Enterprise Software" },
-  { value: "FinTech", label: "FinTech" },
+  { value: "IoT", label: "IoT / Machine Learning" },
+  { value: "Analytics", label: "IoT & Analytics" },
+  { value: "Acoustics", label: "Acoustics & Signal" },
 ];
 
 export default function FacultyProjectsPage() {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [activeCategory, setActiveCategory] = useState<ProjectStatusCategory>("ALL");
   const [domainFilter, setDomainFilter] = useState("All");
 
   const projectsList = Object.values(initialProjects);
+
+  // Compute category counts
+  const counts = {
+    all: projectsList.length,
+    inProgressLive: projectsList.filter((p) => getProjectStatusCategory(p.status as any) === "IN_PROGRESS_LIVE").length,
+    completed: projectsList.filter((p) => getProjectStatusCategory(p.status as any) === "COMPLETED").length,
+    rejected: projectsList.filter((p) => getProjectStatusCategory(p.status as any) === "REJECTED").length,
+  };
 
   const filteredProjects = projectsList.filter((project) => {
     const matchesSearch =
@@ -66,11 +53,12 @@ export default function FacultyProjectsPage() {
       project.msmeCompany.toLowerCase().includes(search.toLowerCase()) ||
       project.team.some((m) => m.name.toLowerCase().includes(search.toLowerCase()));
 
-    const matchesStatus = statusFilter === "All" || project.status === statusFilter;
+    const projCategory = getProjectStatusCategory(project.status as any);
+    const matchesCategory = activeCategory === "ALL" || projCategory === activeCategory;
     const matchesDomain =
       domainFilter === "All" || project.domain.toLowerCase().includes(domainFilter.toLowerCase());
 
-    return matchesSearch && matchesStatus && matchesDomain;
+    return matchesSearch && matchesCategory && matchesDomain;
   });
 
   return (
@@ -81,48 +69,46 @@ export default function FacultyProjectsPage() {
           <div className="flex items-center gap-2 mb-1">
             <FolderKanban className="size-4 text-[#007AFF]" />
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Faculty Project Mentorship
+              Faculty Project Mentorship &amp; Governance
             </span>
           </div>
           <h2 className="text-xl font-bold tracking-tight text-foreground">
-            Assigned Projects
+            Assigned Student Projects
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
-            Supervise multi-student engineering teams, track milestones, and evaluate deliverables.
+            Supervise multi-student engineering teams, track lifecycle categories (In Progress, Completed, Rejected), and evaluate deliverables.
           </p>
         </div>
-        <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] text-foreground self-start sm:self-auto">
-          {projectsList.length} Active Mentorships
+        <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] text-foreground self-start sm:self-auto font-mono">
+          {projectsList.length} Total Supervised Projects
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by project name, ID, MSME company, or student lead..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 text-xs sm:text-sm rounded-md border-black/[0.06] dark:border-white/[0.08] focus-visible:ring-blue-600"
-          />
-        </div>
+      {/* Category Tabs: In Progress / Live | Completed | Rejected */}
+      <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+        <ProjectCategoryTabs
+          activeCategory={activeCategory}
+          onSelectCategory={setActiveCategory}
+          counts={counts}
+        />
 
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <Filter className="size-4 text-muted-foreground shrink-0 hidden sm:block" />
-          <IOSSelect
-            size="sm"
-            options={statusFilterOptions}
-            value={statusFilter}
-            onChange={setStatusFilter}
-            className="w-44"
-          />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1 max-w-lg">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by project name, ID, MSME company, or student lead..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 text-xs h-9 rounded-md border-black/[0.06] dark:border-white/[0.08] focus-visible:ring-blue-600 bg-white"
+            />
+          </div>
+
           <IOSSelect
             size="sm"
             options={domainFilterOptions}
             value={domainFilter}
             onChange={setDomainFilter}
-            className="w-44"
+            className="w-full sm:w-44"
           />
         </div>
       </div>
@@ -131,11 +117,10 @@ export default function FacultyProjectsPage() {
       <div className="space-y-4">
         {filteredProjects.length === 0 ? (
           <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-12 text-center text-muted-foreground text-sm">
-            No projects match the selected search criteria.
+            No projects match the selected category and search criteria.
           </div>
         ) : (
           filteredProjects.map((project) => {
-            const st = statusConfig[project.status] ?? statusConfig.IN_PROGRESS;
             const completedMilestones = project.milestones.filter((m) => m.done).length;
             const progressPct = Math.round(
               (completedMilestones / project.milestones.length) * 100
@@ -146,17 +131,11 @@ export default function FacultyProjectsPage() {
                 key={project.id}
                 className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 hover:border-slate-300 hover:shadow-xs transition-all duration-150"
               >
-                {/* Header row: ID, Badge, Domain, Deadline */}
+                {/* Header row: ID, Badges, Domain, Deadline */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-mono font-medium text-muted-foreground bg-slate-100 px-2.5 py-0.5 rounded">
-                      {project.id}
-                    </span>
-                    <span
-                      className={`text-xs font-medium px-2.5 py-0.5 rounded border ${st.badgeClass}`}
-                    >
-                      {st.label}
-                    </span>
+                    <CopyIdBadge id={project.id} label="ID" />
+                    <ProjectStatusCategoryBadge status={project.status as any} size="sm" />
                     <span className="text-xs text-muted-foreground">·</span>
                     <span className="text-xs font-medium text-muted-foreground">{project.domain}</span>
                   </div>
@@ -180,6 +159,17 @@ export default function FacultyProjectsPage() {
                     {project.description}
                   </p>
                 </div>
+
+                {/* Rejection Note if Rejected */}
+                {project.status === "REJECTED" && project.rejectionReason && (
+                  <div className="mb-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-900 flex items-start gap-2">
+                    <XCircle className="size-3.5 text-rose-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-[11px]">Deliverable Rejected / Closed:</p>
+                      <p className="mt-0.5 leading-relaxed">{project.rejectionReason}</p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Team Roster & Milestone Progress */}
                 <div className="bg-black/[0.02] dark:bg-white/[0.03]/75 rounded-md p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4 border border-slate-100">
@@ -247,7 +237,7 @@ export default function FacultyProjectsPage() {
                     href={`/dashboard/faculty/project-details?id=${project.id}`}
                     className="inline-flex items-center justify-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-md bg-[#007AFF] hover:bg-[#007AFF]/90 text-white transition-all active:scale-[0.98]"
                   >
-                    <span>Supervise &amp; Review</span>
+                    <span>Supervise, Details &amp; History</span>
                     <ChevronRight className="size-3.5" />
                   </Link>
                 </div>
