@@ -19,25 +19,8 @@ import { IOSSelect } from "@/components/ui/ios-select";
 import { initialIdeaSubmissions, FacultyIdeaSubmission } from "@/lib/faculty-data";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { toast } from "sonner";
+import { StatusBadge } from "@/components/ui/status-badge";
 
-const statusConfig: Record<string, { label: string; badgeClass: string }> = {
-  PENDING_REVIEW: {
-    label: "Awaiting Faculty Review",
-    badgeClass: "bg-[#FF9500]/10 text-[#FF9500] border-transparent",
-  },
-  ACCEPTED: {
-    label: "Approved & Recommended",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
-  },
-  REVISION_REQUESTED: {
-    label: "Changes Requested",
-    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
-  },
-  REJECTED: {
-    label: "Rejected",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
-  },
-};
 
 const filterOptions = [
   { value: "All", label: "All Review Statuses" },
@@ -174,9 +157,7 @@ export default function FacultyIdeaSubmissionsPage() {
           </div>
         ) : (
           filteredIdeas.map((idea) => {
-            const st = statusConfig[idea.status] ?? statusConfig.PENDING_REVIEW;
-
-            return (
+                        return (
               <div
                 key={idea.id}
                 className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 hover:border-slate-300 hover:shadow-xs transition-all"
@@ -187,11 +168,7 @@ export default function FacultyIdeaSubmissionsPage() {
                     <span className="text-xs font-mono font-medium text-muted-foreground bg-slate-100 px-2 py-0.5 rounded">
                       {idea.id}
                     </span>
-                    <span
-                      className={`text-xs font-medium px-2.5 py-0.5 rounded border ${st.badgeClass}`}
-                    >
-                      {st.label}
-                    </span>
+                    <StatusBadge status={idea.status} />
                     <span className="text-xs text-muted-foreground">·</span>
                     <span className="text-xs font-medium text-muted-foreground">{idea.domain}</span>
                   </div>

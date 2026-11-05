@@ -8,6 +8,26 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
   plugins: [nextCookies()],
+  trustedOrigins: [
+    "http://localhost:3000",
+    "http://localhost:3005",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3005",
+  ],
+  rateLimit: {
+    window: 10,
+    max: 100,
+    customRules: {
+      "/sign-in/*": {
+        window: 10,
+        max: 100,
+      },
+      "/sign-up/*": {
+        window: 10,
+        max: 100,
+      },
+    },
+  },
   user: {
     additionalFields: {
       role: {

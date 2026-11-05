@@ -44,6 +44,7 @@ import {
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { SidebarProfileCard } from "@/components/dashboard/sidebar-profile-card";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { MsmeLogoMark } from "@/components/ui/msme-logo";
 import { PageTransition } from "@/components/motion/page-transition";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -229,7 +230,7 @@ export function DashboardShell({
     if (session.isPending) return;
 
     if (!session.data?.user) {
-      window.location.href = "/login";
+      window.location.replace("/login");
       return;
     }
 
@@ -260,11 +261,70 @@ export function DashboardShell({
     const handlePageShow = (event: PageTransitionEvent) => {
       if (event.persisted) {
         window.location.reload();
+      } else {
+        // Double check session validity on navigation/pageshow to prevent stale bfcache views
+        authClient
+          .getSession()
+          .then((res) => {
+            if (!res?.data?.user) {
+              window.location.replace("/login");
+            }
+          })
+          .catch(() => {
+            window.location.replace("/login");
+          });
       }
     };
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
+
+  // ---------------------------------------------------------------------------
+  // Browser Back Button Interception
+  // ---------------------------------------------------------------------------
+  // Intercept the browser Back button across all protected dashboard routes.
+  // When an authenticated user presses Back, prevent leaving or navigating back to
+  // previous dashboard pages and display the logout confirmation dialog.
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const armTrap = () => {
+      try {
+        const currentState = window.history.state || {};
+        if (!currentState.__msme_dashboard_trap) {
+          window.history.pushState(
+            { ...currentState, __msme_dashboard_trap: true },
+            "",
+            window.location.href
+          );
+        }
+      } catch {
+        // Fallback for sandboxed environments
+      }
+    };
+
+    armTrap();
+
+    const handlePopState = () => {
+      // User pressed the browser Back or Forward button.
+      // 1. Immediately re-arm the trap to prevent slipping back on repeated clicks
+      armTrap();
+
+      // 2. Open the logout confirmation dialog
+      setShowSignOutConfirm(true);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [pathname]);
+
+  // Ensure confirmation dialog is dismissed when user deliberately navigates via in-app links
+  React.useEffect(() => {
+    setShowSignOutConfirm(false);
+  }, [pathname]);
 
   const isActive = (item: NavItem) => {
     if (item.exact) {
@@ -309,11 +369,11 @@ export function DashboardShell({
       }
 
       toast.success("Signed out successfully.");
-      window.location.replace("/");
+      window.location.replace("/login?logged_out=1");
     } catch (err) {
       console.error("Sign out error:", err);
       toast.error("Failed to sign out. Please try again.");
-      window.location.replace("/");
+      window.location.replace("/login?logged_out=1");
     } finally {
       setIsSigningOut(false);
       setShowSignOutConfirm(false);
@@ -360,9 +420,7 @@ export function DashboardShell({
         {/* Sidebar Header with Institutional Branding */}
         <div className="h-14 flex items-center justify-between px-4 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="size-8 rounded-[10px] bg-[#007AFF] text-white flex items-center justify-center shrink-0 shadow-xs font-bold text-sm select-none">
-              M
-            </div>
+            <MsmeLogoMark size={32} className="shrink-0" />
             <div className="min-w-0 flex flex-col">
               <span className="text-sm font-semibold tracking-tight text-slate-900 dark:text-white leading-tight truncate">
                 FXEC MSME Hub
@@ -382,12 +440,12 @@ export function DashboardShell({
         </div>
 
         {/* Sidebar Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3.5 space-y-1 select-none flex flex-col justify-between">
+        <nav className="flex-1 overflow-y-auto overscroll-contain px-3 py-3 space-y-1 select-none flex flex-col justify-between">
           <div>
-            <div className="px-3 py-1.5 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            <div className="px-3.5 py-2 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
               Navigation
             </div>
-            <ul className="space-y-1 mt-0.5">
+            <ul className="space-y-1.5 mt-0.5">
               {activeNavItems.map((item) => {
                 const active = isActive(item);
                 const ItemIcon = item.icon;
@@ -397,7 +455,7 @@ export function DashboardShell({
                       href={item.href}
                       onClick={() => setSidebarOpen(false)}
                       className={cn(
-                        "group flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-xs font-medium transition-all duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]",
+                        "group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13.5px] sm:text-sm font-medium transition-all duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.985] min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] focus-visible:ring-offset-1 dark:focus-visible:ring-offset-[#151516]",
                         active
                           ? "bg-[#007AFF] text-white font-medium shadow-xs"
                           : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
@@ -405,13 +463,15 @@ export function DashboardShell({
                     >
                       <ItemIcon
                         className={cn(
-                          "size-4 shrink-0 transition-colors",
-                          active ? "text-white" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300"
+                          "size-[18px] shrink-0 transition-colors",
+                          active
+                            ? "text-white"
+                            : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300"
                         )}
                       />
-                      <span className="truncate flex-1">{item.label}</span>
+                      <span className="truncate flex-1 leading-snug">{item.label}</span>
                       {active && (
-                        <ChevronRight className="size-3 text-white/90 shrink-0" />
+                        <ChevronRight className="size-3.5 text-white/90 shrink-0" />
                       )}
                     </Link>
                   </li>
@@ -428,10 +488,10 @@ export function DashboardShell({
                 setSidebarOpen(false);
                 setShowSignOutConfirm(true);
               }}
-              className="group w-full flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-xs font-medium text-[#FF3B30] dark:text-[#FF453A] hover:bg-red-500/10 dark:hover:bg-red-500/15 transition-all duration-150 cursor-pointer select-none active:scale-[0.98] text-left"
+              className="group w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13.5px] sm:text-sm font-medium text-[#FF3B30] dark:text-[#FF453A] hover:bg-red-500/10 dark:hover:bg-red-500/15 transition-all duration-150 cursor-pointer select-none active:scale-[0.985] text-left min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
             >
-              <LogOut className="size-4 shrink-0 transition-colors" />
-              <span className="truncate flex-1">Log Out</span>
+              <LogOut className="size-[18px] shrink-0 transition-colors" />
+              <span className="truncate flex-1 leading-snug">Log Out</span>
             </button>
           </div>
         </nav>
@@ -449,10 +509,10 @@ export function DashboardShell({
       {/* Main Column */}
       <div className="flex-1 flex flex-col min-w-0 lg:pl-[260px]">
         {/* Standardized Apple iOS Style Header (h-14) */}
-        <header className="sticky top-0 z-30 h-14 bg-white/80 dark:bg-[#161618]/80 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/[0.08] px-4 sm:px-6 flex items-center justify-between shrink-0 shadow-xs">
-          <div className="flex items-center gap-3 min-w-0">
+        <header className="sticky top-0 z-30 h-14 bg-white/80 dark:bg-[#161618]/80 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/[0.08] px-3 sm:px-6 flex items-center justify-between shrink-0 shadow-xs">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
-              className="lg:hidden p-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-[8px] hover:bg-black/[0.04] transition-colors"
+              className="lg:hidden p-2 min-h-[40px] min-w-[40px] flex items-center justify-center text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-[8px] hover:bg-black/[0.04] transition-colors"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open menu"
             >
@@ -540,7 +600,7 @@ export function DashboardShell({
         </header>
 
         {/* Main Content Area - Standardized Layout Wrapper */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 overflow-x-hidden">
           <PageTransition className="w-full max-w-7xl mx-auto space-y-6">
             {children}
           </PageTransition>
@@ -550,14 +610,19 @@ export function DashboardShell({
       {/* Unified iOS-Inspired Sign Out Confirmation Dialog */}
       <ConfirmationDialog
         open={showSignOutConfirm}
-        onOpenChange={setShowSignOutConfirm}
-        title="Log out?"
-        description="You will need to sign in again to access your workspace."
+        onOpenChange={(open) => {
+          if (!isSigningOut) {
+            setShowSignOutConfirm(open);
+          }
+        }}
+        title="Do you want to log out and leave your dashboard?"
+        description="Leaving your dashboard will end your active session. Any unsaved changes will be lost."
         confirmText={isSigningOut ? "Logging out..." : "Log Out"}
         cancelText="Cancel"
         variant="destructive"
         isLoading={isSigningOut}
         onConfirm={handleSignOut}
+        onCancel={() => setShowSignOutConfirm(false)}
       />
     </div>
   );

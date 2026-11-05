@@ -20,40 +20,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { IOSSelect } from "@/components/ui/ios-select";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { initialIndustryProjects, IndustryProjectItem } from "@/lib/industry-data";
 
-const statusConfig: Record<string, { label: string; badgeClass: string; icon: React.ElementType }> = {
-  ASSIGNED: {
-    label: "Team Assigned",
-    badgeClass: "bg-slate-100 text-foreground border-black/[0.06] dark:border-white/[0.08]",
-    icon: Clock,
-  },
-  IN_PROGRESS: {
-    label: "Under Development",
-    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
-    icon: Clock,
-  },
-  SOLUTION_SUBMITTED: {
-    label: "Solution Submitted for Admin Review",
-    badgeClass: "bg-[#007AFF]/10 text-[#007AFF] border-transparent",
-    icon: AlertCircle,
-  },
-  REVISION_IN_PROGRESS: {
-    label: "Revision Requested by Admin",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
-    icon: AlertCircle,
-  },
-  APPROVED: {
-    label: "Solution Approved by MSME Admin",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
-    icon: CheckCircle2,
-  },
-  COMPLETED: {
-    label: "Project Closed & Rated",
-    badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
-    icon: CheckCircle2,
-  },
-};
 
 export default function IndustryProjectsPage() {
   const [projects] = useState<IndustryProjectItem[]>(initialIndustryProjects);
@@ -73,14 +42,19 @@ export default function IndustryProjectsPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          Collaborative Project Deliverables
-        </h2>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          PRD §8.3 REQ-IND-02 &amp; REQ-IND-03: Track project progression from faculty assignment to public GitHub solution delivery and admin validation.
-        </p>
+    <div className="space-y-6">
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <FolderKanban className="size-4 text-[#007AFF]" />
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              Collaborative Project Deliverables
+            </h1>
+          </div>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            PRD §8.3 REQ-IND-02 &amp; REQ-IND-03: Track project progression from faculty assignment to public GitHub solution delivery and admin validation.
+          </p>
+        </div>
       </div>
 
       {/* Search and Status Filters */}
@@ -112,9 +86,6 @@ export default function IndustryProjectsPage() {
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredProjects.map((prj) => {
-          const cfg = statusConfig[prj.status] || statusConfig.IN_PROGRESS;
-          const StatusIcon = cfg.icon;
-
           return (
             <Card
               key={prj.id}
@@ -130,10 +101,7 @@ export default function IndustryProjectsPage() {
                       Ref: {prj.problemId}
                     </span>
                   </div>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${cfg.badgeClass}`}>
-                    <StatusIcon className="size-3" />
-                    {cfg.label}
-                  </span>
+                  <StatusBadge status={prj.status} />
                 </div>
 
                 <CardTitle className="text-base font-bold text-foreground leading-snug">

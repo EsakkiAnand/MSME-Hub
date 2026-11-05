@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { IOSSelect } from "@/components/ui/ios-select";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { initialStudents } from "@/lib/faculty-data";
 
 const departmentOptions = [
@@ -30,24 +31,6 @@ const statusOptions = [
   { value: "APPROVED", label: "Approved" },
 ];
 
-const statusBadge: Record<string, { label: string; badgeClass: string }> = {
-  IN_PROGRESS: {
-    label: "In Progress",
-    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
-  },
-  SOLUTION_SUBMITTED: {
-    label: "Under Review",
-    badgeClass: "bg-[#FF9500]/10 text-[#FF9500] border-transparent",
-  },
-  APPROVED: {
-    label: "Approved",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
-  },
-  REVISION_IN_PROGRESS: {
-    label: "Revision Needed",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
-  },
-};
 
 export default function MyStudentsPage() {
   const [search, setSearch] = useState("");
@@ -144,7 +127,6 @@ export default function MyStudentsPage() {
                 </tr>
               ) : (
                 filteredStudents.map((student) => {
-                  const st = statusBadge[student.projectStatus] ?? statusBadge.IN_PROGRESS;
                   return (
                     <tr key={student.id} className="hover:bg-black/[0.02] dark:bg-white/[0.02] transition-colors">
                       {/* Name & Role */}
@@ -196,11 +178,7 @@ export default function MyStudentsPage() {
 
                       {/* Status */}
                       <td className="px-4 py-3.5">
-                        <span
-                          className={`inline-flex text-[11px] font-medium px-2.5 py-0.5 rounded border ${st.badgeClass}`}
-                        >
-                          {st.label}
-                        </span>
+                        <StatusBadge status={student.projectStatus} />
                       </td>
 
                       {/* Action */}

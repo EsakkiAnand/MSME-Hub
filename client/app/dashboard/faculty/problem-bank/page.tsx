@@ -32,30 +32,11 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 import { initialProblemBank, ProblemBankItem } from "@/lib/admin-data";
 import { cn } from "@/lib/utils";
 
-const statusConfig: Record<
-  ProblemBankItem["status"],
-  { label: string; badgeClass: string; icon: React.ElementType }
-> = {
-  POOL_AVAILABLE: {
-    label: "Available in Pool",
-    badgeClass: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/50",
-    icon: CheckCircle2,
-  },
-  CLAIMED: {
-    label: "Claimed & Staffed",
-    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50",
-    icon: Clock,
-  },
-  REJECTED: {
-    label: "Needs Revision / Rejected",
-    badgeClass: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/50",
-    icon: XCircle,
-  },
-};
 
 export default function FacultyProblemBankPage() {
   const [problems, setProblems] = useState<ProblemBankItem[]>(initialProblemBank);
@@ -183,7 +164,7 @@ export default function FacultyProblemBankPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6">
       {/* ── Page Header ──────────────────────────────────────────────── */}
       <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -318,8 +299,6 @@ export default function FacultyProblemBankPage() {
             </thead>
             <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
               {filteredProblems.map((prob) => {
-                const statusMeta = statusConfig[prob.status];
-                const StatusIcon = statusMeta.icon;
                 return (
                   <tr
                     key={prob.id}
@@ -366,15 +345,7 @@ export default function FacultyProblemBankPage() {
 
                     {/* Status Badge */}
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <div
-                        className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border",
-                          statusMeta.badgeClass
-                        )}
-                      >
-                        <StatusIcon className="size-3" />
-                        <span>{statusMeta.label}</span>
-                      </div>
+                      <StatusBadge status={prob.status} />
                       {prob.claimedByFaculty && (
                         <div className="text-[10px] text-muted-foreground mt-1 truncate max-w-[140px]">
                           By: {prob.claimedByFaculty}

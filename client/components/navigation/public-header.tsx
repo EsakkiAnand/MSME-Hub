@@ -4,10 +4,12 @@ import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ShieldCheck } from "lucide-react";
+import { MsmeLogoMark } from "@/components/ui/msme-logo";
 
 export interface PublicHeaderProps {
   action?: "login" | "signup" | "home" | "none";
   className?: string;
+  onActionClick?: (action: "login" | "signup") => void;
 }
 
 /**
@@ -15,41 +17,49 @@ export interface PublicHeaderProps {
  * Displays aligned institutional branding with a single, clear contextual action.
  * Eliminates redundant Exit / Close / duplicate Back buttons.
  */
-export function PublicHeader({ action = "none", className }: PublicHeaderProps) {
+export function PublicHeader({
+  action = "none",
+  className,
+  onActionClick,
+}: PublicHeaderProps) {
   return (
     <header
       className={cn(
-        "w-full border-b bg-background/80 backdrop-blur-md px-6 py-4",
+        "w-full border-b bg-background/80 backdrop-blur-md px-3.5 sm:px-6 py-3 sm:py-4",
         className
       )}
     >
-      <div className="container mx-auto flex items-center justify-between">
+      <div className="container mx-auto flex items-center justify-between gap-2">
         {/* Institutional Branding: Always navigates to public root ("/") */}
         <Link
           href="/"
-          className="flex items-center gap-2.5 transition-opacity hover:opacity-90 select-none"
+          className="flex items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90 select-none shrink-0"
         >
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold shadow-sm text-sm">
-            M
-          </div>
+          <MsmeLogoMark size={32} />
           <div>
             <span className="font-bold text-base sm:text-lg tracking-tight">
-              MSME-Hub
+              FXEC MSME Hub
             </span>
             <span className="hidden sm:inline-block ml-2 text-xs font-medium text-muted-foreground">
-              Innovation Platform
+              Academic Project Portal
             </span>
           </div>
         </Link>
 
         {/* Navigation Controls */}
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground shrink-0">
           {action === "signup" && (
             <span>
-              Don&apos;t have an account?{" "}
+              <span className="hidden sm:inline">Don&apos;t have an account? </span>
               <Link
                 href="/signup"
-                className="font-semibold text-primary hover:underline ml-1"
+                onClick={(e) => {
+                  if (onActionClick) {
+                    e.preventDefault();
+                    onActionClick("signup");
+                  }
+                }}
+                className="font-semibold text-primary hover:underline"
               >
                 Sign up
               </Link>
@@ -58,10 +68,16 @@ export function PublicHeader({ action = "none", className }: PublicHeaderProps) 
 
           {action === "login" && (
             <span>
-              Already have an account?{" "}
+              <span className="hidden sm:inline">Already have an account? </span>
               <Link
                 href="/login"
-                className="font-semibold text-primary hover:underline ml-1"
+                onClick={(e) => {
+                  if (onActionClick) {
+                    e.preventDefault();
+                    onActionClick("login");
+                  }
+                }}
+                className="font-semibold text-primary hover:underline"
               >
                 Sign in
               </Link>
@@ -81,10 +97,11 @@ export function PublicHeader({ action = "none", className }: PublicHeaderProps) 
 
           <Link
             href="/admin/login"
-            className="text-xs font-medium text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 transition-colors"
+            className="text-xs font-medium text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 transition-colors whitespace-nowrap"
           >
-            <ShieldCheck className="size-3.5" />
-            <span>Admin Portal</span>
+            <ShieldCheck className="size-3.5 shrink-0" />
+            <span className="hidden xs:inline">Admin Portal</span>
+            <span className="xs:hidden">Admin</span>
           </Link>
         </div>
       </div>

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger-group";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const myProjects = [
   {
@@ -52,28 +53,7 @@ const recentUpdates = [
   },
 ];
 
-const statusConfig: Record<string, { label: string; badgeClass: string }> = {
-  IN_PROGRESS: {
-    label: "In Progress",
-    badgeClass: "bg-[#007AFF]/10 text-[#007AFF] dark:bg-[#0A84FF]/15 dark:text-[#0A84FF]",
-  },
-  SOLUTION_SUBMITTED: {
-    label: "Solution Submitted",
-    badgeClass: "bg-[#FF9500]/10 text-[#FF9500] dark:bg-[#FF9F0A]/15 dark:text-[#FF9F0A]",
-  },
-  APPROVED: {
-    label: "Approved",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] dark:bg-[#30D158]/15 dark:text-[#30D158]",
-  },
-  REVISION_IN_PROGRESS: {
-    label: "Revision Needed",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] dark:bg-[#FF453A]/15 dark:text-[#FF453A]",
-  },
-  ASSIGNED: {
-    label: "Assigned",
-    badgeClass: "bg-black/[0.05] text-foreground dark:bg-white/[0.08]",
-  },
-};
+
 
 export default function StudentDashboardPage() {
   const session = authClient.useSession();
@@ -186,54 +166,42 @@ export default function StudentDashboardPage() {
           </div>
 
           <div className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
-            {myProjects.map((project) => {
-              const st = statusConfig[project.status] ?? {
-                label: project.status,
-                badgeClass: "bg-black/[0.05] text-foreground dark:bg-white/[0.08]",
-              };
-              return (
-                <div
-                  key={project.id}
-                  className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-[11px] font-mono font-medium text-muted-foreground bg-black/[0.04] dark:bg-white/[0.06] px-2 py-0.5 rounded-[6px]">
-                        {project.id}
-                      </span>
-                      {project.isLead && (
-                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#007AFF]/10 text-[#007AFF]">
-                          Project Team Lead
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm font-semibold text-foreground tracking-tight">
-                      {project.name}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
-                      <span>Staff Mentor: {project.mentor}</span>
-                      <span>·</span>
-                      <span>Deadline: {project.deadline}</span>
-                    </div>
-                  </div>
-
-                  <div className="shrink-0 flex sm:flex-col items-start sm:items-end justify-between sm:justify-center gap-2">
-                    <span
-                      className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full ${st.badgeClass}`}
-                    >
-                      {st.label}
+            {myProjects.map((project) => (
+              <div
+                key={project.id}
+                className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[11px] font-mono font-medium text-muted-foreground bg-black/[0.04] dark:bg-white/[0.06] px-2 py-0.5 rounded-[6px]">
+                      {project.id}
                     </span>
-                    <Link
-                      href={`/dashboard/student/project-details?id=${project.id}`}
-                      className="text-xs font-medium text-[#007AFF] hover:underline flex items-center gap-1"
-                    >
-                      View Details
-                      <ExternalLink className="size-3" />
-                    </Link>
+                    {project.isLead && (
+                      <StatusBadge status="STUDENT" label="Team Lead" variant="info" />
+                    )}
+                  </div>
+                  <p className="text-sm font-semibold text-foreground tracking-tight">
+                    {project.name}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
+                    <span>Staff Mentor: {project.mentor}</span>
+                    <span>·</span>
+                    <span>Deadline: {project.deadline}</span>
                   </div>
                 </div>
-              );
-            })}
+
+                <div className="shrink-0 flex sm:flex-col items-start sm:items-end justify-between sm:justify-center gap-2">
+                  <StatusBadge status={project.status} />
+                  <Link
+                    href={`/dashboard/student/project-details?id=${project.id}`}
+                    className="text-xs font-medium text-[#007AFF] hover:underline flex items-center gap-1"
+                  >
+                    View Details
+                    <ExternalLink className="size-3" />
+                  </Link>
+                </div>
+              </div>
+            ))}
 
             {myProjects.length === 0 && (
               <div className="p-8 text-center text-xs text-muted-foreground">

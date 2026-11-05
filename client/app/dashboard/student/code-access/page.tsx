@@ -16,6 +16,7 @@ import {
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface CodeProject {
   id: string;
@@ -45,26 +46,6 @@ const initialCodeProjects: CodeProject[] = [
   },
 ];
 
-const accessStatusConfig: Record<
-  string,
-  { label: string; badgeClass: string; icon: React.ElementType }
-> = {
-  ACCESSIBLE: {
-    label: "Accessible",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
-    icon: CheckCircle2,
-  },
-  NO_REPO: {
-    label: "Pending Commit",
-    badgeClass: "bg-slate-100 text-muted-foreground border-black/[0.06] dark:border-white/[0.08]",
-    icon: AlertCircle,
-  },
-  RESTRICTED: {
-    label: "Restricted",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
-    icon: Lock,
-  },
-};
 
 export default function CodeAccessPage() {
   const [projects, setProjects] = useState<CodeProject[]>(initialCodeProjects);
@@ -193,7 +174,6 @@ export default function CodeAccessPage() {
 
         <div className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
           {projects.map((project) => {
-            const ac = accessStatusConfig[project.accessStatus];
             return (
               <div
                 key={project.id}
@@ -220,12 +200,7 @@ export default function CodeAccessPage() {
                 </div>
 
                 <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto flex-wrap">
-                  <span
-                    className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded border ${ac.badgeClass}`}
-                  >
-                    <ac.icon className="size-3" />
-                    {ac.label}
-                  </span>
+                  <StatusBadge status={project.accessStatus} />
 
                   {project.githubUrl ? (
                     <div className="flex items-center gap-1.5">

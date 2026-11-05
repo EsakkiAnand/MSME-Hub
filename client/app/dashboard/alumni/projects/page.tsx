@@ -18,30 +18,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { IOSSelect } from "@/components/ui/ios-select";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { initialMentoredProjects, MentoredProject } from "@/lib/alumni-data";
 
-const statusConfig: Record<string, { label: string; badgeClass: string; icon: React.ElementType }> = {
-  IN_PROGRESS: {
-    label: "In Progress",
-    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
-    icon: Clock,
-  },
-  SOLUTION_SUBMITTED: {
-    label: "Solution Submitted",
-    badgeClass: "bg-[#007AFF]/10 text-[#007AFF] border-transparent",
-    icon: AlertCircle,
-  },
-  APPROVED: {
-    label: "Approved by Admin",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
-    icon: CheckCircle2,
-  },
-  REVISION_IN_PROGRESS: {
-    label: "Revision in Progress",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
-    icon: AlertCircle,
-  },
-};
 
 export default function MentoredProjectsPage() {
   const [projects] = useState<MentoredProject[]>(initialMentoredProjects);
@@ -61,15 +41,17 @@ export default function MentoredProjectsPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          Mentored Projects Directory
-        </h2>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          PRD §8.6: Active industry challenges where alumni mentors provide architectural critique, code quality reviews, and open-source guidance.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <DashboardPageHeader
+        icon={FolderKanban}
+        title="Mentored Projects Directory"
+        badge={
+          <Badge variant="outline" className="text-[11px] font-medium border-black/[0.08] dark:border-white/[0.08]">
+            PRD §8.6
+          </Badge>
+        }
+        subtitle="Active industry challenges where alumni mentors provide architectural critique, code quality reviews, and open-source guidance."
+      />
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
@@ -100,9 +82,6 @@ export default function MentoredProjectsPage() {
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredProjects.map((p) => {
-          const cfg = statusConfig[p.status] || statusConfig.IN_PROGRESS;
-          const StatusIcon = cfg.icon;
-
           return (
             <Card key={p.id} className="border-black/[0.06] dark:border-white/[0.08] shadow-xs hover:border-slate-300 transition-all bg-white flex flex-col justify-between">
               <CardHeader className="pb-3 pt-5 px-5">
@@ -110,10 +89,7 @@ export default function MentoredProjectsPage() {
                   <Badge variant="outline" className="font-mono text-[11px] bg-black/[0.02] dark:bg-white/[0.03]">
                     {p.id}
                   </Badge>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${cfg.badgeClass}`}>
-                    <StatusIcon className="size-3" />
-                    {cfg.label}
-                  </span>
+                  <StatusBadge status={p.status} />
                 </div>
 
                 <CardTitle className="text-base font-bold text-foreground leading-snug">

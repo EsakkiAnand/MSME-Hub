@@ -27,35 +27,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 import { initialRatingModerations, RatingModerationItem } from "@/lib/admin-data";
 import { cn } from "@/lib/utils";
 
-const statusConfig: Record<
-  RatingModerationItem["status"],
-  { label: string; badgeClass: string; icon: React.ElementType }
-> = {
-  QUEUED: {
-    label: "Under Moderation",
-    badgeClass: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/50",
-    icon: Clock,
-  },
-  APPROVED_PUBLISHED: {
-    label: "Published to Portfolio",
-    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50",
-    icon: CheckCircle2,
-  },
-  MEDIATION_REQUESTED: {
-    label: "Mediation Active",
-    badgeClass: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/50",
-    icon: Scale,
-  },
-  SUPPRESSED: {
-    label: "Suppressed / Hidden",
-    badgeClass: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/50",
-    icon: XCircle,
-  },
-};
+
 
 export default function RatingModerationPage() {
   const [moderations, setModerations] = useState<RatingModerationItem[]>(
@@ -139,7 +116,7 @@ export default function RatingModerationPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6">
       {/* ── Page Header ──────────────────────────────────────────────── */}
       <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -238,8 +215,6 @@ export default function RatingModerationPage() {
             </thead>
             <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
               {filteredItems.map((item) => {
-                const statusMeta = statusConfig[item.status];
-                const StatusIcon = statusMeta.icon;
                 return (
                   <tr
                     key={item.id}
@@ -281,15 +256,7 @@ export default function RatingModerationPage() {
                     </td>
 
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <div
-                        className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border",
-                          statusMeta.badgeClass
-                        )}
-                      >
-                        <StatusIcon className="size-3" />
-                        <span>{statusMeta.label}</span>
-                      </div>
+                      <StatusBadge status={item.status} />
                     </td>
 
                     <td className="px-5 py-4 text-right whitespace-nowrap">

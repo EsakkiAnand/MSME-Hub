@@ -16,37 +16,14 @@ import {
 } from "lucide-react";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger-group";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   initialStudents,
   initialProjects,
   initialIdeaSubmissions,
 } from "@/lib/faculty-data";
 
-const statusConfig: Record<
-  string,
-  { label: string; badgeClass: string; icon: React.ElementType }
-> = {
-  IN_PROGRESS: {
-    label: "In Progress",
-    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/50",
-    icon: Clock,
-  },
-  SOLUTION_SUBMITTED: {
-    label: "Under Review",
-    badgeClass: "bg-[#FF9500]/10 text-[#FF9500] border-transparent dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/50",
-    icon: AlertCircle,
-  },
-  APPROVED: {
-    label: "Approved",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50",
-    icon: CheckCircle2,
-  },
-  REVISION_IN_PROGRESS: {
-    label: "Revision Needed",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/50",
-    icon: AlertCircle,
-  },
-};
+
 
 const recentActivities = [
   {
@@ -82,27 +59,30 @@ export default function FacultyDashboardPage() {
   const pendingIdeasCount = initialIdeaSubmissions.filter((i) => i.status === "PENDING_REVIEW").length;
 
   return (
-    <div className="space-y-5 max-w-7xl mx-auto">
-      {/* 1. Compact Faculty Profile Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]/80 dark:border-border">
+    <div className="space-y-6">
+      {/* 1. Standardized Faculty Profile Header Banner */}
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground dark:text-foreground">
-            Welcome back, {facultyName}
-          </h1>
-          <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-muted-foreground dark:text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <span className="font-medium text-foreground dark:text-slate-300">Faculty ID:</span>
-              <CopyIdBadge id={facultyId} size="xs" />
-            </div>
-            <span className="text-slate-300 dark:text-foreground">·</span>
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              Welcome back, {facultyName}
+            </h1>
+            <CopyIdBadge id={facultyId} size="xs" />
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50">
+              Faculty Supervisor
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-0.5">
             <span>{department}</span>
-            <span className="text-slate-300 dark:text-foreground">·</span>
+            <span className="text-muted-foreground/40">·</span>
             <span>Academic Year 2026–2027</span>
+            <span className="text-muted-foreground/40">·</span>
+            <span>Assigned Mentorships &amp; Industrial Challenges</span>
           </div>
         </div>
 
         {/* Primary Shortcuts */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
           <Link
             href="/dashboard/faculty/projects"
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-[10px] border border-black/[0.08] dark:border-white/[0.12] bg-black/[0.02] dark:bg-white/[0.04] text-foreground hover:bg-black/[0.05] active:scale-[0.98] transition-all"
@@ -252,7 +232,6 @@ export default function FacultyDashboardPage() {
 
             <div className="divide-y divide-black/[0.05] dark:divide-white/[0.06] dark:divide-border/60">
               {projectsList.map((project) => {
-                const st = statusConfig[project.status] ?? statusConfig.IN_PROGRESS;
                 const leadMember =
                   project.team.find((m) => m.isLead) || project.team[0] || { name: "Unassigned" };
 
@@ -266,11 +245,7 @@ export default function FacultyDashboardPage() {
                         <span className="font-mono text-xs font-semibold text-muted-foreground dark:text-slate-300 bg-slate-100 dark:bg-muted px-1.5 py-0.5 rounded">
                           {project.id}
                         </span>
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${st.badgeClass}`}
-                        >
-                          {st.label}
-                        </span>
+                        <StatusBadge status={project.status} />
                         <span className="text-[11px] text-muted-foreground dark:text-muted-foreground hidden sm:inline">
                           Due {project.deadline}
                         </span>
@@ -337,9 +312,7 @@ export default function FacultyDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06] dark:divide-border/60">
-                  {initialStudents.slice(0, 5).map((student) => {
-                    const st = statusConfig[student.projectStatus] ?? statusConfig.IN_PROGRESS;
-                    return (
+                  {initialStudents.slice(0, 5).map((student) => (
                       <tr
                         key={student.id}
                         className="hover:bg-black/[0.02] dark:bg-white/[0.02] dark:hover:bg-muted/30 transition-colors"
@@ -350,9 +323,7 @@ export default function FacultyDashboardPage() {
                               {student.name}
                             </span>
                             {student.isLead && (
-                              <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40">
-                                Lead
-                              </span>
+                              <StatusBadge label="Lead" variant="warning" />
                             )}
                           </div>
                           <span className="text-[11px] text-muted-foreground dark:text-muted-foreground">
@@ -374,15 +345,10 @@ export default function FacultyDashboardPage() {
                           </Link>
                         </td>
                         <td className="px-4 py-2.5">
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${st.badgeClass}`}
-                          >
-                            {st.label}
-                          </span>
+                          <StatusBadge status={student.projectStatus} />
                         </td>
                       </tr>
-                    );
-                  })}
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -446,9 +412,7 @@ export default function FacultyDashboardPage() {
                 </h3>
               </div>
               {pendingIdeasCount > 0 && (
-                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40">
-                  {pendingIdeasCount} pending
-                </span>
+                <StatusBadge label={`${pendingIdeasCount} pending`} variant="warning" />
               )}
             </div>
             <p className="text-xs text-muted-foreground dark:text-muted-foreground leading-relaxed">

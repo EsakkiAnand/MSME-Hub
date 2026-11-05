@@ -28,6 +28,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { IOSSelect } from "@/components/ui/ios-select";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 import { initialGuidanceRequests, GuidanceRequestItem } from "@/lib/alumni-data";
 import { respondToGuidanceRequestAction } from "@/app/actions/alumni";
@@ -119,15 +120,20 @@ export default function GuidanceBoardPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6">
       {/* Page Header */}
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          Open Guidance Board
-        </h2>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          PRD §8.6 Hybrid Guidance Engine: Discover technical bottlenecks submitted by student project teams and post architectural advice.
-        </p>
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <HelpCircle className="size-4 text-[#007AFF]" />
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              Open Guidance Board
+            </h1>
+          </div>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            PRD §8.6 Hybrid Guidance Engine: Discover technical bottlenecks submitted by student project teams and post architectural advice.
+          </p>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -203,19 +209,7 @@ export default function GuidanceBoardPage() {
                     </Badge>
                   </div>
 
-                  {req.status === "OPEN" ? (
-                    <Badge className="bg-blue-50 text-[#007AFF] border border-blue-200 text-[10px] font-semibold flex items-center gap-1">
-                      <Clock className="size-2.5" /> Open
-                    </Badge>
-                  ) : req.status === "RESOLVED" ? (
-                    <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="size-2.5" /> Resolved
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-semibold flex items-center gap-1">
-                      <MessageSquare className="size-2.5" /> Answered
-                    </Badge>
-                  )}
+                  <StatusBadge status={req.status} />
                 </div>
 
                 <CardTitle className="text-sm font-semibold text-foreground leading-relaxed">

@@ -29,6 +29,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { IOSSelect } from "@/components/ui/ios-select";
 import { toast } from "sonner";
 import {
@@ -123,7 +124,7 @@ export default function AlumniOverviewPage() {
   const profile = data?.profile;
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6">
       {/* Welcome Banner */}
       <div className="bg-white dark:bg-card rounded-xl border border-black/[0.06] dark:border-white/[0.08] dark:border-border p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -379,9 +380,7 @@ export default function AlumniOverviewPage() {
                     <span className="text-xs font-semibold text-foreground truncate max-w-[180px]">
                       {p.title}
                     </span>
-                    <Badge variant="outline" className="text-[10px] bg-white">
-                      {p.status}
-                    </Badge>
+                    <StatusBadge status={p.status} />
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                     <span>Lead: {p.teamLeadName}</span>

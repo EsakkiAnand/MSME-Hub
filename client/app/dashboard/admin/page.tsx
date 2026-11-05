@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger-group";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 // ─── Mock Metrics ─────────────────────────────────────────────────────────────
 const dashboardStats = [
@@ -89,7 +90,6 @@ const recentActivity = [
     href: "/dashboard/admin/industry-verification",
     icon: Building2,
     iconColor: "text-blue-500",
-    statusClass: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-800/50",
   },
   {
     id: 2,
@@ -101,7 +101,6 @@ const recentActivity = [
     href: "/dashboard/admin/github-review",
     icon: GitBranch,
     iconColor: "text-violet-500",
-    statusClass: "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/30 dark:text-violet-300 dark:border-violet-800/50",
   },
   {
     id: 3,
@@ -113,7 +112,6 @@ const recentActivity = [
     href: "/dashboard/admin/rating-moderation",
     icon: Star,
     iconColor: "text-amber-500",
-    statusClass: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800/50",
   },
   {
     id: 4,
@@ -125,7 +123,6 @@ const recentActivity = [
     href: "/dashboard/admin/industry-verification",
     icon: CheckCircle2,
     iconColor: "text-emerald-500",
-    statusClass: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-800/50",
   },
   {
     id: 5,
@@ -137,7 +134,6 @@ const recentActivity = [
     href: "/dashboard/admin/github-review",
     icon: CheckCircle2,
     iconColor: "text-emerald-500",
-    statusClass: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-800/50",
   },
 ];
 
@@ -191,7 +187,7 @@ export default function AdminDashboardPage() {
   const adminId = (user as any)?.uniqueId || "ADM0001";
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6">
       {/* ── Welcome Banner ─────────────────────────────────────────────── */}
       <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -316,11 +312,7 @@ export default function AdminDashboardPage() {
                           <span className="text-xs font-semibold text-foreground leading-tight">
                             {item.title}
                           </span>
-                          <span
-                            className={`shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-full border ${item.statusClass}`}
-                          >
-                            {item.status}
-                          </span>
+                          <StatusBadge status={item.status} />
                         </div>
                         <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
                           {item.description}

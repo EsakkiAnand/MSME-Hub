@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Filter, ExternalLink } from "lucide-react";
+import { Search, Filter, ExternalLink, FolderKanban } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { IOSSelect } from "@/components/ui/ios-select";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const allProjects = [
   {
@@ -27,28 +28,7 @@ const allProjects = [
   },
 ];
 
-const statusConfig: Record<string, { label: string; badgeClass: string }> = {
-  IN_PROGRESS: {
-    label: "In Progress",
-    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
-  },
-  SOLUTION_SUBMITTED: {
-    label: "Solution Submitted",
-    badgeClass: "bg-[#FF9500]/10 text-[#FF9500] border-transparent",
-  },
-  APPROVED: {
-    label: "Approved",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
-  },
-  REVISION_IN_PROGRESS: {
-    label: "Revision Needed",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
-  },
-  ASSIGNED: {
-    label: "Assigned",
-    badgeClass: "bg-slate-100 text-foreground border-black/[0.06] dark:border-white/[0.08]",
-  },
-};
+
 
 const statusOptions = [
   { value: "All", label: "All Statuses" },
@@ -74,6 +54,24 @@ export default function MyProjectsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Standardized Page Header Card */}
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <FolderKanban className="size-4 text-[#007AFF]" />
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              My Assigned Projects
+            </h1>
+          </div>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            Track active engineering deliverables, faculty mentorship milestones, and evaluate project statuses.
+          </p>
+        </div>
+        <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] text-foreground self-start sm:self-auto shrink-0">
+          {filtered.length} Active {filtered.length === 1 ? "Project" : "Projects"}
+        </div>
+      </div>
+
       {/* Search and Filter Toolbar */}
       <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <div className="relative flex-1">
@@ -138,10 +136,6 @@ export default function MyProjectsPage() {
             </thead>
             <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
               {filtered.map((project) => {
-                const st = statusConfig[project.status] ?? {
-                  label: project.status,
-                  badgeClass: "bg-slate-100 text-foreground border-black/[0.06] dark:border-white/[0.08]",
-                };
                 return (
                   <tr key={project.id} className="hover:bg-black/[0.02] dark:bg-white/[0.02] transition-colors">
                     <td className="px-6 py-4 font-mono text-xs text-muted-foreground font-medium">
@@ -153,19 +147,13 @@ export default function MyProjectsPage() {
                           {project.name}
                         </span>
                         {project.isLead && (
-                          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border bg-blue-50 text-[#007AFF] border-blue-200 shrink-0">
-                            Team Lead
-                          </span>
+                          <StatusBadge label="Team Lead" variant="info" />
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">{project.domain}</p>
                     </td>
                     <td className="px-4 py-4">
-                      <span
-                        className={`text-xs font-medium px-2 py-0.5 rounded border ${st.badgeClass}`}
-                      >
-                        {st.label}
-                      </span>
+                      <StatusBadge status={project.status} />
                     </td>
                     <td className="px-4 py-4 text-xs font-medium text-foreground">
                       {project.mentor}
@@ -191,12 +179,7 @@ export default function MyProjectsPage() {
 
         {/* Mobile View */}
         <div className="sm:hidden divide-y divide-black/[0.05] dark:divide-white/[0.06]">
-          {filtered.map((project) => {
-            const st = statusConfig[project.status] ?? {
-              label: project.status,
-              badgeClass: "bg-slate-100 text-foreground border-black/[0.06] dark:border-white/[0.08]",
-            };
-            return (
+          {filtered.map((project) => (
               <div key={project.id} className="p-4 space-y-2 hover:bg-black/[0.02] dark:bg-white/[0.02] transition-colors">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
@@ -204,15 +187,11 @@ export default function MyProjectsPage() {
                     <p className="text-xs font-mono text-muted-foreground mt-0.5">{project.id}</p>
                   </div>
                   {project.isLead && (
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border bg-blue-50 text-[#007AFF] border-blue-200 shrink-0">
-                      Team Lead
-                    </span>
+                    <StatusBadge label="Team Lead" variant="info" />
                   )}
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className={`font-medium px-2 py-0.5 rounded border ${st.badgeClass}`}>
-                    {st.label}
-                  </span>
+                  <StatusBadge status={project.status} />
                   <span>Mentor: {project.mentor}</span>
                 </div>
                 <div className="pt-1 flex items-center justify-between text-xs">
@@ -225,8 +204,7 @@ export default function MyProjectsPage() {
                   </Link>
                 </div>
               </div>
-            );
-          })}
+            ))}
         </div>
 
         {filtered.length === 0 && (

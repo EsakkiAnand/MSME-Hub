@@ -26,38 +26,20 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { initialPlatformUsers, PlatformUserItem } from "@/lib/admin-data";
 import { cn } from "@/lib/utils";
 
-const roleConfig: Record<
+
+const roleFilterMeta: Record<
   PlatformUserItem["role"],
-  { label: string; badgeClass: string; icon: React.ElementType }
+  { label: string; icon: React.ElementType }
 > = {
-  MSME_ADMIN: {
-    label: "MSME Admin",
-    badgeClass: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/50",
-    icon: ShieldCheck,
-  },
-  STAFF: {
-    label: "Faculty Supervisor",
-    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50",
-    icon: BookOpen,
-  },
-  STUDENT: {
-    label: "Student Scholar",
-    badgeClass: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/50",
-    icon: GraduationCap,
-  },
-  INDUSTRY: {
-    label: "Industry Partner",
-    badgeClass: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800/50",
-    icon: Building2,
-  },
-  ALUMNI: {
-    label: "Alumni Mentor",
-    badgeClass: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/50",
-    icon: Award,
-  },
+  STUDENT: { label: "Students", icon: BookOpen },
+  STAFF: { label: "Faculty", icon: GraduationCap },
+  INDUSTRY: { label: "Industry", icon: Building2 },
+  ALUMNI: { label: "Alumni", icon: Award },
+  MSME_ADMIN: { label: "Admins", icon: ShieldCheck },
 };
 
 export default function AdminUsersPage() {
@@ -79,7 +61,7 @@ export default function AdminUsersPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6">
       {/* ── Page Header ──────────────────────────────────────────────── */}
       <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -102,7 +84,7 @@ export default function AdminUsersPage() {
         {(["STUDENT", "STAFF", "INDUSTRY", "ALUMNI", "MSME_ADMIN"] as const).map(
           (roleKey) => {
             const count = users.filter((u) => u.role === roleKey).length;
-            const meta = roleConfig[roleKey];
+            const meta = roleFilterMeta[roleKey];
             const Icon = meta.icon;
             return (
               <div
@@ -187,8 +169,6 @@ export default function AdminUsersPage() {
             </thead>
             <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
               {filteredUsers.map((user) => {
-                const roleMeta = roleConfig[user.role];
-                const RoleIcon = roleMeta.icon;
                 return (
                   <tr
                     key={user.id}
@@ -206,15 +186,7 @@ export default function AdminUsersPage() {
                     </td>
 
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <div
-                        className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border",
-                          roleMeta.badgeClass
-                        )}
-                      >
-                        <RoleIcon className="size-3" />
-                        <span>{roleMeta.label}</span>
-                      </div>
+                      <StatusBadge status={user.role} />
                     </td>
 
                     <td className="px-4 py-4 text-muted-foreground">

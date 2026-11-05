@@ -20,6 +20,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 import { getIndustryOverviewAction } from "@/app/actions/industry";
 import { IndustryProblemItem, IndustryProjectItem } from "@/lib/industry-data";
@@ -70,15 +71,13 @@ export default function IndustryOverviewPage() {
   const projects: IndustryProjectItem[] = data?.recentProjects || [];
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6">
       {/* Welcome & Identity Banner */}
       <div className="bg-white dark:bg-card rounded-xl border border-black/[0.06] dark:border-white/[0.08] dark:border-border p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-[#007AFF] border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50">
-                Verified MSME Partner
-              </span>
+              <StatusBadge variant="role-industry" label="Verified MSME Partner" />
               <CopyIdBadge id={profile?.companyId || "HTMP001"} label="Company ID" size="xs" />
               <CopyIdBadge id={data?.user?.uniqueId || "IND0001"} label="Partner ID" size="xs" />
             </div>
@@ -237,16 +236,7 @@ export default function IndustryOverviewPage() {
                   <Badge variant="outline" className="font-mono text-[10px] bg-white">
                     {prob.id}
                   </Badge>
-                  <Badge
-                    variant="outline"
-                    className={
-                      prob.status === "CLAIMED"
-                        ? "bg-[#007AFF]/10 text-[#007AFF] border-transparent text-[10px]"
-                        : "bg-blue-50 text-[#007AFF] border-blue-200 text-[10px]"
-                    }
-                  >
-                    {prob.status === "CLAIMED" ? "Claimed by Staff" : "Available in Pool"}
-                  </Badge>
+                  <StatusBadge status={prob.status} />
                 </div>
                 <h4 className="text-xs font-bold text-foreground leading-snug">
                   {prob.title}
@@ -294,18 +284,7 @@ export default function IndustryOverviewPage() {
                   <Badge variant="outline" className="font-mono text-[10px] bg-white">
                     {prj.id}
                   </Badge>
-                  <Badge
-                    variant="outline"
-                    className={
-                      prj.status === "APPROVED"
-                        ? "bg-[#34C759]/10 text-[#34C759] border-transparent text-[10px]"
-                        : prj.status === "SOLUTION_SUBMITTED"
-                        ? "bg-[#007AFF]/10 text-[#007AFF] border-transparent text-[10px]"
-                        : "bg-blue-50 text-[#007AFF] border-blue-200 text-[10px]"
-                    }
-                  >
-                    {prj.status}
-                  </Badge>
+                  <StatusBadge status={prj.status} />
                 </div>
                 <h4 className="text-xs font-bold text-foreground leading-snug">
                   {prj.problemTitle}

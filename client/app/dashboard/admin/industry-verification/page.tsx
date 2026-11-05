@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 import {
   initialIndustryVerifications,
@@ -142,7 +143,7 @@ export default function IndustryVerificationPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6">
       {/* ── Page Header ──────────────────────────────────────────────── */}
       <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -311,24 +312,7 @@ export default function IndustryVerificationPage() {
                       </td>
 
                       <td className="px-4 py-4 whitespace-nowrap">
-                        {item.status === "PENDING" && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300">
-                            <Clock className="size-3" />
-                            Pending Review
-                          </span>
-                        )}
-                        {item.status === "APPROVED" && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300">
-                            <CheckCircle2 className="size-3" />
-                            Verified
-                          </span>
-                        )}
-                        {item.status === "REJECTED" && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300">
-                            <XCircle className="size-3" />
-                            Rejected
-                          </span>
-                        )}
+                        <StatusBadge status={item.status} />
                       </td>
 
                       <td className="px-5 py-4 text-right whitespace-nowrap">
@@ -417,24 +401,7 @@ export default function IndustryVerificationPage() {
                       </td>
 
                       <td className="px-4 py-4 whitespace-nowrap">
-                        {item.status === "PENDING" && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300">
-                            <Clock className="size-3" />
-                            Pending Queue
-                          </span>
-                        )}
-                        {item.status === "APPROVED" && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300">
-                            <CheckCircle2 className="size-3" />
-                            Verified Mentor
-                          </span>
-                        )}
-                        {item.status === "REJECTED" && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300">
-                            <XCircle className="size-3" />
-                            Declined
-                          </span>
-                        )}
+                        <StatusBadge status={item.status} />
                       </td>
 
                       <td className="px-5 py-4 text-right whitespace-nowrap">

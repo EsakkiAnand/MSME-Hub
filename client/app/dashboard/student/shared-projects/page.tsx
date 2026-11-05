@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLink, Share2, Users, GitBranch, Calendar } from "lucide-react";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const sharedProjects = [
   {
@@ -27,20 +28,6 @@ const sharedProjects = [
   },
 ];
 
-const statusConfig: Record<string, { label: string; badgeClass: string }> = {
-  IN_PROGRESS: {
-    label: "In Progress",
-    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
-  },
-  APPROVED: {
-    label: "Approved",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
-  },
-  SOLUTION_SUBMITTED: {
-    label: "Solution Submitted",
-    badgeClass: "bg-[#FF9500]/10 text-[#FF9500] border-transparent",
-  },
-};
 
 export default function SharedProjectsPage() {
   return (
@@ -63,11 +50,7 @@ export default function SharedProjectsPage() {
       {/* Standardized Project Cards List */}
       <div className="space-y-4">
         {sharedProjects.map((project) => {
-          const st = statusConfig[project.status] ?? {
-            label: project.status,
-            badgeClass: "bg-slate-100 text-foreground border-black/[0.06] dark:border-white/[0.08]",
-          };
-          return (
+                    return (
             <div
               key={project.id}
               className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden hover:border-slate-300 hover:shadow-xs transition-all duration-150"
@@ -78,11 +61,7 @@ export default function SharedProjectsPage() {
                   <span className="text-xs font-mono font-medium text-muted-foreground bg-white border border-black/[0.06] dark:border-white/[0.08] px-2 py-0.5 rounded">
                     {project.id}
                   </span>
-                  <span
-                    className={`text-xs font-medium px-2.5 py-0.5 rounded border ${st.badgeClass}`}
-                  >
-                    {st.label}
-                  </span>
+                  <StatusBadge status={project.status} />
                   <span className="text-xs text-muted-foreground">
                     Domain: <span className="font-medium text-foreground">{project.domain}</span>
                   </span>

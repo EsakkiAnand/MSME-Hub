@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { IOSSelect } from "@/components/ui/ios-select";
 import { updateIndustryCompanyProfileAction } from "@/app/actions/industry";
 
@@ -69,7 +70,7 @@ export default function IndustryProfilePage() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
         <div>
@@ -77,10 +78,7 @@ export default function IndustryProfilePage() {
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Company & Partner Profile
             </h1>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
-              <ShieldCheck className="h-3 w-3 text-emerald-600" />
-              Verified MSME
-            </span>
+            <StatusBadge variant="success" label="Verified MSME" />
           </div>
           <p className="text-sm text-muted-foreground mt-1">
             Manage your organization identification, Udyam compliance credentials, and partnership details.
@@ -98,10 +96,7 @@ export default function IndustryProfilePage() {
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xl font-bold text-foreground">{companyName}</h2>
               {isVerified && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Udyam Validated
-                </span>
+                <StatusBadge variant="success" label="Udyam Validated" />
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">

@@ -27,30 +27,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { IOSSelect } from "@/components/ui/ios-select";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { initialIndustryProblems, IndustryProblemItem } from "@/lib/industry-data";
 
-const statusConfig: Record<string, { label: string; badgeClass: string; icon: React.ElementType }> = {
-  DRAFT: {
-    label: "Draft",
-    badgeClass: "bg-slate-100 text-foreground border-black/[0.06] dark:border-white/[0.08]",
-    icon: Clock,
-  },
-  POOL_AVAILABLE: {
-    label: "In Domain Pool",
-    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
-    icon: Clock,
-  },
-  CLAIMED: {
-    label: "Claimed by Staff",
-    badgeClass: "bg-[#007AFF]/10 text-[#007AFF] border-transparent",
-    icon: CheckCircle2,
-  },
-  REJECTED: {
-    label: "Rejected / Scope Revision",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
-    icon: AlertCircle,
-  },
-};
 
 export default function MySubmittedProblemsPage() {
   const [problems] = useState<IndustryProblemItem[]>(initialIndustryProblems);
@@ -72,18 +51,21 @@ export default function MySubmittedProblemsPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6">
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-foreground">
-            My Submitted Challenges
-          </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <div className="flex items-center gap-2 mb-1">
+            <FileText className="size-4 text-[#007AFF]" />
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              My Submitted Challenges
+            </h1>
+          </div>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             PRD §8.3: Review operational challenges submitted by your company, monitor faculty claiming status, and inspect assigned student projects.
           </p>
         </div>
 
-        <Link href="/dashboard/industry/submit-problem">
+        <Link href="/dashboard/industry/submit-problem" className="shrink-0 self-start sm:self-auto">
           <Button size="sm" className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs h-9">
             <PlusCircle className="size-3.5 mr-1.5" />
             Submit New Challenge
@@ -155,9 +137,6 @@ export default function MySubmittedProblemsPage() {
                 </tr>
               ) : (
                 filteredProblems.map((prob) => {
-                  const cfg = statusConfig[prob.status] || statusConfig.POOL_AVAILABLE;
-                  const StatusIcon = cfg.icon;
-
                   return (
                     <tr key={prob.id} className="hover:bg-black/[0.02] dark:bg-white/[0.03]/80 transition-colors">
                       <td className="py-3 px-4 font-mono font-bold text-foreground whitespace-nowrap">
@@ -180,10 +159,7 @@ export default function MySubmittedProblemsPage() {
                         {new Date(prob.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${cfg.badgeClass}`}>
-                          <StatusIcon className="size-2.5" />
-                          {cfg.label}
-                        </span>
+                        <StatusBadge status={prob.status} />
                       </td>
                       <td className="py-3 px-4 text-right whitespace-nowrap">
                         <Button

@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { initialGuidanceRequests, GuidanceRequestItem } from "@/lib/alumni-data";
 
 export default function GuidanceHistoryPage() {
@@ -25,15 +27,17 @@ export default function GuidanceHistoryPage() {
   const totalEndorsements = historyItems.filter((i) => i.isHelpful).length;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          Guidance Activity &amp; Endorsement History
-        </h2>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          PRD §8.6: Complete record of architectural and security feedback provided to student project teams, including student-awarded Helpful Endorsements.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <DashboardPageHeader
+        icon={History}
+        title="Guidance Activity & Endorsement History"
+        badge={
+          <Badge variant="outline" className="text-[11px] font-medium border-black/[0.08] dark:border-white/[0.08]">
+            PRD §8.6
+          </Badge>
+        }
+        subtitle="Complete record of architectural and security feedback provided to student project teams, including student-awarded Helpful Endorsements."
+      />
 
       {/* Standardized Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch">
@@ -106,16 +110,7 @@ export default function GuidanceHistoryPage() {
                     </span>
                   )}
 
-                  <Badge
-                    variant="outline"
-                    className={
-                      item.status === "RESOLVED"
-                        ? "bg-[#34C759]/10 text-[#34C759] border-transparent text-[10px]"
-                        : "bg-[#007AFF]/10 text-[#007AFF] border-transparent text-[10px]"
-                    }
-                  >
-                    {item.status}
-                  </Badge>
+                  <StatusBadge status={item.status} />
                 </div>
               </div>
 

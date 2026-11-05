@@ -68,6 +68,6 @@ export function getRoleDashboardPath(role?: string | null): string {
     case "MSME_ADMIN":
       return "/dashboard/admin";
     default:
-      return "/dashboard";
+      return "/login";
   }
 }

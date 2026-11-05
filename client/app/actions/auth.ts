@@ -394,6 +394,16 @@ export async function signOutAction() {
       console.warn("Could not retrieve session prior to signout:", err);
     }
 
+    // Fallback: extract token directly from cookie store if not resolved by API
+    if (!sessionToken) {
+      const rawCookieToken =
+        cookieStore.get("better-auth.session_token")?.value ||
+        cookieStore.get("__Secure-better-auth.session_token")?.value;
+      if (rawCookieToken) {
+        sessionToken = rawCookieToken.split(".")[0];
+      }
+    }
+
     // 2. Call Better-Auth API signOut to trigger library hooks
     try {
       await auth.api.signOut({

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { staggerContainerVariants, staggerItemVariants } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,12 @@ interface StaggerContainerProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function StaggerContainer({ children, className, ...props }: StaggerContainerProps) {
+  const shouldReduceMotion = useReducedMotion();
+
+  if (shouldReduceMotion) {
+    return <div className={cn(className)} {...props}>{children}</div>;
+  }
+
   return (
     <motion.div
       variants={staggerContainerVariants}
@@ -30,6 +36,12 @@ interface StaggerItemProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function StaggerItem({ children, className, ...props }: StaggerItemProps) {
+  const shouldReduceMotion = useReducedMotion();
+
+  if (shouldReduceMotion) {
+    return <div className={cn(className)} {...props}>{children}</div>;
+  }
+
   return (
     <motion.div
       variants={staggerItemVariants}

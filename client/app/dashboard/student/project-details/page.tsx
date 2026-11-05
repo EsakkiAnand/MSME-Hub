@@ -17,6 +17,7 @@ import {
 import { Suspense } from "react";
 import { ContextualBreadcrumb } from "@/components/navigation/contextual-breadcrumb";
 import { ContextualBack } from "@/components/navigation/contextual-back";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const projectsData: Record<
   string,
@@ -91,12 +92,6 @@ const projectsData: Record<
   },
 };
 
-const statusConfig: Record<string, { label: string; badgeClass: string; icon: React.ElementType }> = {
-  IN_PROGRESS: { label: "In Progress", badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200", icon: Clock },
-  SOLUTION_SUBMITTED: { label: "Solution Submitted", badgeClass: "bg-[#FF9500]/10 text-[#FF9500] border-transparent", icon: CheckCircle2 },
-  APPROVED: { label: "Approved", badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent", icon: CheckCircle2 },
-  REVISION_IN_PROGRESS: { label: "Revision Needed", badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent", icon: AlertCircle },
-};
 
 function ProjectDetailsContent() {
   const searchParams = useSearchParams();
@@ -105,7 +100,7 @@ function ProjectDetailsContent() {
 
   if (!project) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="space-y-6">
         <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-12 text-center">
           <p className="text-muted-foreground text-sm">Project details not found.</p>
           <div className="mt-4 flex justify-center">
@@ -119,17 +114,11 @@ function ProjectDetailsContent() {
       </div>
     );
   }
-
-  const st = statusConfig[project.status] ?? {
-    label: project.status,
-    badgeClass: "bg-slate-100 text-foreground border-black/[0.06] dark:border-white/[0.08]",
-    icon: Clock,
-  };
   const completedMilestones = project.milestones.filter((m) => m.done).length;
   const progressPct = Math.round((completedMilestones / project.milestones.length) * 100);
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Contextual Breadcrumb */}
       <ContextualBreadcrumb
         items={[
@@ -146,11 +135,7 @@ function ProjectDetailsContent() {
               <span className="text-xs font-mono font-medium text-muted-foreground bg-slate-100 px-2 py-0.5 rounded">
                 {project.id}
               </span>
-              <span
-                className={`text-xs font-medium px-2.5 py-0.5 rounded border ${st.badgeClass}`}
-              >
-                {st.label}
-              </span>
+              <StatusBadge status={project.status} />
             </div>
             <h2 className="text-xl font-semibold text-foreground tracking-tight">
               {project.name}

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { initialIndustryProjects, IndustryProjectItem } from "@/lib/industry-data";
 import { submitIndustryRatingAction } from "@/app/actions/industry";
 import {
@@ -102,7 +103,7 @@ export default function IndustryRatingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6">
       {/* Page Header */}
       <div className="bg-white dark:bg-card rounded-xl border border-black/[0.06] dark:border-white/[0.08] dark:border-border p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
         <div>
@@ -166,9 +167,7 @@ export default function IndustryRatingsPage() {
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2.5">
                     <CopyIdBadge id={proj.id} label="PRJ" size="xs" />
-                    <span className="inline-flex items-center gap-1 rounded-md bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 text-xs font-semibold">
-                      Solution Submitted
-                    </span>
+                    <StatusBadge status={proj.status} />
                   </div>
 
                   <h3 className="font-semibold text-foreground dark:text-foreground text-sm line-clamp-2 mb-2">
@@ -252,15 +251,9 @@ export default function IndustryRatingsPage() {
 
                     <div className="flex items-center gap-2">
                       {isModerated ? (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 text-xs font-medium">
-                          <AlertTriangle className="h-3 w-3" />
-                          Under ADR 0004 Mediation
-                        </span>
+                        <StatusBadge status="MEDIATION_REQUESTED" label="Mediation" />
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-xs font-medium">
-                          <CheckCircle2 className="h-3 w-3" />
-                          Published Showcase
-                        </span>
+                        <StatusBadge status="APPROVED_PUBLISHED" label="Published Showcase" />
                       )}
                     </div>
                   </div>

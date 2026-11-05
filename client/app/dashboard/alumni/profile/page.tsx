@@ -109,7 +109,7 @@ export default function AlumniProfilePage() {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Header Profile Identity Card */}
       <Card className="border-black/[0.06] dark:border-white/[0.08] shadow-xs bg-white overflow-hidden">
         <div className="h-20 bg-black/[0.03] dark:bg-white/[0.04] border-b border-black/[0.06] dark:border-white/[0.08]" />

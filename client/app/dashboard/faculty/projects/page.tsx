@@ -17,25 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { IOSSelect } from "@/components/ui/ios-select";
 import { initialProjects, FacultyProject } from "@/lib/faculty-data";
+import { StatusBadge } from "@/components/ui/status-badge";
 
-const statusConfig: Record<string, { label: string; badgeClass: string }> = {
-  IN_PROGRESS: {
-    label: "In Progress",
-    badgeClass: "bg-blue-50 text-[#007AFF] border-blue-200",
-  },
-  SOLUTION_SUBMITTED: {
-    label: "Under Review",
-    badgeClass: "bg-[#FF9500]/10 text-[#FF9500] border-transparent",
-  },
-  APPROVED: {
-    label: "Approved",
-    badgeClass: "bg-[#34C759]/10 text-[#34C759] border-transparent",
-  },
-  REVISION_IN_PROGRESS: {
-    label: "Revision Needed",
-    badgeClass: "bg-[#FF3B30]/10 text-[#FF3B30] border-transparent",
-  },
-};
+
 
 const statusFilterOptions = [
   { value: "All", label: "All Project Statuses" },
@@ -135,7 +119,6 @@ export default function FacultyProjectsPage() {
           </div>
         ) : (
           filteredProjects.map((project) => {
-            const st = statusConfig[project.status] ?? statusConfig.IN_PROGRESS;
             const completedMilestones = project.milestones.filter((m) => m.done).length;
             const progressPct = Math.round(
               (completedMilestones / project.milestones.length) * 100
@@ -152,11 +135,7 @@ export default function FacultyProjectsPage() {
                     <span className="text-xs font-mono font-medium text-muted-foreground bg-slate-100 px-2.5 py-0.5 rounded">
                       {project.id}
                     </span>
-                    <span
-                      className={`text-xs font-medium px-2.5 py-0.5 rounded border ${st.badgeClass}`}
-                    >
-                      {st.label}
-                    </span>
+                    <StatusBadge status={project.status} />
                     <span className="text-xs text-muted-foreground">·</span>
                     <span className="text-xs font-medium text-muted-foreground">{project.domain}</span>
                   </div>

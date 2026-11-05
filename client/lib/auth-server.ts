@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { UserRole } from "@prisma/client";
 import { getRoleDashboardPath } from "@/lib/auth-utils";
@@ -16,10 +17,11 @@ export interface AuthenticatedUser {
 }
 
 /**
- * Validates the current server session and returns the verified database user.
- * If unauthenticated, expired, missing, or invalid, throws redirect to /login.
+ * Retrieves the currently authenticated user from the server session, if valid.
+ * Does not redirect; returns null for unauthenticated visitors or expired sessions.
  */
-export async function requireAuth(): Promise<AuthenticatedUser> {
+export async function getOptionalAuth(): Promise<AuthenticatedUser | null> {
+  await connection();
   const reqHeaders = await headers();
 
   let session = null;
@@ -28,15 +30,14 @@ export async function requireAuth(): Promise<AuthenticatedUser> {
       headers: reqHeaders,
     });
   } catch (err) {
-    console.error("Session validation error in requireAuth:", err);
-    redirect("/login");
+    console.warn("Session check in getOptionalAuth returned null:", err);
+    return null;
   }
 
   if (!session?.user?.id) {
-    redirect("/login");
+    return null;
   }
 
-  // Fetch trusted user identity and role from database
   let dbUser = null;
   try {
     dbUser = await prisma.user.findUnique({
@@ -52,15 +53,23 @@ export async function requireAuth(): Promise<AuthenticatedUser> {
       },
     });
   } catch (err) {
-    console.error("Database query error in requireAuth:", err);
-    redirect("/login");
+    console.error("Database query error in getOptionalAuth:", err);
+    return null;
   }
 
-  if (!dbUser) {
+  return (dbUser as AuthenticatedUser) || null;
+}
+
+/**
+ * Validates the current server session and returns the verified database user.
+ * If unauthenticated, expired, missing, or invalid, throws redirect to /login.
+ */
+export async function requireAuth(): Promise<AuthenticatedUser> {
+  const user = await getOptionalAuth();
+  if (!user) {
     redirect("/login");
   }
-
-  return dbUser as AuthenticatedUser;
+  return user;
 }
 
 /**
