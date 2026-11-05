@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { UserRole } from "@prisma/client";
@@ -23,11 +23,19 @@ export interface AuthenticatedUser {
 export async function getOptionalAuth(): Promise<AuthenticatedUser | null> {
   await connection();
   const reqHeaders = await headers();
+  const cookieStore = await cookies();
+
+  // Explicitly ensure the complete cookie header is forwarded to Better Auth
+  const headersWithCookies = new Headers(reqHeaders);
+  const cookieString = cookieStore.toString();
+  if (cookieString) {
+    headersWithCookies.set("cookie", cookieString);
+  }
 
   let session = null;
   try {
     session = await auth.api.getSession({
-      headers: reqHeaders,
+      headers: headersWithCookies,
     });
   } catch (err) {
     console.warn("Session check in getOptionalAuth returned null:", err);
@@ -35,6 +43,14 @@ export async function getOptionalAuth(): Promise<AuthenticatedUser | null> {
   }
 
   if (!session?.user?.id) {
+    return null;
+  }
+
+  // Verify that the session has not expired
+  if (
+    session?.session?.expiresAt &&
+    new Date(session.session.expiresAt).getTime() <= Date.now()
+  ) {
     return null;
   }
 

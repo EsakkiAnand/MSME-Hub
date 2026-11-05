@@ -38,6 +38,7 @@ enum IdeaStatus {
   SUBMITTED
   UNDER_REVIEW
   NEEDS_CHANGES
+  RESUBMITTED
   REJECTED
   ACCEPTED
   SHOWCASE_PUBLISHED
@@ -104,6 +105,10 @@ model User {
   // Mentorship / Feedback Relations
   alumniGuidance    GuidanceRequest[] @relation("AlumniAssignedGuidance")
   feedbackAuthored  Feedback[]        @relation("AuthorFeedback")
+
+  // Admin Idea Review Relations
+  reviewedIdeas     Idea[]            @relation("AdminReviewedIdeas")
+  adminIdeaReviews  IdeaReview[]      @relation("AdminReviewsAuthored")
 
   @@map("user")
 }
@@ -269,21 +274,46 @@ model ProjectMember {
 // ---------------------------------------------------------------------------
 
 model Idea {
-  id            String     @id @default(uuid())
-  studentId     String
-  title         String
-  description   String     @db.Text
-  domain        String
-  status        IdeaStatus @default(SUBMITTED)
-  staffComments String?    @db.Text
-  isShowcase    Boolean    @default(false)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id                 String           @id @default(uuid())
+  studentId          String
+  title              String
+  description        String           @db.Text
+  problemStatement   String?          @db.Text
+  proposedSolution   String?          @db.Text
+  expectedImpact     String?          @db.Text
+  attachments        String?          @db.Text
+  domain             String
+  status             IdeaStatus       @default(SUBMITTED)
+  staffComments      String?          @db.Text
+  adminFeedback      String?          @db.Text
+  reviewedByAdminId  String?
+  reviewedAt         DateTime?
+  resubmittedAt      DateTime?
+  isShowcase         Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
-  student       User       @relation("StudentIdeas", fields: [studentId], references: [id], onDelete: Cascade)
-  project       Project?
+  student            User             @relation("StudentIdeas", fields: [studentId], references: [id], onDelete: Cascade)
+  reviewedByAdmin    User?            @relation("AdminReviewedIdeas", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  project            Project?
+  reviewHistory      IdeaReview[]     @relation("IdeaReviewHistory")
 
   @@map("idea")
+}
+
+model IdeaReview {
+  id              String      @id @default(uuid())
+  ideaId          String
+  adminId         String
+  action          IdeaStatus
+  feedback        String      @db.Text
+  previousStatus  IdeaStatus?
+  createdAt       DateTime    @default(now())
+
+  idea            Idea        @relation("IdeaReviewHistory", fields: [ideaId], references: [id], onDelete: Cascade)
+  admin           User        @relation("AdminReviewsAuthored", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("idea_review")
 }
 
 // ---------------------------------------------------------------------------

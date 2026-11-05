@@ -45,16 +45,6 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
     }
   }, [portalParam]);
 
-  // Client-side session listener: if already authenticated, replace history to dashboard
-  const session = authClient.useSession();
-  useEffect(() => {
-    if (!session.isPending && session.data?.user && !isLoggedOut) {
-      const userRole = (session.data.user as any)?.role || "STUDENT";
-      const targetPath = getRoleDashboardPath(userRole);
-      router.replace(targetPath);
-    }
-  }, [session.isPending, session.data?.user, isLoggedOut, router]);
-
   // Standard Form State
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

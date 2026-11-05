@@ -28,18 +28,6 @@ import { toast } from "sonner";
 
 export function AdminLoginForm() {
   const router = useRouter();
-  const session = authClient.useSession();
-
-  useEffect(() => {
-    if (!session.isPending && session.data?.user) {
-      const userRole = (session.data.user as any)?.role;
-      if (userRole === "MSME_ADMIN") {
-        router.replace("/dashboard/admin");
-      } else {
-        router.replace(getRoleDashboardPath(userRole || "STUDENT"));
-      }
-    }
-  }, [session.isPending, session.data?.user, router]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

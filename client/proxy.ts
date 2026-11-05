@@ -6,7 +6,29 @@ import { getRoleDashboardPath } from "@/lib/auth-utils";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Intercept all protected dashboard routes
+  // 1. Handle common route aliases for dashboard access
+  if (pathname === "/student/dashboard" || pathname.startsWith("/student/dashboard/")) {
+    const targetUrl = new URL(pathname.replace("/student/dashboard", "/dashboard/student"), request.url);
+    return NextResponse.redirect(targetUrl);
+  }
+  if (pathname === "/admin/dashboard" || pathname.startsWith("/admin/dashboard/")) {
+    const targetUrl = new URL(pathname.replace("/admin/dashboard", "/dashboard/admin"), request.url);
+    return NextResponse.redirect(targetUrl);
+  }
+  if (pathname === "/faculty/dashboard" || pathname.startsWith("/faculty/dashboard/")) {
+    const targetUrl = new URL(pathname.replace("/faculty/dashboard", "/dashboard/faculty"), request.url);
+    return NextResponse.redirect(targetUrl);
+  }
+  if (pathname === "/industry/dashboard" || pathname.startsWith("/industry/dashboard/")) {
+    const targetUrl = new URL(pathname.replace("/industry/dashboard", "/dashboard/industry"), request.url);
+    return NextResponse.redirect(targetUrl);
+  }
+  if (pathname === "/alumni/dashboard" || pathname.startsWith("/alumni/dashboard/")) {
+    const targetUrl = new URL(pathname.replace("/alumni/dashboard", "/dashboard/alumni"), request.url);
+    return NextResponse.redirect(targetUrl);
+  }
+
+  // 2. Intercept all protected dashboard routes
   if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
     const rawToken =
       request.cookies.get("better-auth.session_token")?.value ||
@@ -40,6 +62,7 @@ export async function proxy(request: NextRequest) {
       ? new Date(validSession.expiresAt).getTime() <= Date.now()
       : true;
 
+    // Reject unauthenticated, expired, or missing sessions immediately
     if (!validSession || isExpired || !validSession.user) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);
@@ -51,13 +74,24 @@ export async function proxy(request: NextRequest) {
       );
       response.headers.set("Pragma", "no-cache");
       response.headers.set("Expires", "0");
+      // Expire stale cookie on client if present
+      if (rawToken) {
+        response.cookies.set("better-auth.session_token", "", {
+          path: "/",
+          maxAge: 0,
+        });
+        response.cookies.set("__Secure-better-auth.session_token", "", {
+          path: "/",
+          maxAge: 0,
+        });
+      }
       return response;
     }
 
     const userRole = validSession.user.role;
     const authorizedPath = getRoleDashboardPath(userRole);
 
-    // 1. Root /dashboard index: redirect to the user's role workspace
+    // Root /dashboard index: redirect to the user's role workspace
     if (pathname === "/dashboard") {
       const response = NextResponse.redirect(new URL(authorizedPath, request.url));
       response.headers.set(
@@ -67,7 +101,7 @@ export async function proxy(request: NextRequest) {
       return response;
     }
 
-    // 2. Role-based routing boundary checks
+    // Role-based routing boundary checks
     let isAuthorized = true;
     if (pathname.startsWith("/dashboard/student") && userRole !== "STUDENT") {
       isAuthorized = false;
@@ -109,6 +143,22 @@ export async function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
+export const middleware = proxy;
+export default proxy;
+
 export const config = {
-  matcher: ["/dashboard", "/dashboard/:path*"],
+  matcher: [
+    "/dashboard",
+    "/dashboard/:path*",
+    "/student/dashboard",
+    "/student/dashboard/:path*",
+    "/admin/dashboard",
+    "/admin/dashboard/:path*",
+    "/faculty/dashboard",
+    "/faculty/dashboard/:path*",
+    "/industry/dashboard",
+    "/industry/dashboard/:path*",
+    "/alumni/dashboard",
+    "/alumni/dashboard/:path*",
+  ],
 };

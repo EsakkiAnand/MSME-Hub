@@ -15,6 +15,7 @@ import {
   ArrowUpRight,
   FileText,
   ChevronRight,
+  Lightbulb,
 } from "lucide-react";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger-group";
@@ -22,6 +23,15 @@ import { StatusBadge } from "@/components/ui/status-badge";
 
 // ─── Mock Metrics ─────────────────────────────────────────────────────────────
 const dashboardStats = [
+  {
+    label: "Idea Verifications",
+    sublabel: "Student pitches in queue",
+    value: 5,
+    icon: Lightbulb,
+    iconColor: "text-amber-500",
+    href: "/dashboard/admin/idea-verification",
+    accent: "bg-amber-50 dark:bg-amber-950/30",
+  },
   {
     label: "Industry Verifications",
     sublabel: "Pending approval",
@@ -139,6 +149,14 @@ const recentActivity = [
 
 // ─── Quick Action Links ───────────────────────────────────────────────────────
 const quickActions = [
+  {
+    label: "Verify Student Ideas",
+    description: "Screen, approve, or request improvements for student pitches",
+    href: "/dashboard/admin/idea-verification",
+    icon: Lightbulb,
+    count: 5,
+    countClass: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+  },
   {
     label: "Review Industry Verifications",
     description: "Approve or reject pending Udyam certificate submissions",

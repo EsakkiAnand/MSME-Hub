@@ -171,6 +171,7 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleConfig> = {
     },
     navItems: [
       { href: "/dashboard/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { href: "/dashboard/admin/idea-verification", label: "Idea Verification", icon: Lightbulb },
       { href: "/dashboard/admin/problem-bank", label: "Problem Bank", icon: Building2 },
       { href: "/dashboard/admin/industry-verification", label: "Industry Verification", icon: ShieldCheck },
       { href: "/dashboard/admin/github-review", label: "GitHub Review", icon: GitBranch },
@@ -355,16 +356,42 @@ export function DashboardShell({
       .join(" ");
   }, [pathname, activeNavItems, activePortalTitle]);
 
+  // Evict page from browser bfcache on Back/Forward navigation
+  React.useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        window.location.replace("/login");
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
+
+  // Client-side session guard: if session is resolved and no authenticated user exists, immediately redirect to /login
+  React.useEffect(() => {
+    if (!session.isPending && !session.data?.user) {
+      window.location.replace("/login");
+    }
+  }, [session.isPending, session.data?.user]);
+
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
-      await signOutAction();
-      await authClient.signOut();
+      // 1. Call Better Auth client signOut FIRST so client hooks and endpoints execute cleanly
+      try {
+        await authClient.signOut();
+      } catch (clientErr) {
+        console.warn("Client signOut notice:", clientErr);
+      }
 
+      // 2. Server-side session invalidation: database purge & force cookie expiry
+      await signOutAction();
+
+      // 3. Clear client-side web storages
       if (typeof window !== "undefined") {
         try {
           sessionStorage.clear();
-          localStorage.removeItem("better-auth.session_data");
+          localStorage.clear();
         } catch {}
       }
 

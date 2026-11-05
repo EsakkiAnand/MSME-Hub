@@ -33,11 +33,21 @@ if (typeof dns.setServers === "function") {
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-const connectionString =
+let rawConnectionString =
   process.env.DATABASE_URL ||
   "postgresql://postgres:postgres@localhost:5432/msme_hub?schema=public";
 
-const pool = new Pool({ connectionString });
+// Ensure pg-connection-string libpq compatibility flag is present to suppress deprecation warning
+// while maintaining full strict TLS certificate verification
+if (
+  rawConnectionString.includes("sslmode=") &&
+  !rawConnectionString.includes("uselibpqcompat=")
+) {
+  const separator = rawConnectionString.includes("?") ? "&" : "?";
+  rawConnectionString = `${rawConnectionString}${separator}uselibpqcompat=true`;
+}
+
+const pool = new Pool({ connectionString: rawConnectionString });
 const adapter = new PrismaPg(pool);
 
 export const prisma =

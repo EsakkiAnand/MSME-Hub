@@ -437,14 +437,12 @@ export async function signOutAction() {
     ];
 
     for (const name of authCookieNames) {
-      cookieStore.delete(name);
       cookieStore.set(name, "", {
         path: "/",
         maxAge: 0,
         expires: new Date(0),
         httpOnly: true,
         sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
       });
     }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import {
@@ -10,10 +11,13 @@ import {
   Share2,
   ChevronRight,
   ExternalLink,
+  RotateCcw,
+  AlertTriangle,
 } from "lucide-react";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger-group";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { getStudentIdeas } from "@/app/actions/ideas";
 
 const myProjects = [
   {
@@ -60,6 +64,17 @@ export default function StudentDashboardPage() {
   const user = session?.data?.user;
   const studentName = user?.name ?? "Student";
 
+  const [studentIdeas, setStudentIdeas] = useState<any[]>([]);
+  const [ideasLoading, setIdeasLoading] = useState(false);
+
+  useEffect(() => {
+    getStudentIdeas()
+      .then((ideas) => setStudentIdeas(ideas || []))
+      .catch((err) => console.log("Student ideas load notice:", err.message));
+  }, []);
+
+  const needsImprovementIdea = studentIdeas.find((i) => i.status === "NEEDS_CHANGES");
+
   const activeCount = myProjects.filter(
     (p) => p.status === "IN_PROGRESS" || p.status === "ASSIGNED"
   ).length;
@@ -102,6 +117,40 @@ export default function StudentDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* MSME Admin Needs Improvement Action Alert */}
+      {needsImprovementIdea && (
+        <div className="rounded-[16px] border border-amber-300 dark:border-amber-900/60 bg-amber-50/90 dark:bg-amber-950/30 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="size-9 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center shrink-0 text-amber-700 dark:text-amber-300">
+              <RotateCcw className="size-4" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-amber-900 dark:text-amber-200">
+                  MSME Admin Requested Improvements
+                </span>
+                <StatusBadge status="NEEDS_CHANGES" />
+              </div>
+              <p className="text-xs text-amber-800 dark:text-amber-300/90 font-medium">
+                "{needsImprovementIdea.title}"
+              </p>
+              {needsImprovementIdea.adminFeedback && (
+                <p className="text-[11px] text-amber-700 dark:text-amber-400 line-clamp-2 leading-relaxed">
+                  Note: {needsImprovementIdea.adminFeedback}
+                </p>
+              )}
+            </div>
+          </div>
+          <Link
+            href="/dashboard/student/submit-idea"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-[10px] bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium transition-all active:scale-[0.98] shrink-0"
+          >
+            <span>Revise &amp; Resubmit</span>
+            <ChevronRight className="size-3.5" />
+          </Link>
+        </div>
+      )}
 
       {/* Summary Metrics - Native iOS Metric Cards */}
       <StaggerContainer className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -148,9 +197,10 @@ export default function StudentDashboardPage() {
 
       {/* Main Grid: Projects List + Right Column */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Active Projects Table Card */}
-        <div className="lg:col-span-2 rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08]">
+        <div className="lg:col-span-2 space-y-6">
+          {/* Active Projects Table Card */}
+          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08]">
             <div>
               <h3 className="text-sm font-semibold text-foreground tracking-tight">Assigned Projects</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -210,6 +260,82 @@ export default function StudentDashboardPage() {
             )}
           </div>
         </div>
+
+        {/* Submitted Ideas & Verification Section */}
+        <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08]">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="size-4 text-amber-500" />
+              <div>
+                <h3 className="text-sm font-semibold text-foreground tracking-tight">
+                  My Idea Submissions &amp; Verification
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Proposals submitted for MSME Admin evaluation and industry showcase
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/dashboard/student/submit-idea"
+              className="text-xs font-medium text-[#007AFF] hover:underline flex items-center gap-1"
+            >
+              Submit Idea <ChevronRight className="size-3.5" />
+            </Link>
+          </div>
+
+          <div className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
+            {studentIdeas.slice(0, 3).map((idea) => (
+              <div
+                key={idea.id}
+                className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+              >
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status={idea.status} />
+                    <span className="text-xs font-medium text-foreground bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200">
+                      {idea.domain}
+                    </span>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Clock className="size-3 text-muted-foreground" />
+                      {new Date(idea.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-sm font-semibold text-foreground tracking-tight">
+                    {idea.title}
+                  </p>
+                  {idea.adminFeedback && (
+                    <p className="text-[11px] text-muted-foreground line-clamp-1">
+                      Admin Note: {idea.adminFeedback}
+                    </p>
+                  )}
+                </div>
+
+                <div className="shrink-0 flex items-center gap-2">
+                  <Link
+                    href="/dashboard/student/submit-idea"
+                    className="text-xs font-medium px-3 py-1.5 rounded-[8px] bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] text-foreground flex items-center gap-1 transition-all active:scale-[0.98]"
+                  >
+                    <span>{idea.status === "NEEDS_CHANGES" ? "Revise Idea" : "View Status"}</span>
+                    <ChevronRight className="size-3.5" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+
+            {studentIdeas.length === 0 && (
+              <div className="p-8 text-center text-xs text-muted-foreground space-y-1.5">
+                <p>No project ideas submitted yet.</p>
+                <Link
+                  href="/dashboard/student/submit-idea"
+                  className="inline-block text-[#007AFF] hover:underline font-medium"
+                >
+                  Submit your first idea proposal →
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
         {/* Right Column: Capacity Limit & Quick Actions */}
         <div className="space-y-4">

@@ -67,8 +67,14 @@ export const STATUS_MAP: Record<string, StatusMeta> = {
   CLAIMED:              { label: "Claimed",            variant: "info"         },
   // Idea submissions
   PENDING_REVIEW:       { label: "Pending Review",     variant: "neutral"      },
-  ACCEPTED:             { label: "Accepted",           variant: "success"      },
+  ACCEPTED:             { label: "Approved",           variant: "success"      },
   REVISION_REQUESTED:   { label: "Revision Requested", variant: "warning"      },
+  NEEDS_CHANGES:        { label: "Needs Improvement",  variant: "warning"      },
+  NEEDS_IMPROVEMENT:    { label: "Needs Improvement",  variant: "warning"      },
+  RESUBMITTED:          { label: "Resubmitted",        variant: "info"         },
+  UNDER_REVIEW:         { label: "Under Review",       variant: "neutral"      },
+  SHOWCASE_PUBLISHED:   { label: "Approved & Live",    variant: "success"      },
+  CONVERTED_TO_PROJECT: { label: "Project Incubated",  variant: "success"      },
   // Verification / admin
   PENDING:              { label: "Pending",            variant: "neutral"      },
   SUBMITTED:            { label: "Submitted",          variant: "review"       },

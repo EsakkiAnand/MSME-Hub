@@ -222,8 +222,9 @@ export default function FacultyIdeaSubmissionsPage() {
 
                 {/* Action Controls */}
                 <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[11px] text-muted-foreground">
-                    Faculty authority: Accept for MSME sponsorship, request improvements, or reject
+                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <Sparkles className="size-3 text-amber-500" />
+                    <span>Faculty Academic Recommendation (Official verification &amp; approval governed exclusively by MSME Admin)</span>
                   </span>
 
                   <div className="flex items-center gap-2">
@@ -233,7 +234,7 @@ export default function FacultyIdeaSubmissionsPage() {
                       className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white transition-all active:scale-[0.98]"
                     >
                       <CheckCircle2 className="size-3.5" />
-                      <span>Approve Idea</span>
+                      <span>Recommend to Admin</span>
                     </button>
 
                     <button
@@ -242,7 +243,7 @@ export default function FacultyIdeaSubmissionsPage() {
                       className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md bg-white border border-blue-200 text-[#007AFF] hover:bg-blue-50 disabled:opacity-50 transition-all active:scale-[0.98]"
                     >
                       <RotateCcw className="size-3.5" />
-                      <span>Request Changes</span>
+                      <span>Suggest Revisions</span>
                     </button>
 
                     <button
@@ -251,7 +252,7 @@ export default function FacultyIdeaSubmissionsPage() {
                       className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50 transition-all active:scale-[0.98]"
                     >
                       <XCircle className="size-3.5" />
-                      <span>Reject</span>
+                      <span>Decline Recommendation</span>
                     </button>
                   </div>
                 </div>
