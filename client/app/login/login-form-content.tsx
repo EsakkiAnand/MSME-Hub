@@ -14,6 +14,7 @@ import {
   EyeOff,
   Loader2,
   ArrowRight,
+  ArrowLeft,
   ShieldCheck,
   GraduationCap,
   Sparkles,
@@ -556,14 +557,23 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
       </div>
 
       {/* Bottom Footer Block */}
-      <div className="mt-auto pt-4">
-        <div className="text-center text-xs text-muted-foreground">
+      <div className="mt-auto pt-4 space-y-2 text-center">
+        <div className="text-xs text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
             href="/signup"
             className="font-semibold text-primary hover:underline transition-colors"
           >
             Sign up
+          </Link>
+        </div>
+        <div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors py-1 px-2.5 rounded-md hover:bg-black/[0.03] dark:hover:bg-white/[0.04]"
+          >
+            <ArrowLeft className="size-3" />
+            <span>Return to Home</span>
           </Link>
         </div>
       </div>

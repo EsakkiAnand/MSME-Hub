@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, ArrowLeft } from "lucide-react";
 import { MsmeLogoMark } from "@/components/ui/msme-logo";
 
 export interface PublicHeaderProps {
@@ -14,8 +14,7 @@ export interface PublicHeaderProps {
 
 /**
  * Standardized application header for public and authentication pages.
- * Displays aligned institutional branding with a single, clear contextual action.
- * Eliminates redundant Exit / Close / duplicate Back buttons.
+ * Displays aligned institutional branding with clear return-to-home and contextual navigation.
  */
 export function PublicHeader({
   action = "none",
@@ -33,6 +32,7 @@ export function PublicHeader({
         {/* Institutional Branding: Always navigates to public root ("/") */}
         <Link
           href="/"
+          title="Return to MSME Hub Home"
           className="flex items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90 select-none shrink-0"
         >
           <MsmeLogoMark size={32} />
@@ -48,6 +48,17 @@ export function PublicHeader({
 
         {/* Navigation Controls */}
         <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground shrink-0">
+          {/* Explicit Home / Exit link */}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1 rounded-md hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+          >
+            <ArrowLeft className="size-3.5 shrink-0" />
+            <span>Home</span>
+          </Link>
+
+          <div className="h-4 w-px bg-border mx-0.5" />
+
           {action === "signup" && (
             <span>
               <span className="hidden sm:inline">Don&apos;t have an account? </span>
@@ -82,15 +93,6 @@ export function PublicHeader({
                 Sign in
               </Link>
             </span>
-          )}
-
-          {action === "home" && (
-            <Link
-              href="/"
-              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Return to Home
-            </Link>
           )}
 
           <div className="h-4 w-px bg-border mx-0.5" />

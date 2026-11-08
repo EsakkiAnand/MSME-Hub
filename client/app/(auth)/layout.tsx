@@ -47,6 +47,27 @@ export default function AuthLayout({
     }
   }, [pathname]);
 
+  // Safely handle browser Back button when on /login or /signup
+  // If the user was redirected here from a protected dashboard route or post-logout,
+  // pressing Back navigates them cleanly to "/" (Home) instead of looping back to /login.
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      if (
+        params.get("redirect")?.startsWith("/dashboard") ||
+        params.get("logged_out") === "1" ||
+        document.referrer.includes("/dashboard")
+      ) {
+        window.location.replace("/");
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   const OFFSET = shouldReduceMotion ? 0 : 20;
   const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
 

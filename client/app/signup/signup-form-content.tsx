@@ -23,6 +23,7 @@ import {
   CheckCircle2,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
   Info,
   Eye,
   EyeOff,
@@ -659,14 +660,23 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
       </div>
 
       {/* In-Card Link to Sign In */}
-      <div className="mt-auto pt-4">
-        <div className="text-center text-xs text-muted-foreground">
+      <div className="mt-auto pt-4 space-y-2 text-center">
+        <div className="text-xs text-muted-foreground">
           Already have an account?{" "}
           <Link
             href="/login"
             className="font-semibold text-primary hover:underline transition-colors"
           >
             Sign in
+          </Link>
+        </div>
+        <div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors py-1 px-2.5 rounded-md hover:bg-black/[0.03] dark:hover:bg-white/[0.04]"
+          >
+            <ArrowLeft className="size-3" />
+            <span>Return to Home</span>
           </Link>
         </div>
       </div>
