@@ -32,6 +32,7 @@ enum ProjectStatus {
   REVISION_IN_PROGRESS
   APPROVED
   COMPLETED
+  REJECTED
 }
 
 enum IdeaStatus {

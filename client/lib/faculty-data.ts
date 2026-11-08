@@ -16,7 +16,7 @@ export interface FacultyStudent {
 export interface FacultyProject {
   id: string;
   name: string;
-  status: "IN_PROGRESS" | "SOLUTION_SUBMITTED" | "APPROVED" | "REVISION_IN_PROGRESS";
+  status: "IN_PROGRESS" | "SOLUTION_SUBMITTED" | "APPROVED" | "REVISION_IN_PROGRESS" | "COMPLETED" | "REJECTED";
   mentor: string;
   description: string;
   deadline: string;
@@ -31,6 +31,7 @@ export interface FacultyProject {
     reason: string;
     currentDeadline: string;
   } | null;
+  rejectionReason?: string | null;
 }
 
 export interface FacultyIdeaSubmission {
@@ -129,6 +130,61 @@ export const initialProjects: Record<string, FacultyProject> = {
       { name: "ML Model Benchmark Report.pdf", type: "Evaluation" },
     ],
     extensionRequested: null,
+  },
+  "PRJ-2024-003": {
+    id: "PRJ-2024-003",
+    name: "Solar Pump Telemetry & Cloud Controller for Micro-Irrigation",
+    status: "SOLUTION_SUBMITTED",
+    mentor: "Dr. Arulalan V",
+    msmeCompany: "SunAgro Solar Technologies",
+    description:
+      "Design an edge IoT telemetry controller with GSM/GPRS fallback that captures solar photovoltaic water pump telemetry and feeds predictive irrigation scheduling alerts to smallholder farmers.",
+    deadline: "2026-11-15",
+    domain: "IoT & Analytics",
+    team: [
+      { name: "Karthik S", regNo: "950821105022", role: "Embedded Firmware Lead", isLead: true },
+      { name: "Dharani M", regNo: "950821105014", role: "Cloud Ingestion Engineer", isLead: false },
+    ],
+    milestones: [
+      { label: "Sensor bench testing & analog calibration", done: true, date: "2026-09-05" },
+      { label: "ESP32 firmware & MQTT SSL telemetry payload", done: true, date: "2026-10-01" },
+      { label: "Cloud dashboard with low-flow anomaly detection", done: true, date: "2026-10-25" },
+      { label: "Deliverable package submission for Admin review", done: true, date: "2026-11-04" },
+    ],
+    githubUrl: "https://github.com/fxec-students/solar-pump-telemetry",
+    documents: [
+      { name: "Field Sensor Wiring Schematics.pdf", type: "Hardware Spec" },
+      { name: "MQTT Broker Security & Certs.pdf", type: "Security Brief" },
+    ],
+    extensionRequested: null,
+  },
+  "PRJ-2024-009": {
+    id: "PRJ-2024-009",
+    name: "High-Frequency Acoustic Crack Detection for Foundries",
+    status: "REJECTED",
+    mentor: "Dr. S. Ramanathan",
+    msmeCompany: "South Castings & Alloys",
+    description:
+      "Implement a acoustic emission spectral analyzer to detect micro-cracks in heavy ductile iron castings immediately upon demolding before machining operations begin.",
+    deadline: "2026-09-30",
+    domain: "Acoustics & Signal Processing",
+    team: [
+      { name: "Vigneshwaran R", regNo: "950821114055", role: "Signal Processing Lead", isLead: true },
+      { name: "Manoj Kumar P", regNo: "950821114032", role: "Data Acquisition Specialist", isLead: false },
+    ],
+    milestones: [
+      { label: "Piezoelectric transducer calibration", done: true, date: "2026-06-25" },
+      { label: "Fast Fourier Transform pipeline in C++", done: true, date: "2026-07-30" },
+      { label: "Foundry floor ambient noise isolation", done: false, date: "2026-08-30" },
+    ],
+    githubUrl: "https://github.com/fxec-students/acoustic-crack-detection",
+    documents: [
+      { name: "Foundry Problem Brief.pdf", type: "Industry Brief" },
+      { name: "Rejection Audit Notice.pdf", type: "Governance Decision" },
+    ],
+    extensionRequested: null,
+    rejectionReason:
+      "Deliverable failed environmental ambient noise isolation on the foundry floor with 65% false alarm rate. Repository lacked required MIT license compliance.",
   },
 };
 
