@@ -10,7 +10,8 @@ export const ROLE_PREFIX_MAP: Record<string, string> = {
   FACULTY: "FAC",
   INDUSTRY: "IND",
   MSME_ADMIN: "ADM",
-  ALUMNI: "ALU",
+  ALUMNI: "EXP",
+  INDUSTRY_EXPERT: "EXP",
 };
 
 // ---------------------------------------------------------------------------

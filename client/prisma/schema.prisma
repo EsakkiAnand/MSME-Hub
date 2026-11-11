@@ -18,6 +18,19 @@ enum UserRole {
   MSME_ADMIN
 }
 
+enum StudentTrack {
+  UNSELECTED
+  SUBMIT_IDEA
+  JOIN_MSME
+}
+
+enum MsmeApprovalStatus {
+  NOT_APPLIED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum ProblemStatus {
   DRAFT
   POOL_AVAILABLE
@@ -84,6 +97,12 @@ model User {
   isVerified        Boolean   @default(false)
   institutionDomain String?
   uniqueId          String?   @unique
+
+  // Student Track Selection & Governance
+  studentTrack        StudentTrack        @default(UNSELECTED)
+  msmeApprovalStatus  MsmeApprovalStatus  @default(NOT_APPLIED)
+  msmeApprovalReason  String?             @db.Text
+  msmeApprovedAt      DateTime?
 
   // Auth Relations
   sessions          Session[]

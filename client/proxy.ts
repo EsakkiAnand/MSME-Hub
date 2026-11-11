@@ -27,6 +27,10 @@ export async function proxy(request: NextRequest) {
     const targetUrl = new URL(pathname.replace("/alumni/dashboard", "/dashboard/alumni"), request.url);
     return NextResponse.redirect(targetUrl);
   }
+  if (pathname === "/dashboard/industry-expert" || pathname.startsWith("/dashboard/industry-expert/")) {
+    const targetUrl = new URL(pathname.replace("/dashboard/industry-expert", "/dashboard/alumni"), request.url);
+    return NextResponse.redirect(targetUrl);
+  }
 
   // 2. Intercept all protected dashboard routes
   if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
@@ -38,6 +42,7 @@ export async function proxy(request: NextRequest) {
     const sessionToken = rawToken ? rawToken.split(".")[0] : null;
 
     let validSession = null;
+    let queryError = false;
     if (sessionToken) {
       try {
         validSession = await prisma.session.findUnique({
@@ -48,11 +53,13 @@ export async function proxy(request: NextRequest) {
                 id: true,
                 role: true,
                 isVerified: true,
+                studentTrack: true,
               },
             },
           },
         });
-      } catch (err) {
+      } catch (err: any) {
+        queryError = true;
         console.error("Proxy session verification database error:", err);
       }
     }
@@ -64,6 +71,12 @@ export async function proxy(request: NextRequest) {
 
     // Reject unauthenticated, expired, or missing sessions immediately
     if (!validSession || isExpired || !validSession.user) {
+      // If there was a database query error, allow the request to proceed to downstream handlers
+      // instead of aggressively wiping cookies and redirecting to /login
+      if (queryError) {
+        return NextResponse.next();
+      }
+
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);
 
@@ -74,8 +87,8 @@ export async function proxy(request: NextRequest) {
       );
       response.headers.set("Pragma", "no-cache");
       response.headers.set("Expires", "0");
-      // Expire stale cookie on client if present
-      if (rawToken) {
+      // Expire stale cookie on client if explicitly confirmed expired/missing in DB
+      if (rawToken && !queryError) {
         response.cookies.set("better-auth.session_token", "", {
           path: "/",
           maxAge: 0,
@@ -89,7 +102,27 @@ export async function proxy(request: NextRequest) {
     }
 
     const userRole = validSession.user.role;
-    const authorizedPath = getRoleDashboardPath(userRole);
+    const studentTrack = (validSession.user as any).studentTrack;
+
+    // Student track onboarding redirection: unselected students must choose their pathway first
+    if (
+      userRole === "STUDENT" &&
+      (!studentTrack || studentTrack === "UNSELECTED") &&
+      pathname.startsWith("/dashboard/student") &&
+      pathname !== "/dashboard/student/onboarding"
+    ) {
+      const response = NextResponse.redirect(new URL("/dashboard/student/onboarding", request.url));
+      response.headers.set(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+      );
+      return response;
+    }
+
+    const authorizedPath =
+      userRole === "STUDENT" && (!studentTrack || studentTrack === "UNSELECTED")
+        ? "/dashboard/student/onboarding"
+        : getRoleDashboardPath(userRole);
 
     // Root /dashboard index: redirect to the user's role workspace
     if (pathname === "/dashboard") {

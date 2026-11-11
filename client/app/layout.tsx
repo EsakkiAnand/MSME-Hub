@@ -13,7 +13,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "FXEC MSME Hub | Industry-Academia Collaboration Platform",
   description:
-    "Official institutional platform connecting verified MSMEs, academic departments, student project teams, and alumni mentors at Francis Xavier Engineering College.",
+    "Official institutional platform connecting verified MSMEs, academic departments, student project teams, and industry experts at Francis Xavier Engineering College.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

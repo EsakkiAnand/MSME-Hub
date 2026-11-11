@@ -140,13 +140,13 @@ export const ROLE_DASHBOARD_CONFIG: Record<string, RoleConfig> = {
     ],
   },
   ALUMNI: {
-    portalTitle: "Alumni Mentor",
-    portalSubtitle: "Mentorship & Guidance Portal",
+    portalTitle: "Industry Expert",
+    portalSubtitle: "Expert Mentorship & Guidance Portal",
     portalIcon: Award,
-    defaultIdPrefix: "ALM",
+    defaultIdPrefix: "EXP",
     profileHref: "/dashboard/alumni/profile",
     badge: {
-      label: "Verified Mentor",
+      label: "Verified Industry Expert",
       icon: CheckCircle2,
       className: "bg-amber-50 text-amber-700 border-amber-200",
     },
@@ -417,6 +417,44 @@ export function DashboardShell({
             Verifying authorized session...
           </p>
         </div>
+      </div>
+    );
+  }
+
+  // Pathway selection onboarding: clean view before loading the full dashboard shell
+  if (pathname === "/dashboard/student/onboarding") {
+    return (
+      <div className="min-h-screen flex flex-col bg-[#f8f9fb] dark:bg-[#0c0c0e] text-foreground antialiased">
+        <header className="h-14 border-b border-black/[0.06] dark:border-white/[0.08] bg-white/80 dark:bg-[#151516]/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5">
+            <MsmeLogoMark size={26} className="shrink-0" />
+            <span className="text-sm font-semibold tracking-tight text-foreground">FXEC MSME-Hub</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowSignOutConfirm(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+          >
+            <LogOut className="size-3.5" />
+            <span>Sign Out</span>
+          </button>
+        </header>
+        <main className="flex-1 flex flex-col">{children}</main>
+        <ConfirmationDialog
+          open={showSignOutConfirm}
+          onOpenChange={(open) => {
+            if (!isSigningOut) {
+              setShowSignOutConfirm(open);
+            }
+          }}
+          title="Do you want to log out?"
+          description="Leaving will end your active session."
+          confirmText={isSigningOut ? "Logging out..." : "Log Out"}
+          cancelText="Cancel"
+          variant="destructive"
+          isLoading={isSigningOut}
+          onConfirm={handleSignOut}
+        />
       </div>
     );
   }

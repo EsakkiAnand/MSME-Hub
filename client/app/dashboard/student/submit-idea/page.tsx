@@ -401,7 +401,7 @@ export default function SubmitIdeaPage() {
                 <span>Need Guidance?</span>
               </div>
               <p className="text-xs text-blue-800 dark:text-blue-300/80 leading-relaxed">
-                Connect with FXEC Alumni Mentors through your dashboard Guidance tab for technical advice before pitching.
+                Connect with FXEC Industry Experts through your dashboard Guidance tab for technical advice before pitching.
               </p>
             </div>
           </div>

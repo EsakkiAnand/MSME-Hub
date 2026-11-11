@@ -11,6 +11,7 @@ import {
   IndustrySignupInput,
   AlumniSignupInput,
   getRoleDashboardPath,
+  getAuthorizedUserPath,
 } from "@/lib/auth-utils";
 import { allocateUserUniqueId, allocateCompanyId } from "@/lib/id-generator";
 
@@ -52,6 +53,23 @@ export async function validateInstitutionalEmail(email: string): Promise<{
   }
 
   return { isValid: true, domain };
+}
+
+// ---------------------------------------------------------------------------
+// Helper: Authenticated Session with Forwarded Cookies
+// ---------------------------------------------------------------------------
+
+async function getActionSession() {
+  const reqHeaders = await headers();
+  const cookieStore = await cookies();
+  const headersWithCookies = new Headers(reqHeaders);
+  const cookieString = cookieStore.toString();
+  if (cookieString) {
+    headersWithCookies.set("cookie", cookieString);
+  }
+  return auth.api.getSession({
+    headers: headersWithCookies,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -286,10 +304,7 @@ export async function registerAlumniAction(input: AlumniSignupInput) {
  */
 export async function syncOAuthRoleAction(intendedRole?: "STUDENT" | "STAFF") {
   try {
-    const reqHeaders = await headers();
-    const session = await auth.api.getSession({
-      headers: reqHeaders,
-    });
+    const session = await getActionSession();
 
     if (!session || !session.user) {
       return { success: false, error: "Unauthenticated session" };
@@ -356,7 +371,7 @@ export async function syncOAuthRoleAction(intendedRole?: "STUDENT" | "STAFF") {
     }
 
     // Determine redirect destination
-    const redirectUrl = getRoleDashboardPath(activeRole);
+    const redirectUrl = getAuthorizedUserPath(activeRole, user.studentTrack);
     return { success: true, redirectUrl, role: activeRole };
   } catch (error: any) {
     console.error("Error in syncOAuthRoleAction:", error);
@@ -364,6 +379,100 @@ export async function syncOAuthRoleAction(intendedRole?: "STUDENT" | "STAFF") {
       success: false,
       error: error?.message || "Failed to process role synchronization.",
     };
+  }
+}
+
+/**
+ * Select student pathway: "SUBMIT_IDEA" (Student Innovation Incubation) or "JOIN_MSME" (Industry Challenge Track)
+ */
+export async function selectStudentTrackAction(track: "SUBMIT_IDEA" | "JOIN_MSME") {
+  try {
+    const session = await getActionSession();
+
+    if (!session || !session.user) {
+      return { success: false, error: "Unauthenticated session" };
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    });
+
+    if (!user || user.role !== UserRole.STUDENT) {
+      return { success: false, error: "Unauthorized. Student account required." };
+    }
+
+    if (track === "SUBMIT_IDEA") {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          studentTrack: "SUBMIT_IDEA",
+        },
+      });
+      revalidatePath("/dashboard/student");
+      return {
+        success: true,
+        track: "SUBMIT_IDEA",
+        redirectUrl: "/dashboard/student/submit-idea",
+      };
+    } else if (track === "JOIN_MSME") {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          studentTrack: "JOIN_MSME",
+          msmeApprovalStatus: "PENDING",
+          // Active project assignment remains locked until admin approves
+          isVerified: false,
+        },
+      });
+      revalidatePath("/dashboard/student");
+      revalidatePath("/dashboard/admin/industry-verification");
+      return {
+        success: true,
+        track: "JOIN_MSME",
+        redirectUrl: "/dashboard/student/join-msme",
+      };
+    }
+
+    return { success: false, error: "Invalid track selection" };
+  } catch (error: any) {
+    console.error("Error in selectStudentTrackAction:", error);
+    return {
+      success: false,
+      error: error?.message || "Failed to save track selection.",
+    };
+  }
+}
+
+/**
+ * Retrieve current student's track selection and MSME approval status
+ */
+export async function getStudentTrackStatusAction() {
+  try {
+    const session = await getActionSession();
+
+    if (!session || !session.user) {
+      return { success: false, error: "Unauthenticated" };
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        uniqueId: true,
+        institutionDomain: true,
+        studentTrack: true,
+        msmeApprovalStatus: true,
+        msmeApprovalReason: true,
+        msmeApprovedAt: true,
+        isVerified: true,
+      },
+    });
+
+    return { success: true, user };
+  } catch (error: any) {
+    return { success: false, error: error?.message || "Failed to load student track status." };
   }
 }
 

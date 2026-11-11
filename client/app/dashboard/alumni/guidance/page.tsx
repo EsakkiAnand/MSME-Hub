@@ -96,8 +96,8 @@ export default function GuidanceBoardPage() {
                     ...(r.responses || []),
                     {
                       id: `FB-${Date.now()}`,
-                      authorName: "You (Alumni Mentor)",
-                      authorRole: "Expert Mentor",
+                      authorName: "You (Industry Expert)",
+                      authorRole: "Industry Expert",
                       category: responseCategory as any,
                       content: responseText.trim(),
                       createdAt: new Date().toISOString(),

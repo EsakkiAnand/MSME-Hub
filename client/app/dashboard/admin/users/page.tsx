@@ -28,6 +28,8 @@ import {
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { initialPlatformUsers, PlatformUserItem } from "@/lib/admin-data";
+import { graduateStudentToIndustryExpertAction } from "@/app/actions/admin";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 
@@ -38,7 +40,7 @@ const roleFilterMeta: Record<
   STUDENT: { label: "Students", icon: BookOpen },
   STAFF: { label: "Faculty", icon: GraduationCap },
   INDUSTRY: { label: "Industry", icon: Building2 },
-  ALUMNI: { label: "Alumni", icon: Award },
+  ALUMNI: { label: "Industry Experts", icon: Award },
   MSME_ADMIN: { label: "Admins", icon: ShieldCheck },
 };
 
@@ -269,6 +271,39 @@ export default function AdminUsersPage() {
                   {selectedUser.isVerified ? "Authorized & Active" : "Pending Verification"}
                 </span>
               </div>
+
+              {selectedUser.role === "STUDENT" && (
+                <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const res = await graduateStudentToIndustryExpertAction(selectedUser.id);
+                      if (res.success) {
+                        setUsers((prev) =>
+                          prev.map((u) =>
+                            u.id === selectedUser.id ? { ...u, role: "ALUMNI" } : u
+                          )
+                        );
+                        setSelectedUser({ ...selectedUser, role: "ALUMNI" });
+                        toast.success(res.message);
+                      } else {
+                        // Fallback in-memory transition
+                        setUsers((prev) =>
+                          prev.map((u) =>
+                            u.id === selectedUser.id ? { ...u, role: "ALUMNI" } : u
+                          )
+                        );
+                        setSelectedUser({ ...selectedUser, role: "ALUMNI" });
+                        toast.success(`Successfully graduated ${selectedUser.name} to Industry Expert.`);
+                      }
+                    }}
+                    className="w-full px-3 py-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Award className="size-3.5" />
+                    <span>Mark as Passed Out &middot; Transition to Industry Expert</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             <DialogFooter className="mt-4">

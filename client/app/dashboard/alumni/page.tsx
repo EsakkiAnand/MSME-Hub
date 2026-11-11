@@ -131,9 +131,9 @@ export default function AlumniOverviewPage() {
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50">
-                Alumni Expert Mentor
+                Industry Expert Mentor
               </span>
-              <CopyIdBadge id={data?.user?.uniqueId || "ALU0001"} label="Alumni ID" size="xs" />
+              <CopyIdBadge id={data?.user?.uniqueId || "EXP0001"} label="Expert ID" size="xs" />
             </div>
             <h2 className="text-xl font-bold tracking-tight text-foreground dark:text-foreground">
               Welcome back, {data?.user?.name || "Mentor"}
