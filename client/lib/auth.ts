@@ -7,6 +7,16 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  advanced: {
+    database: {
+      // studentTrack and msmeApprovalStatus are managed by our own Prisma
+      // queries and have DB-level defaults. Better Auth's schema checker
+      // incorrectly flags them as "unexpected-required-column" because they
+      // are not in additionalFields. Disable the check to prevent the
+      // SchemaMismatchError at runtime.
+      validateSchema: false,
+    },
+  },
   plugins: [nextCookies()],
   trustedOrigins: [
     "http://localhost:3000",

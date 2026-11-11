@@ -98,7 +98,8 @@ export const STATUS_MAP: Record<string, StatusMeta> = {
   FACULTY:              { label: "Faculty",            variant: "role-faculty" },
   STUDENT:              { label: "Student Scholar",    variant: "role-student" },
   INDUSTRY:             { label: "Industry Partner",   variant: "role-industry"},
-  ALUMNI:               { label: "Alumni Mentor",      variant: "role-alumni"  },
+  ALUMNI:               { label: "Industry Expert",    variant: "role-alumni"  },
+  INDUSTRY_EXPERT:      { label: "Industry Expert",    variant: "role-alumni"  },
 };
 
 // Helper: resolve a status key to its meta (with a safe fallback).

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { getRoleDashboardPath } from "@/lib/auth-utils";
+import { getRoleDashboardPath, getAuthorizedUserPath } from "@/lib/auth-utils";
 import { adminLoginAction } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
   const redirectParam = searchParams.get("redirect");
   const portalParam = searchParams.get("portal") || searchParams.get("role");
 
-  // Portal Mode: standard (Student, Faculty, Industry, Alumni) vs admin (MSME Admin)
+  // Portal Mode: standard (Student, Faculty, Industry Partner, Industry Expert) vs admin (MSME Admin)
   const [loginMode, setLoginMode] = useState<"standard" | "admin">(
     portalParam === "admin" ? "admin" : "standard"
   );
@@ -104,7 +104,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
       toast.success("Signed in successfully. Redirecting to your workspace...");
 
       const userRole = user.role || "STUDENT";
-      const authorizedDefault = getRoleDashboardPath(userRole);
+      const authorizedDefault = getAuthorizedUserPath(userRole, user.studentTrack);
 
       let targetPath = authorizedDefault;
       if (redirectParam && redirectParam.startsWith("/dashboard")) {

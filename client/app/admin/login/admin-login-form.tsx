@@ -244,7 +244,7 @@ export function AdminLoginForm() {
           className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors"
         >
           <ArrowLeft className="size-3 shrink-0" />
-          <span>Return to Standard Portal (Student, Faculty, Industry, Alumni)</span>
+          <span>Return to Standard Portal (Student, Faculty, Industry Partner, Industry Expert)</span>
         </Link>
       </div>
     </AuthContainer>

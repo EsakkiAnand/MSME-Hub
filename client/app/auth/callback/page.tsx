@@ -33,9 +33,13 @@ function CallbackHandler() {
         }
 
         if (result.redirectUrl) {
-          router.replace(result.redirectUrl);
+          window.location.replace(result.redirectUrl);
         } else {
-          router.replace("/dashboard");
+          window.location.replace(
+            roleParam === "STUDENT"
+              ? "/dashboard/student/onboarding"
+              : "/dashboard"
+          );
         }
       } catch (err: any) {
         if (isMounted) {

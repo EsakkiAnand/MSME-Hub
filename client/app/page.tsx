@@ -50,7 +50,7 @@ export default function Home() {
       iconBg: "bg-emerald-500/10 text-emerald-500",
     },
     {
-      title: "Alumni Mentor",
+      title: "Industry Expert",
       icon: Award,
       badge: "Expert Guidance",
       description:
@@ -82,8 +82,8 @@ export default function Home() {
     },
     {
       num: "03",
-      title: "Development & Alumni Guidance",
-      desc: "Students build solutions and request architectural guidance from registered Alumni via Guidance Board.",
+      title: "Development & Industry Expert Guidance",
+      desc: "Students build solutions and request architectural guidance from registered Industry Experts via Guidance Board.",
     },
     {
       num: "04",
@@ -121,7 +121,7 @@ export default function Home() {
             </h1>
 
             <p className="mt-3 sm:mt-5 text-xs min-[360px]:text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl sm:max-w-2xl mx-auto px-2">
-              A role-governed ecosystem where verified MSMEs submit operational bottlenecks, university teams build MIT-licensed open-source solutions, alumni mentor, and admins validate quality.
+              A role-governed ecosystem where verified MSMEs submit operational bottlenecks, university teams build MIT-licensed open-source solutions, industry experts mentor, and admins validate quality.
             </p>
 
             {/* Responsive Primary Actions: Distinct entry points for Register, Sign In, and Admin */}

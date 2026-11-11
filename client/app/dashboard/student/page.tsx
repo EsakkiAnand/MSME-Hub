@@ -18,6 +18,8 @@ import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger-group";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getStudentIdeas } from "@/app/actions/ideas";
+import { getStudentTrackStatusAction } from "@/app/actions/auth";
+import { Building2, ShieldCheck, ArrowRight } from "lucide-react";
 
 const myProjects = [
   {
@@ -66,11 +68,22 @@ export default function StudentDashboardPage() {
 
   const [studentIdeas, setStudentIdeas] = useState<any[]>([]);
   const [ideasLoading, setIdeasLoading] = useState(false);
+  const [trackStatus, setTrackStatus] = useState<any>(null);
 
   useEffect(() => {
     getStudentIdeas()
       .then((ideas) => setStudentIdeas(ideas || []))
       .catch((err) => console.log("Student ideas load notice:", err.message));
+
+    getStudentTrackStatusAction().then((res) => {
+      if (res.success && res.user) {
+        setTrackStatus(res.user);
+        if (!res.user.studentTrack || res.user.studentTrack === "UNSELECTED") {
+          window.location.replace("/dashboard/student/onboarding");
+          return;
+        }
+      }
+    });
   }, []);
 
   const needsImprovementIdea = studentIdeas.find((i) => i.status === "NEEDS_CHANGES");
@@ -117,6 +130,63 @@ export default function StudentDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* MSME Track Approval State Banner */}
+      {trackStatus?.studentTrack === "JOIN_MSME" && trackStatus?.msmeApprovalStatus === "PENDING" && (
+        <div className="rounded-[16px] border border-amber-300 dark:border-amber-900/60 bg-amber-50/90 dark:bg-amber-950/30 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="size-9 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center shrink-0 text-amber-700 dark:text-amber-300">
+              <Clock className="size-4" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-amber-900 dark:text-amber-200">
+                  MSME Challenge Track Pending Admin Verification
+                </span>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-800/60 text-amber-900 dark:text-amber-100">
+                  Awaiting Review
+                </span>
+              </div>
+              <p className="text-xs text-amber-800/90 dark:text-amber-300/90">
+                Your application to join live industry MSME challenges is under review by the MSME Administrator. Project assignment will unlock upon approval.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard/student/join-msme"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium shrink-0 self-end sm:self-center transition-colors"
+          >
+            <span>View Status</span>
+            <ArrowRight className="size-3" />
+          </Link>
+        </div>
+      )}
+
+      {/* Callout for students on the Idea track who may want to join MSME */}
+      {trackStatus?.studentTrack === "SUBMIT_IDEA" && trackStatus?.msmeApprovalStatus !== "APPROVED" && (
+        <div className="rounded-[16px] border border-blue-200 dark:border-blue-900/60 bg-blue-50/60 dark:bg-blue-950/20 p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="size-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0 text-blue-600 dark:text-blue-400">
+              <Building2 className="size-4" />
+            </div>
+            <div className="space-y-0.5">
+              <span className="text-xs font-semibold text-blue-950 dark:text-blue-200">
+                Want to work on Live Industry Challenges?
+              </span>
+              <p className="text-xs text-blue-800/80 dark:text-blue-300/80">
+                Request to join university MSME project teams to solve verified corporate bottlenecks with MIT-licensed GitHub solutions.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard/student/join-msme"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#14283F] hover:bg-[#14283F]/90 text-white text-xs font-medium shrink-0 self-end sm:self-center transition-colors"
+          >
+            <span>Join MSME Track</span>
+            <ArrowRight className="size-3" />
+          </Link>
+        </div>
+      )}
 
       {/* MSME Admin Needs Improvement Action Alert */}
       {needsImprovementIdea && (

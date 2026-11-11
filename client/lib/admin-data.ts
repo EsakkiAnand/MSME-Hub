@@ -49,6 +49,20 @@ export interface AlumniVerificationItem {
   status: "PENDING" | "APPROVED" | "REJECTED";
 }
 
+export type IndustryExpertVerificationItem = AlumniVerificationItem;
+
+export interface StudentMsmeVerificationItem {
+  id: string;
+  name: string;
+  uniqueId: string;
+  email: string;
+  department: string;
+  studentTrack: "JOIN_MSME";
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  submissionDate: string;
+  approvalReason?: string;
+}
+
 export interface GitHubReviewItem {
   id: string;
   projectId: string; // e.g. PRJ-2024-007
@@ -288,6 +302,42 @@ export const initialAlumniVerifications: AlumniVerificationItem[] = [
     linkedinUrl: "https://linkedin.com/in/deeparamakrishnan-demo",
     submissionDate: "2026-10-29",
     status: "PENDING",
+  },
+];
+
+export const initialIndustryExpertVerifications = initialAlumniVerifications;
+
+// ─── Initial Student MSME Verifications ───────────────────────────────────────
+export const initialStudentMsmeVerifications: StudentMsmeVerificationItem[] = [
+  {
+    id: "STU-REQ-001",
+    name: "Ravi Shankar M",
+    uniqueId: "STU0005",
+    email: "ravi.shankar@college.edu",
+    department: "Computer Science & Engineering",
+    studentTrack: "JOIN_MSME",
+    status: "PENDING",
+    submissionDate: "2026-11-01",
+  },
+  {
+    id: "STU-REQ-002",
+    name: "Ananya Krishnan",
+    uniqueId: "STU0006",
+    email: "ananya.k@college.edu",
+    department: "Electronics & Communication",
+    studentTrack: "JOIN_MSME",
+    status: "PENDING",
+    submissionDate: "2026-11-02",
+  },
+  {
+    id: "STU-REQ-003",
+    name: "Vigneshwaran P",
+    uniqueId: "STU0007",
+    email: "vignesh.p@college.edu",
+    department: "Mechanical Engineering",
+    studentTrack: "JOIN_MSME",
+    status: "APPROVED",
+    submissionDate: "2026-10-28",
   },
 ];
 

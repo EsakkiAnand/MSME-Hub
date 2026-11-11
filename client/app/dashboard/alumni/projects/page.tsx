@@ -50,7 +50,7 @@ export default function MentoredProjectsPage() {
             PRD §8.6
           </Badge>
         }
-        subtitle="Active industry challenges where alumni mentors provide architectural critique, code quality reviews, and open-source guidance."
+        subtitle="Active industry challenges where industry experts provide architectural critique, code quality reviews, and open-source guidance."
       />
 
       {/* Filter and Search Bar */}

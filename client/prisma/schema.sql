@@ -5,6 +5,12 @@ CREATE SCHEMA IF NOT EXISTS "public";
 CREATE TYPE "UserRole" AS ENUM ('STUDENT', 'STAFF', 'ALUMNI', 'INDUSTRY', 'MSME_ADMIN');
 
 -- CreateEnum
+CREATE TYPE "StudentTrack" AS ENUM ('UNSELECTED', 'SUBMIT_IDEA', 'JOIN_MSME');
+
+-- CreateEnum
+CREATE TYPE "MsmeApprovalStatus" AS ENUM ('NOT_APPLIED', 'PENDING', 'APPROVED', 'REJECTED');
+
+-- CreateEnum
 CREATE TYPE "ProblemStatus" AS ENUM ('DRAFT', 'POOL_AVAILABLE', 'CLAIMED', 'REJECTED');
 
 -- CreateEnum
@@ -35,6 +41,10 @@ CREATE TABLE "user" (
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "institutionDomain" TEXT,
     "uniqueId" TEXT UNIQUE,
+    "studentTrack" "StudentTrack" NOT NULL DEFAULT 'UNSELECTED',
+    "msmeApprovalStatus" "MsmeApprovalStatus" NOT NULL DEFAULT 'NOT_APPLIED',
+    "msmeApprovalReason" TEXT,
+    "msmeApprovedAt" TIMESTAMP(3),
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );

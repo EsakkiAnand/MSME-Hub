@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { headers, cookies } from "next/headers";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
-import { UserRole } from "@prisma/client";
+import { UserRole, StudentTrack, MsmeApprovalStatus } from "@prisma/client";
 import { getRoleDashboardPath } from "@/lib/auth-utils";
 
 export interface AuthenticatedUser {
@@ -14,6 +14,10 @@ export interface AuthenticatedUser {
   isVerified: boolean;
   uniqueId: string | null;
   institutionDomain: string | null;
+  studentTrack?: StudentTrack;
+  msmeApprovalStatus?: MsmeApprovalStatus;
+  msmeApprovalReason?: string | null;
+  msmeApprovedAt?: Date | null;
 }
 
 /**
@@ -66,6 +70,10 @@ export async function getOptionalAuth(): Promise<AuthenticatedUser | null> {
         isVerified: true,
         uniqueId: true,
         institutionDomain: true,
+        studentTrack: true,
+        msmeApprovalStatus: true,
+        msmeApprovalReason: true,
+        msmeApprovedAt: true,
       },
     });
   } catch (err) {

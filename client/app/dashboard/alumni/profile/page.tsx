@@ -47,9 +47,9 @@ export default function AlumniProfilePage() {
       try {
         const res = await getAlumniOverviewAction();
         if (res.success) {
-          setName(res.user?.name || sessionUser?.name || "Alumni Mentor");
-          setEmail(res.user?.email || sessionUser?.email || "alumni@francisxavier.ac.in");
-          setUniqueId(res.user?.uniqueId || "ALU0001");
+          setName(res.user?.name || sessionUser?.name || "Industry Expert");
+          setEmail(res.user?.email || sessionUser?.email || "expert@francisxavier.ac.in");
+          setUniqueId(res.user?.uniqueId || "EXP0001");
 
           if (res.profile) {
             setDegree(res.profile.degree || "B.E. Computer Science & Engineering");
@@ -88,7 +88,7 @@ export default function AlumniProfilePage() {
       });
 
       if (res.success) {
-        toast.success("Alumni profile updated successfully!");
+        toast.success("Industry Expert profile updated successfully!");
       } else {
         toast.error(res.error || "Failed to save profile changes.");
       }
@@ -103,7 +103,7 @@ export default function AlumniProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-muted-foreground">
         <Loader2 className="size-8 animate-spin text-[#007AFF] mb-3" />
-        <p className="text-sm font-medium">Loading Alumni Profile...</p>
+        <p className="text-sm font-medium">Loading Industry Expert Profile...</p>
       </div>
     );
   }
@@ -128,7 +128,7 @@ export default function AlumniProfilePage() {
                 <div className="flex items-center gap-2">
                   <h2 className="text-xl font-bold text-foreground">{name}</h2>
                   <Badge variant="outline" className="bg-[#34C759]/10 text-[#34C759] border-transparent text-xs">
-                    <CheckCircle2 className="size-3 mr-1" /> Verified Mentor
+                    <CheckCircle2 className="size-3 mr-1" /> Verified Industry Expert
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">{email}</p>
@@ -136,7 +136,7 @@ export default function AlumniProfilePage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <CopyIdBadge id={uniqueId} label="Alumni ID" size="default" />
+              <CopyIdBadge id={uniqueId} label="Expert ID" size="default" />
             </div>
           </div>
 

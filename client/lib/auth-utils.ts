@@ -64,10 +64,25 @@ export function getRoleDashboardPath(role?: string | null): string {
     case "INDUSTRY":
       return "/dashboard/industry";
     case "ALUMNI":
+    case "INDUSTRY_EXPERT":
       return "/dashboard/alumni";
     case "MSME_ADMIN":
       return "/dashboard/admin";
     default:
       return "/login";
   }
+}
+
+/**
+ * Returns the target workspace URL, directing unselected students to their
+ * options page (/dashboard/student/onboarding) before allowing dashboard access.
+ */
+export function getAuthorizedUserPath(
+  role?: string | null,
+  studentTrack?: string | null
+): string {
+  if (role === "STUDENT" && (!studentTrack || studentTrack === "UNSELECTED")) {
+    return "/dashboard/student/onboarding";
+  }
+  return getRoleDashboardPath(role);
 }

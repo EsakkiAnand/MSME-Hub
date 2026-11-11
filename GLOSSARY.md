@@ -1,6 +1,6 @@
 # MSME-Hub Glossary
 
-A unified platform connecting verified MSMEs, academic institutions, and alumni mentors to solve real-world industry problems and incubate student innovation.
+A unified platform connecting verified MSMEs, academic institutions, and industry experts to solve real-world industry problems and incubate student innovation.
 
 ## Language
 
@@ -22,8 +22,8 @@ _Avoid_: Teacher, professor, instructor, project manager
 An enrolled learner who collaborates on staff-assigned projects, receives mentorship, submits GitHub solution deliverables, and submits independent ideas.
 _Avoid_: Trainee, intern, candidate
 
-**Alumni Mentor**:
-A graduated alumnus who provides structured, domain-specific technical feedback and architectural critique on active student projects.
+**Industry Expert**:
+A graduated alumnus/industry professional who provides structured, domain-specific technical feedback and architectural critique on active student projects. Transitioned from student accounts upon graduation.
 _Avoid_: Advisor, external reviewer, alumni user
 
 ---
@@ -51,11 +51,11 @@ The designated Student within a project team who holds exclusive authority to su
 _Avoid_: Captain, admin student, group head
 
 **Guidance Request**:
-A direct mentorship inquiry initiated by an assigned student to an Alumni Mentor seeking feedback or architectural critique.
+A direct mentorship inquiry initiated by an assigned student to an Industry Expert seeking feedback or architectural critique.
 _Avoid_: Help ticket, query, message
 
 **Guidance Board**:
-A centralized, tagged institutional board where student teams broadcast guidance queries to all registered Alumni Mentors.
+A centralized, tagged institutional board where student teams broadcast guidance queries to all registered Industry Experts.
 _Avoid_: Forum, help desk, public questions
 
 **Deadline Extension Request**:
@@ -63,7 +63,7 @@ A structured request submitted by a Project Team Lead to the Staff mentor for ad
 _Avoid_: Delay notice, extension form
 
 **Helpful Endorsement**:
-A qualitative recognition badge awarded by a Student to an Alumni Mentor upon the resolution of a Guidance Request.
+A qualitative recognition badge awarded by a Student to an Industry Expert upon the resolution of a Guidance Request.
 _Avoid_: Upvote, like, review
 
 **Industry Rating**:
@@ -79,5 +79,5 @@ A curated pool of Staff-accepted student innovation ideas published for verified
 _Avoid_: Pitch deck, marketplace, idea listing
 
 **Feedback**:
-Structured qualitative critique and technical guidance provided by Alumni Mentors or revision instructions provided by the MSME Admin.
+Structured qualitative critique and technical guidance provided by Industry Experts or revision instructions provided by the MSME Admin.
 _Avoid_: Comment, review note, grading

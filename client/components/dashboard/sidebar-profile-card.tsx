@@ -58,7 +58,7 @@ export function SidebarProfileCard({
     if (up.includes("STUDENT")) return "Student";
     if (up.includes("FACULTY") || up.includes("STAFF")) return "Faculty";
     if (up.includes("INDUSTRY")) return "Industry";
-    if (up.includes("ALUMNI")) return "Alumni";
+    if (up.includes("ALUMNI") || up.includes("EXPERT")) return "Industry Expert";
     if (up.includes("ADMIN")) return "Admin";
     return rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
   }, [user, role]);

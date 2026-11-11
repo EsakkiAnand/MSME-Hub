@@ -60,7 +60,7 @@ When implementing features, enforce these non-negotiable rules:
    - Never allow public signups for `MSME_ADMIN`. Root admins are provisioned exclusively via CLI database seed.
    - Students and Staff authenticate via Google Workspace OAuth with an institutional email domain whitelist (`@college.edu`).
    - Industry accounts require document verification (Udyam certificate PDF) approved by an MSME Admin before problem creation is unlocked.
-   - Alumni require 1-click verification queue approval by Staff/Admin.
+   - Industry Experts (graduated alumni) transition upon student passout (no public registration form, accounts are not seeded).
 
 2. **Project & Team Governance**:
    - Staff directly assigns multi-student teams (1 to N) and designates exactly one **Project Team Lead**.
