@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   History,
   Award,
@@ -11,18 +11,47 @@ import {
   Tag,
   Building2,
   GraduationCap,
+  Loader2,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
-import { initialGuidanceRequests, GuidanceRequestItem } from "@/lib/alumni-data";
+import { GuidanceRequestItem } from "@/lib/alumni-data";
+import { getGuidanceBoardAction } from "@/app/actions/alumni";
+import { toast } from "sonner";
 
 export default function GuidanceHistoryPage() {
-  // Filter for answered or resolved queries
-  const [historyItems] = useState<GuidanceRequestItem[]>(
-    initialGuidanceRequests.filter((r) => r.status === "ANSWERED" || r.status === "RESOLVED")
-  );
+  const [historyItems, setHistoryItems] = useState<GuidanceRequestItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Filter for answered or resolved queries from the live board
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      const res = await getGuidanceBoardAction();
+      if (res.success) {
+        setHistoryItems(
+          ((res as any).requests || []).filter(
+            (r: any) => r.status === "ANSWERED" || r.status === "RESOLVED"
+          )
+        );
+      } else {
+        toast.error((res as any).error || "Failed to load guidance history.");
+      }
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading your guidance history...</span>
+      </div>
+    );
+  }
 
   const totalEndorsements = historyItems.filter((i) => i.isHelpful).length;
 

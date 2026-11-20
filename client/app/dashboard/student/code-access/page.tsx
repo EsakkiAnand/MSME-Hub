@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ExternalLink,
   Lock,
@@ -17,6 +17,7 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { getStudentProjects, submitGithubSolutionAction, unlinkGithubSolutionAction } from "@/app/actions/student";
 
 interface CodeProject {
   id: string;
@@ -27,28 +28,10 @@ interface CodeProject {
   isLead: boolean;
 }
 
-const initialCodeProjects: CodeProject[] = [
-  {
-    id: "PRJ-2024-001",
-    name: "Smart Inventory Management for MSMEs",
-    accessStatus: "NO_REPO",
-    githubUrl: null,
-    note: "Solution development in progress. Repository will be committed by the designated Team Lead.",
-    isLead: true,
-  },
-  {
-    id: "PRJ-2024-007",
-    name: "Predictive Maintenance IoT Dashboard",
-    accessStatus: "ACCESSIBLE",
-    githubUrl: "https://github.com/fxec-msme/predictive-maintenance",
-    note: "Public repository — MIT Licensed. Verified and accessible.",
-    isLead: false,
-  },
-];
-
 
 export default function CodeAccessPage() {
-  const [projects, setProjects] = useState<CodeProject[]>(initialCodeProjects);
+  const [projects, setProjects] = useState<CodeProject[]>([]);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [activeProject, setActiveProject] = useState<CodeProject | null>(null);
   const [inputUrl, setInputUrl] = useState("");
   const [inputError, setInputError] = useState("");
@@ -58,6 +41,43 @@ export default function CodeAccessPage() {
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const loadProjects = async () => {
+    const res = await getStudentProjects();
+    if (res.success) {
+      setProjects(
+        ((res as any).projects || []).map((p: any) => ({
+          id: p.id,
+          name: p.title,
+          accessStatus: p.githubUrl ? ("ACCESSIBLE" as const) : ("NO_REPO" as const),
+          githubUrl: p.githubUrl,
+          note: p.githubUrl
+            ? "Public repository committed by the Project Team Lead. Verified and accessible."
+            : "Solution development in progress. Repository will be committed by the designated Team Lead.",
+          isLead: p.isLead,
+        }))
+      );
+    } else {
+      toast.error((res as any).error || "Failed to load your project repositories.");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      setInitialLoading(true);
+      await loadProjects();
+      setInitialLoading(false);
+    })();
+  }, []);
+
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading your repository access...</span>
+      </div>
+    );
+  }
 
   // Open modal to add or edit repository
   const handleOpenLinkModal = (project: CodeProject) => {
@@ -88,24 +108,16 @@ export default function CodeAccessPage() {
     if (!activeProject) return;
     setIsProcessing(true);
     try {
-      await new Promise((r) => setTimeout(r, 600));
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.id === activeProject.id
-            ? {
-                ...p,
-                githubUrl: inputUrl.trim(),
-                accessStatus: "ACCESSIBLE",
-                note: "Public repository committed by Project Team Lead. Verified and accessible.",
-              }
-            : p
-        )
-      );
-      toast.success("Repository link updated successfully.");
-      setShowSaveConfirm(false);
-      setActiveProject(null);
-    } catch {
-      toast.error("Failed to update repository link.");
+      const res = await submitGithubSolutionAction(activeProject.id, inputUrl.trim());
+      if ((res as any).success) {
+        toast.success((res as any).message || "Repository link updated successfully.");
+        setShowSaveConfirm(false);
+        setActiveProject(null);
+        await loadProjects();
+      } else {
+        toast.error((res as any).error || (res as any).details?.reason || "Failed to update repository link.");
+        setShowSaveConfirm(true); // reopen modal
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -121,26 +133,17 @@ export default function CodeAccessPage() {
     if (!activeProject) return;
     setIsProcessing(true);
     try {
-      await new Promise((r) => setTimeout(r, 600));
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.id === activeProject.id
-            ? {
-                ...p,
-                githubUrl: null,
-                accessStatus: "NO_REPO",
-                note: "Repository link unlinked by Team Lead. Pending new commit.",
-              }
-            : p
-        )
-      );
-      toast.success("Repository link removed.");
-      setShowRemoveConfirm(false);
-      setActiveProject(null);
-    } catch {
-      toast.error("Failed to remove repository link.");
+      const res = await unlinkGithubSolutionAction(activeProject.id);
+      if ((res as any).success) {
+        toast.success((res as any).message || "Repository link removed.");
+        await loadProjects();
+      } else {
+        toast.error((res as any).error || "Failed to remove repository link.");
+      }
     } finally {
       setIsProcessing(false);
+      setShowRemoveConfirm(false);
+      setActiveProject(null);
     }
   };
 

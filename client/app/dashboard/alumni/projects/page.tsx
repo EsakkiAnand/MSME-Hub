@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FolderKanban,
   Search,
@@ -9,9 +9,7 @@ import {
   Building2,
   GraduationCap,
   Users,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,13 +18,48 @@ import { Button } from "@/components/ui/button";
 import { IOSSelect } from "@/components/ui/ios-select";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
-import { initialMentoredProjects, MentoredProject } from "@/lib/alumni-data";
-
+import { MentoredProject } from "@/lib/alumni-data";
+import { getDiscoverableProjects } from "@/app/actions/projects";
+import { toast } from "sonner";
 
 export default function MentoredProjectsPage() {
-  const [projects] = useState<MentoredProject[]>(initialMentoredProjects);
+  const [projects, setProjects] = useState<MentoredProject[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [domainFilter, setDomainFilter] = useState("ALL");
+
+  const loadProjects = async () => {
+    setLoading(true);
+    const res = await getDiscoverableProjects();
+    if (res.success) {
+      // Map live projects into the MentoredProject display shape
+      setProjects(
+        ((res as any).projects || []).map((p: any) => ({
+          id: p.id,
+          title: p.title,
+          domain: p.problem?.industry?.domain || "General Engineering",
+          status: p.status,
+          teamLeadName: p.team?.find((m: any) => m.isLead)?.name || "Unassigned",
+          teamLeadUniqueId: p.team?.find((m: any) => m.isLead)?.uniqueId || "STU-0001",
+          facultyMentor: p.staff?.name || "—",
+          industryPartner: p.problem?.industry?.companyName || "Student-Originated Idea",
+          lastActivity: p.guidanceRequests?.length
+            ? `${p.guidanceRequests.length} open guidance thread(s)`
+            : "No open guidance requests",
+          githubUrl: p.githubUrl || null,
+        }))
+      );
+    } else {
+      toast.error((res as any).error || "Failed to load discoverable projects.");
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const domains = Array.from(new Set(projects.map((p) => p.domain)));
 
   const filteredProjects = projects.filter((p) => {
     const matchesSearch =
@@ -39,6 +72,15 @@ export default function MentoredProjectsPage() {
 
     return matchesSearch && matchesDomain;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading discoverable projects...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -71,9 +113,7 @@ export default function MentoredProjectsPage() {
             onChange={setDomainFilter}
             options={[
               { value: "ALL", label: "All Tech Domains" },
-              { value: "Software & Cloud", label: "Software & Cloud" },
-              { value: "IoT & Analytics", label: "IoT & Analytics" },
-              { value: "FinTech & Web", label: "FinTech & Web" },
+              ...domains.map((d) => ({ value: d, label: d })),
             ]}
           />
         </div>

@@ -1,20 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Star,
   ShieldCheck,
   AlertCircle,
   CheckCircle2,
   XCircle,
-  Eye,
-  Check,
   Search,
-  MessageSquare,
-  Building2,
-  GraduationCap,
-  Scale,
-  Clock,
+  Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -27,23 +21,61 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
-import { initialRatingModerations, RatingModerationItem } from "@/lib/admin-data";
-import { cn } from "@/lib/utils";
+import {
+  getAdminRatingModerationQueue,
+  approveRatingAction,
+  suppressRatingAction,
+} from "@/app/actions/admin-projects";
 
-
+interface ModerationItem {
+  id: string;
+  projectId: string;
+  projectTitle: string;
+  msmeCompany: string;
+  studentTeamLead: string;
+  ratingStars: number;
+  writtenFeedback: string;
+  submittedDate: string;
+  isModerated: boolean;
+}
 
 export default function RatingModerationPage() {
-  const [moderations, setModerations] = useState<RatingModerationItem[]>(
-    initialRatingModerations
-  );
+  const [moderations, setModerations] = useState<ModerationItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
-  const [activeItem, setActiveItem] = useState<RatingModerationItem | null>(null);
-  const [adminRemarks, setAdminRemarks] = useState("");
+  const [activeItem, setActiveItem] = useState<ModerationItem | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const loadQueue = async () => {
+    const res = await getAdminRatingModerationQueue();
+    if (res.success) {
+      setModerations(
+        (res.ratings as any[]).map((r) => ({
+          id: r.id,
+          projectId: r.project.id,
+          projectTitle: r.project.title,
+          msmeCompany: r.industry?.companyName || "—",
+          studentTeamLead: r.project.team?.find((m: any) => m.isLead)?.name || "Unassigned",
+          ratingStars: r.stars,
+          writtenFeedback: r.feedbackText,
+          submittedDate: r.createdAt,
+          isModerated: r.isModerated,
+        }))
+      );
+    } else {
+      toast.error(res.error || "Failed to load rating moderation queue.");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await loadQueue();
+      setLoading(false);
+    })();
+  }, []);
 
   const filteredItems = moderations.filter((item) => {
     const matchesSearch =
@@ -53,67 +85,45 @@ export default function RatingModerationPage() {
       item.studentTeamLead.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.projectId.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = statusFilter === "ALL" || item.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
-  const queuedCount = moderations.filter((m) => m.status === "QUEUED").length;
-  const publishedCount = moderations.filter((m) => m.status === "APPROVED_PUBLISHED").length;
-  const mediatedCount = moderations.filter((m) => m.status === "MEDIATION_REQUESTED").length;
-
-  const handleOpenModeration = (item: RatingModerationItem) => {
-    setActiveItem(item);
-    setAdminRemarks(item.adminRemarks || "");
-  };
-
-  const handlePublish = async (id: string) => {
+  const handleApprove = async (id: string) => {
     setIsProcessing(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setModerations((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, status: "APPROVED_PUBLISHED", adminRemarks: adminRemarks.trim() }
-          : item
-      )
-    );
+    const res = await approveRatingAction(id);
     setIsProcessing(false);
-    setActiveItem(null);
-    toast.success("Rating approved and published to student portfolio.");
-  };
 
-  const handleMediate = async (id: string) => {
-    setIsProcessing(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setModerations((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, status: "MEDIATION_REQUESTED", adminRemarks: adminRemarks.trim() }
-          : item
-      )
-    );
-    setIsProcessing(false);
+    if (res.success) {
+      toast.success(res.message || "Rating published to student portfolio.");
+      await loadQueue();
+    } else {
+      toast.error(res.error || "Failed to approve rating.");
+    }
     setActiveItem(null);
-    toast.info("Mediation session initiated between Faculty Supervisor and MSME partner.");
   };
 
   const handleSuppress = async (id: string) => {
-    if (!adminRemarks.trim()) {
-      toast.error("Please provide justification for suppressing this industry rating.");
-      return;
-    }
     setIsProcessing(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setModerations((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, status: "SUPPRESSED", adminRemarks: adminRemarks.trim() }
-          : item
-      )
-    );
+    const res = await suppressRatingAction(id);
     setIsProcessing(false);
+
+    if (res.success) {
+      toast.info(res.message || "Rating suppressed.");
+      await loadQueue();
+    } else {
+      toast.error(res.error || "Failed to suppress rating.");
+    }
     setActiveItem(null);
-    toast.warning("Rating suppressed from student portfolio.");
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading rating moderation desk...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -124,158 +134,106 @@ export default function RatingModerationPage() {
             <h1 className="text-xl font-bold tracking-tight text-foreground">
               Industry Rating Moderation Desk
             </h1>
-            <Badge variant="outline" className="text-xs bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300">
+            <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300">
               PRD §8.2 REQ-ADM-03
             </Badge>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Automatic moderation quarantine for industry partner ratings &le; 2 stars. Review written testimonials, verify constraint validity, and mediate revisions before public portfolio display.
+            Ratings of 2 stars or below are routed here for admin mediation before appearing on
+            student portfolios (ADR 0004).
           </p>
         </div>
       </div>
 
-      {/* ── KPI Metric Cards ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-[14px] border border-amber-200 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/20 shadow-xs p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-amber-700 dark:text-amber-300 text-xs font-semibold uppercase tracking-wider mb-2">
-            <span>In Moderation Queue</span>
-            <Clock className="size-4 text-amber-600" />
-          </div>
-          <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">{queuedCount}</div>
-          <p className="text-[11px] text-amber-600/80 dark:text-amber-400 mt-1">Ratings &le; 2 stars</p>
-        </div>
-
-        <div className="rounded-[14px] border border-blue-200 dark:border-blue-900/50 bg-blue-50/40 dark:bg-blue-950/20 shadow-xs p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-blue-700 dark:text-blue-300 text-xs font-semibold uppercase tracking-wider mb-2">
-            <span>Active Mediations</span>
-            <Scale className="size-4 text-blue-600" />
-          </div>
-          <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{mediatedCount}</div>
-          <p className="text-[11px] text-blue-600/80 dark:text-blue-400 mt-1">Faculty &amp; Industry sync</p>
-        </div>
-
-        <div className="rounded-[14px] border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20 shadow-xs p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2">
-            <span>Published</span>
-            <CheckCircle2 className="size-4 text-emerald-600" />
-          </div>
-          <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{publishedCount}</div>
-          <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400 mt-1">Visible on portfolios</p>
-        </div>
-
-        <div className="rounded-[14px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1C1C1E] shadow-xs p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
-            <span>Protection Rule</span>
-            <ShieldCheck className="size-4 text-rose-500" />
-          </div>
-          <div className="text-2xl font-bold text-foreground">Automatic</div>
-          <p className="text-[11px] text-muted-foreground mt-1">Shields student portfolios</p>
-        </div>
-      </div>
-
-      {/* ── Filter Toolbar ───────────────────────────────────────────── */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="relative flex-1">
+      {/* ── Search ──────────────────────────────────────────────────── */}
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-4">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search project title, ID, company, or team lead..."
+            placeholder="Search by project, company, team lead, or ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 text-xs h-9"
           />
         </div>
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-9 text-xs rounded-lg border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#161618] px-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/20"
-        >
-          <option value="ALL">All Moderation States</option>
-          <option value="QUEUED">Under Moderation</option>
-          <option value="MEDIATION_REQUESTED">Mediation Active</option>
-          <option value="APPROVED_PUBLISHED">Published</option>
-          <option value="SUPPRESSED">Suppressed</option>
-        </select>
       </div>
 
-      {/* ── Moderation Table ─────────────────────────────────────────── */}
+      {/* ── Moderation Queue Table ──────────────────────────────────── */}
       <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-black/[0.02] dark:bg-white/[0.03] border-b border-black/[0.06] dark:border-white/[0.08] text-muted-foreground font-semibold">
               <tr>
-                <th className="px-5 py-3.5">Project &amp; Team</th>
-                <th className="px-4 py-3.5">MSME Enterprise</th>
-                <th className="px-4 py-3.5">Score</th>
-                <th className="px-4 py-3.5">Partner Feedback Preview</th>
-                <th className="px-4 py-3.5">Moderation State</th>
-                <th className="px-5 py-3.5 text-right">Action</th>
+                <th className="px-5 py-3.5">Project</th>
+                <th className="px-4 py-3.5">Team Lead</th>
+                <th className="px-4 py-3.5">Rating</th>
+                <th className="px-4 py-3.5">Industry Feedback</th>
+                <th className="px-5 py-3.5 text-right">Moderation</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
-              {filteredItems.map((item) => {
-                return (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors"
-                  >
-                    <td className="px-5 py-4 max-w-xs">
-                      <div className="flex items-center gap-2 mb-1">
-                        <CopyIdBadge id={item.projectId} size="xs" />
-                        <span className="text-[10px] text-muted-foreground">
-                          {item.submittedDate}
-                        </span>
-                      </div>
-                      <div className="font-semibold text-foreground text-xs leading-snug">
-                        {item.projectTitle}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5">
-                        Lead: {item.studentTeamLead}
-                      </div>
-                    </td>
+              {filteredItems.map((item) => (
+                <tr
+                  key={item.id}
+                  className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors"
+                >
+                  <td className="px-5 py-4 max-w-sm">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CopyIdBadge id={item.projectId} size="xs" />
+                    </div>
+                    <div className="font-semibold text-foreground text-xs leading-snug">
+                      {item.projectTitle}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5">
+                      {item.msmeCompany}
+                    </div>
+                  </td>
 
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="font-medium text-foreground">{item.msmeCompany}</div>
-                    </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="font-medium text-foreground">{item.studentTeamLead}</div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {new Date(item.submittedDate).toLocaleDateString()}
+                    </div>
+                  </td>
 
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-1 text-amber-500 font-bold">
-                        <Star className="size-4 fill-amber-500 text-amber-500" />
-                        <span>{item.ratingStars} / 5</span>
-                      </div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">
-                        Q:{item.technicalQualityScore} &middot; T:{item.timelinessScore} &middot; C:{item.communicationScore}
-                      </div>
-                    </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          className={`size-3.5 ${
+                            s <= item.ratingStars
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-slate-300 dark:text-zinc-600"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </td>
 
-                    <td className="px-4 py-4 max-w-sm">
-                      <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
-                        &ldquo;{item.writtenFeedback}&rdquo;
-                      </p>
-                    </td>
+                  <td className="px-4 py-4 max-w-xs">
+                    <p className="text-[11px] text-muted-foreground line-clamp-3">
+                      {item.writtenFeedback}
+                    </p>
+                  </td>
 
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <StatusBadge status={item.status} />
-                    </td>
-
-                    <td className="px-5 py-4 text-right whitespace-nowrap">
-                      <button
-                        onClick={() => handleOpenModeration(item)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.1] hover:bg-black/[0.04] text-foreground font-medium text-xs transition-colors"
-                      >
-                        <ShieldCheck className="size-3.5 text-amber-500" />
-                        <span>Moderate</span>
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+                  <td className="px-5 py-4 text-right whitespace-nowrap">
+                    <button
+                      onClick={() => setActiveItem(item)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.1] hover:bg-black/[0.04] text-foreground font-medium text-xs transition-colors"
+                    >
+                      <ShieldCheck className="size-3.5 text-amber-500" />
+                      <span>Moderate</span>
+                    </button>
+                  </td>
+                </tr>
+              ))}
 
               {filteredItems.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground text-xs">
-                    No rating moderation cases found.
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground text-xs">
+                    No ratings are currently in the moderation queue.
                   </td>
                 </tr>
               )}
@@ -284,99 +242,73 @@ export default function RatingModerationPage() {
         </div>
       </div>
 
-      {/* ── Moderation Action Dialog ─────────────────────────────────── */}
-      <Dialog
-        open={!!activeItem}
-        onOpenChange={(open) => !open && setActiveItem(null)}
-      >
+      {/* ── Moderation Dialog ───────────────────────────────────────── */}
+      <Dialog open={!!activeItem} onOpenChange={(open) => !open && setActiveItem(null)}>
         {activeItem && (
-          <DialogContent className="max-w-xl p-6 rounded-2xl">
+          <DialogContent className="max-w-2xl p-6 rounded-2xl">
             <DialogHeader className="pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
               <div className="flex items-center gap-2 mb-1">
                 <CopyIdBadge id={activeItem.projectId} size="xs" />
                 <span className="text-xs text-muted-foreground">
-                  Partner: {activeItem.msmeCompany}
+                  {activeItem.msmeCompany}
                 </span>
               </div>
               <DialogTitle className="text-base font-bold text-foreground">
-                Moderate Review for {activeItem.projectTitle}
+                {activeItem.projectTitle}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Student Team Lead: {activeItem.studentTeamLead} &middot; Rating: {activeItem.ratingStars} Stars
+                {activeItem.ratingStars}-star rating submitted by industry partner
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4 pt-3 text-xs">
-              {/* Detailed Scorecard */}
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="p-2.5 rounded-lg bg-muted/40 border border-black/[0.04]">
-                  <span className="text-[10px] text-muted-foreground block">Timeliness</span>
-                  <span className="font-bold text-foreground text-sm">{activeItem.timelinessScore} / 5</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-muted/40 border border-black/[0.04]">
-                  <span className="text-[10px] text-muted-foreground block">Technical Quality</span>
-                  <span className="font-bold text-foreground text-sm">{activeItem.technicalQualityScore} / 5</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-muted/40 border border-black/[0.04]">
-                  <span className="text-[10px] text-muted-foreground block">Communication</span>
-                  <span className="font-bold text-foreground text-sm">{activeItem.communicationScore} / 5</span>
-                </div>
-              </div>
-
-              {/* Written Review */}
-              <div className="space-y-1">
-                <span className="font-semibold text-foreground uppercase tracking-wider text-[10px]">
-                  Written Testimonial / Critical Feedback:
+            <div className="space-y-3 pt-4">
+              <div className="rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 p-3 text-xs">
+                <span className="font-semibold text-amber-800 dark:text-amber-300 block mb-1">
+                  Industry Partner Written Feedback:
                 </span>
-                <p className="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/50 p-3 rounded-lg text-foreground leading-relaxed">
-                  &ldquo;{activeItem.writtenFeedback}&rdquo;
-                </p>
+                <span className="text-amber-700 dark:text-amber-400 leading-relaxed">
+                  {activeItem.writtenFeedback}
+                </span>
               </div>
 
-              {/* Administrative Remarks */}
-              <div className="space-y-1.5">
-                <label className="font-semibold text-foreground">
-                  Administrative Moderation Notes
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Record justification, mediation steps taken with MSME representative, or reasons for suppressing this review..."
-                  value={adminRemarks}
-                  onChange={(e) => setAdminRemarks(e.target.value)}
-                  className="w-full text-xs border border-black/[0.08] dark:border-white/[0.1] rounded-lg p-2.5 text-foreground bg-white dark:bg-background focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                />
-              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Choose whether to publish this rating to the student portfolio or keep it
+                suppressed after mediation. Suppressed ratings remain visible only to
+                administrators.
+              </p>
             </div>
 
-            <DialogFooter className="mt-4 flex sm:justify-between items-center gap-2">
+            <DialogFooter className="mt-5">
               <button
                 type="button"
                 disabled={isProcessing}
                 onClick={() => handleSuppress(activeItem.id)}
-                className="px-3.5 py-2 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-medium flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                className="px-3.5 py-2 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-medium flex items-center gap-1.5 transition-colors disabled:opacity-50"
               >
                 <XCircle className="size-3.5" />
-                <span>Suppress from Portfolio</span>
+                <span>Keep Suppressed</span>
               </button>
 
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  disabled={isProcessing}
-                  onClick={() => handleMediate(activeItem.id)}
-                  className="px-3.5 py-2 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 text-xs font-medium flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                  onClick={() => setActiveItem(null)}
+                  className="px-3.5 py-2 rounded-lg border border-black/[0.06] dark:border-white/[0.08] text-foreground text-xs font-medium hover:bg-black/[0.02]"
                 >
-                  <Scale className="size-3.5" />
-                  <span>Initiate Mediation</span>
+                  Cancel
                 </button>
                 <button
                   type="button"
                   disabled={isProcessing}
-                  onClick={() => handlePublish(activeItem.id)}
+                  onClick={() => handleApprove(activeItem.id)}
                   className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-50"
                 >
-                  <Check className="size-3.5" />
-                  <span>Publish Rating</span>
+                  {isProcessing ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="size-3.5" />
+                  )}
+                  <span>{isProcessing ? "Publishing..." : "Publish to Portfolio"}</span>
                 </button>
               </div>
             </DialogFooter>
@@ -386,4 +318,3 @@ export default function RatingModerationPage() {
     </div>
   );
 }
-

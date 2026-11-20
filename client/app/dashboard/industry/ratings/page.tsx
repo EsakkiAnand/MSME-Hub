@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Star,
   CheckCircle2,
@@ -12,12 +12,12 @@ import {
   Award,
   Clock,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { initialIndustryProjects, IndustryProjectItem } from "@/lib/industry-data";
-import { submitIndustryRatingAction } from "@/app/actions/industry";
+import { getIndustryProjectsAction, submitIndustryRatingAction } from "@/app/actions/industry";
 import {
   Dialog,
   DialogContent,
@@ -29,14 +29,51 @@ import {
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 export default function IndustryRatingsPage() {
-  const [projects, setProjects] = useState<IndustryProjectItem[]>(initialIndustryProjects);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<IndustryProjectItem | null>(null);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
   const [starCount, setStarCount] = useState(5);
   const [hoverStar, setHoverStar] = useState(0);
   const [feedbackText, setFeedbackText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  const loadProjects = async () => {
+    const res = await getIndustryProjectsAction();
+    if (res.success) {
+      // Map live projects into the IndustryProjectItem display shape
+      setProjects(
+        ((res as any).projects || []).map((p: any) => ({
+          id: p.id,
+          problemId: p.problemId,
+          problemTitle: p.title,
+          domain: p.domain || "General",
+          status: p.status,
+          githubUrl: p.githubUrl,
+          studentTeamLeadName: p.leadStudent?.split("(")[0]?.trim() || "Unassigned",
+          studentTeamLeadId: p.leadStudent?.split("(")[1]?.replace(")", "") || "—",
+          facultyMentorName: p.staff || "—",
+          hasRated: p.hasRating,
+          rating: p.rating
+            ? {
+                stars: p.rating.stars,
+                feedbackText: p.rating.feedbackText,
+                createdAt: p.rating.createdAt,
+              }
+            : null,
+        }))
+      );
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await loadProjects();
+      setLoading(false);
+    })();
+  }, []);
 
   // Eligible for review: SOLUTION_SUBMITTED, APPROVED, or COMPLETED
   const pendingEvaluation = projects.filter(
@@ -45,7 +82,7 @@ export default function IndustryRatingsPage() {
 
   const completedReviews = projects.filter((p) => p.hasRated && p.rating);
 
-  const openRatingModal = (project: IndustryProjectItem) => {
+  const openRatingModal = (project: any) => {
     setSelectedProject(project);
     setStarCount(5);
     setFeedbackText("");
@@ -74,25 +111,11 @@ export default function IndustryRatingsPage() {
       });
 
       if (res.success) {
-        toast.success(res.message);
-        setProjects((prev) =>
-          prev.map((p) =>
-            p.id === selectedProject.id
-              ? {
-                  ...p,
-                  hasRated: true,
-                  rating: {
-                    stars: starCount,
-                    feedbackText: feedbackText.trim(),
-                    createdAt: new Date().toISOString(),
-                  },
-                }
-              : p
-          )
-        );
+        toast.success((res as any).message || "Rating recorded successfully.");
+        await loadProjects();
         setIsRatingModalOpen(false);
       } else {
-        toast.error(res.error || "Failed to record evaluation.");
+        toast.error((res as any).error || "Failed to record evaluation.");
       }
     } catch {
       toast.error("An unexpected error occurred while submitting rating.");
@@ -101,6 +124,15 @@ export default function IndustryRatingsPage() {
       setShowConfirmDialog(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading your evaluations...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

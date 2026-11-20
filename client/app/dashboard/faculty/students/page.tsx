@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -9,46 +9,106 @@ import {
   Crown,
   ChevronRight,
   Mail,
-  UserCheck,
-  Building,
+  Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { IOSSelect } from "@/components/ui/ios-select";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { initialStudents } from "@/lib/faculty-data";
+import { getStaffProjects } from "@/app/actions/staff";
+import { toast } from "sonner";
 
-const departmentOptions = [
-  { value: "All", label: "All Departments" },
-  { value: "CSE", label: "Computer Science (CSE)" },
-  { value: "IT", label: "Information Technology (IT)" },
-  { value: "ECE", label: "Electronics & Comm (ECE)" },
-];
+interface AssignedStudentRow {
+  id: string;
+  name: string;
+  email: string;
+  uniqueId: string | null;
+  isLead: boolean;
+  projectId: string;
+  projectName: string;
+  projectStatus: string;
+  activeProjectsCount: number;
+}
 
 const statusOptions = [
   { value: "All", label: "All Project Statuses" },
+  { value: "ASSIGNED", label: "Team Assigned" },
   { value: "IN_PROGRESS", label: "In Progress" },
   { value: "SOLUTION_SUBMITTED", label: "Under Review" },
+  { value: "REVISION_IN_PROGRESS", label: "Revision In Progress" },
   { value: "APPROVED", label: "Approved" },
+  { value: "COMPLETED", label: "Completed" },
 ];
 
-
 export default function MyStudentsPage() {
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [deptFilter, setDeptFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  const filteredStudents = initialStudents.filter((student) => {
+  const load = async () => {
+    setLoading(true);
+    const res = await getStaffProjects();
+    if (res.success) {
+      setProjects((res.projects as any[]) || []);
+    } else {
+      toast.error(res.error || "Failed to load supervised projects.");
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const students: AssignedStudentRow[] = useMemo(() => {
+    const rows: AssignedStudentRow[] = [];
+    const activeCounts = new Map<string, number>();
+    for (const p of projects) {
+      const isActive = ["ASSIGNED", "IN_PROGRESS", "SOLUTION_SUBMITTED", "REVISION_IN_PROGRESS"].includes(p.status);
+      for (const m of p.members || []) {
+        if (isActive) {
+          activeCounts.set(m.id, (activeCounts.get(m.id) || 0) + 1);
+        }
+        rows.push({
+          id: `${m.id}-${p.id}`,
+          name: m.name,
+          email: m.email,
+          uniqueId: m.uniqueId,
+          isLead: m.isLead,
+          projectId: p.id,
+          projectName: p.title,
+          projectStatus: p.status,
+          activeProjectsCount: 0,
+        });
+      }
+    }
+    for (const row of rows) {
+      row.activeProjectsCount = activeCounts.get(row.id.split("-")[0]) || 0;
+    }
+    return rows;
+  }, [projects]);
+
+  const filteredStudents = students.filter((student) => {
     const matchesSearch =
+      search.trim() === "" ||
       student.name.toLowerCase().includes(search.toLowerCase()) ||
-      student.regNo.toLowerCase().includes(search.toLowerCase()) ||
+      (student.uniqueId || "").toLowerCase().includes(search.toLowerCase()) ||
       student.projectName.toLowerCase().includes(search.toLowerCase()) ||
       student.email.toLowerCase().includes(search.toLowerCase());
 
-    const matchesDept = deptFilter === "All" || student.department === deptFilter;
     const matchesStatus = statusFilter === "All" || student.projectStatus === statusFilter;
 
-    return matchesSearch && matchesDept && matchesStatus;
+    return matchesSearch && matchesStatus;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading student directory...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -65,11 +125,11 @@ export default function MyStudentsPage() {
             Assigned Students
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
-            Browse and monitor students enrolled in projects under your faculty supervision.
+            Browse and monitor students enrolled in projects under your faculty supervision. Concurrency cap: 2 active projects per student.
           </p>
         </div>
         <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] text-foreground self-start sm:self-auto">
-          Total Assigned: {initialStudents.length} Students
+          Total Assignments: {students.length}
         </div>
       </div>
 
@@ -78,7 +138,7 @@ export default function MyStudentsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
-            placeholder="Search by student name, register number, email, or project..."
+            placeholder="Search by student name, ID, email, or project..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 text-xs sm:text-sm rounded-md border-black/[0.06] dark:border-white/[0.08] focus-visible:ring-blue-600"
@@ -89,13 +149,6 @@ export default function MyStudentsPage() {
           <Filter className="size-4 text-muted-foreground shrink-0 hidden sm:block" />
           <IOSSelect
             size="sm"
-            options={departmentOptions}
-            value={deptFilter}
-            onChange={setDeptFilter}
-            className="w-44"
-          />
-          <IOSSelect
-            size="sm"
             options={statusOptions}
             value={statusFilter}
             onChange={setStatusFilter}
@@ -104,15 +157,15 @@ export default function MyStudentsPage() {
         </div>
       </div>
 
-      {/* Students Table / Grid */}
+      {/* Students Table */}
       <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-black/[0.02] dark:bg-white/[0.03]/75 border-b border-black/[0.06] dark:border-white/[0.08] text-muted-foreground font-medium uppercase tracking-wider">
               <tr>
                 <th className="px-5 py-3.5">Student Information</th>
-                <th className="px-4 py-3.5">Register Number</th>
-                <th className="px-4 py-3.5">Dept &amp; Year</th>
+                <th className="px-4 py-3.5">Permanent ID</th>
+                <th className="px-4 py-3.5">Active Projects</th>
                 <th className="px-4 py-3.5">Assigned Project</th>
                 <th className="px-4 py-3.5">Project Status</th>
                 <th className="px-4 py-3.5 text-right">Actions</th>
@@ -129,7 +182,6 @@ export default function MyStudentsPage() {
                 filteredStudents.map((student) => {
                   return (
                     <tr key={student.id} className="hover:bg-black/[0.02] dark:bg-white/[0.02] transition-colors">
-                      {/* Name & Role */}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2.5">
                           <div className="size-8 rounded-full bg-slate-100 border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center font-semibold text-foreground text-xs shrink-0">
@@ -137,9 +189,7 @@ export default function MyStudentsPage() {
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <span className="font-semibold text-foreground truncate">
-                                {student.name}
-                              </span>
+                              <span className="font-semibold text-foreground truncate">{student.name}</span>
                               {student.isLead && (
                                 <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-200">
                                   <Crown className="size-2.5" />
@@ -155,33 +205,30 @@ export default function MyStudentsPage() {
                         </div>
                       </td>
 
-                      {/* Register Number */}
                       <td className="px-4 py-3.5 font-mono text-foreground font-medium">
-                        {student.regNo}
+                        {student.uniqueId || "—"}
                       </td>
 
-                      {/* Dept & Academic Standing */}
                       <td className="px-4 py-3.5">
-                        <span className="font-semibold text-foreground">{student.department}</span>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">CGPA: {student.cgpa}</p>
+                        <StatusBadge
+                          label={`${student.activeProjectsCount} / 2 active`}
+                          variant={student.activeProjectsCount >= 2 ? "warning" : "neutral"}
+                        />
                       </td>
 
-                      {/* Assigned Project */}
                       <td className="px-4 py-3.5">
                         <span className="text-[11px] font-mono font-medium text-muted-foreground bg-slate-100 px-1.5 py-0.5 rounded">
-                          {student.projectId}
+                          {student.projectId.slice(0, 8)}
                         </span>
                         <p className="font-medium text-foreground truncate max-w-[220px] mt-1">
                           {student.projectName}
                         </p>
                       </td>
 
-                      {/* Status */}
                       <td className="px-4 py-3.5">
                         <StatusBadge status={student.projectStatus} />
                       </td>
 
-                      {/* Action */}
                       <td className="px-4 py-3.5 text-right">
                         <Link
                           href={`/dashboard/faculty/project-details?id=${student.projectId}`}

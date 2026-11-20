@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   GitBranch,
   ShieldCheck,
@@ -13,13 +13,10 @@ import {
   FileText,
   Search,
   Check,
-  X,
   RotateCcw,
   GitCommit,
-  Building2,
-  GraduationCap,
-  MessageSquare,
   Award,
+  Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -35,21 +32,78 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
-import { initialGitHubReviews, GitHubReviewItem } from "@/lib/admin-data";
-import { cn } from "@/lib/utils";
+import {
+  getAdminSolutionReviewQueue,
+  adminReviewSolutionAction,
+} from "@/app/actions/admin-projects";
+import { getProjectGithubTree } from "@/app/actions/projects";
 
+interface ReviewItem {
+  id: string;
+  projectId: string;
+  projectTitle: string;
+  msmeCompany: string;
+  domain: string;
+  studentTeamLead: string;
+  facultyMentor: string;
+  githubUrl: string | null;
+  status: string;
+  revisionNotes: string | null;
+  submittedDate: string;
+  commitCount: number;
+  hasMitLicense: boolean;
+  hasReadme: boolean;
+  lastCommitDate: string | null;
+  treeFiles: { path: string; type: string; size?: number }[];
+}
 
 export default function AdminGitHubReviewPage() {
-  const [reviews, setReviews] = useState<GitHubReviewItem[]>(initialGitHubReviews);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
-  const [activeItem, setActiveItem] = useState<GitHubReviewItem | null>(null);
+  const [activeItem, setActiveItem] = useState<ReviewItem | null>(null);
   const [activeTab, setActiveTab] = useState<"tree" | "readme" | "license" | "decision">("tree");
   const [revisionNotes, setRevisionNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Filtered reviews
+  const loadQueue = async () => {
+    const res = await getAdminSolutionReviewQueue();
+    if (res.success) {
+      setReviews(
+        (res.projects as any[]).map((p) => ({
+          id: p.id,
+          projectId: p.id,
+          projectTitle: p.title,
+          msmeCompany: p.problem?.industry?.companyName || "Student-Originated Idea",
+          domain: p.problem?.industry?.domain || p.problem?.domain || "General",
+          studentTeamLead: p.team?.find((m: any) => m.isLead)?.name || "Unassigned",
+          facultyMentor: p.staff?.name || "—",
+          githubUrl: p.githubUrl,
+          status: p.status,
+          revisionNotes: p.adminReviewNotes,
+          submittedDate: p.updatedAt,
+          commitCount: 0,
+          hasMitLicense: false,
+          hasReadme: false,
+          lastCommitDate: null,
+          treeFiles: [],
+        }))
+      );
+    } else {
+      toast.error(res.error || "Failed to load solution review queue.");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await loadQueue();
+      setLoading(false);
+    })();
+  }, []);
+
   const filteredReviews = reviews.filter((r) => {
     const matchesSearch =
       searchQuery.trim() === "" ||
@@ -66,24 +120,52 @@ export default function AdminGitHubReviewPage() {
   const approvedCount = reviews.filter((r) => r.status === "APPROVED").length;
   const revisionCount = reviews.filter((r) => r.status === "REVISION_IN_PROGRESS").length;
 
-  const handleOpenInspector = (item: GitHubReviewItem) => {
+  const handleOpenInspector = async (item: ReviewItem) => {
     setActiveItem(item);
     setActiveTab("tree");
     setRevisionNotes(item.revisionNotes || "");
+
+    // Fetch cached live GitHub tree (5-min TTL) to populate file tree + compliance checks
+    if (item.githubUrl) {
+      const treeRes: any = await getProjectGithubTree(item.id);
+      if (treeRes.success) {
+        const files = (treeRes.tree || []).map((f: any) => ({
+          path: f.path,
+          type: f.type,
+          size: f.size,
+        }));
+        const lower = files.map((f: any) => f.path.toLowerCase());
+        setActiveItem((prev) =>
+          prev?.id === item.id
+            ? {
+                ...prev,
+                treeFiles: files,
+                commitCount: treeRes.details?.commitCount ?? prev.commitCount,
+                hasMitLicense: treeRes.details?.hasMitLicense ?? prev.hasMitLicense,
+                hasReadme: treeRes.details?.hasReadme ?? prev.hasReadme,
+                lastCommitDate: treeRes.details?.lastCommitDate ?? prev.lastCommitDate,
+              }
+            : prev
+        );
+      }
+    }
   };
 
   const handleApproveSolution = async (id: string) => {
     setIsProcessing(true);
-    await new Promise((r) => setTimeout(r, 600));
-
-    setReviews((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, status: "APPROVED", revisionNotes: undefined } : item
-      )
-    );
-
+    const res = await adminReviewSolutionAction({
+      projectId: id,
+      decision: "APPROVE",
+      reviewNotes: "Solution approved by MSME Admin after GitHub compliance inspection.",
+    });
     setIsProcessing(false);
-    toast.success("GitHub deliverable approved! Project unlocked for Industry Partner rating.");
+
+    if (res.success) {
+      toast.success(res.message || "Solution approved! Project unlocked for Industry Partner rating.");
+      await loadQueue();
+    } else {
+      toast.error(res.error || "Failed to approve solution.");
+    }
     setActiveItem(null);
   };
 
@@ -94,20 +176,30 @@ export default function AdminGitHubReviewPage() {
     }
 
     setIsProcessing(true);
-    await new Promise((r) => setTimeout(r, 600));
-
-    setReviews((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, status: "REVISION_IN_PROGRESS", revisionNotes: revisionNotes.trim() }
-          : item
-      )
-    );
-
+    const res = await adminReviewSolutionAction({
+      projectId: id,
+      decision: "REQUEST_REVISION",
+      reviewNotes: revisionNotes.trim(),
+    });
     setIsProcessing(false);
-    toast.info("Revision notes dispatched. Student team lead notified to update repository.");
+
+    if (res.success) {
+      toast.info(res.message || "Revision notes dispatched. Student team lead notified.");
+      await loadQueue();
+    } else {
+      toast.error(res.error || "Failed to request revision.");
+    }
     setActiveItem(null);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading solution review gate...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -135,9 +227,7 @@ export default function AdminGitHubReviewPage() {
             <span>Awaiting Gate Review</span>
             <Clock className="size-4 text-blue-600" />
           </div>
-          <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-            {pendingCount}
-          </div>
+          <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{pendingCount}</div>
           <p className="text-[11px] text-blue-600/80 dark:text-blue-400 mt-1">
             Submitted by Student Team Leads
           </p>
@@ -148,9 +238,7 @@ export default function AdminGitHubReviewPage() {
             <span>Approved Solutions</span>
             <CheckCircle2 className="size-4 text-emerald-600" />
           </div>
-          <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-            {approvedCount}
-          </div>
+          <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{approvedCount}</div>
           <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400 mt-1">
             Passed MIT &amp; README validation
           </p>
@@ -161,9 +249,7 @@ export default function AdminGitHubReviewPage() {
             <span>Revisions Active</span>
             <AlertCircle className="size-4 text-amber-600" />
           </div>
-          <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">
-            {revisionCount}
-          </div>
+          <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">{revisionCount}</div>
           <p className="text-[11px] text-amber-600/80 dark:text-amber-400 mt-1">
             Teams addressing feedback
           </p>
@@ -201,7 +287,6 @@ export default function AdminGitHubReviewPage() {
         >
           <option value="ALL">All Statuses</option>
           <option value="SOLUTION_SUBMITTED">Awaiting Review</option>
-          <option value="APPROVED">Approved</option>
           <option value="REVISION_IN_PROGRESS">Revision In Progress</option>
         </select>
       </div>
@@ -230,9 +315,7 @@ export default function AdminGitHubReviewPage() {
                     <td className="px-5 py-4 max-w-sm">
                       <div className="flex items-center gap-2 mb-1">
                         <CopyIdBadge id={item.projectId} size="xs" />
-                        <span className="text-[10px] text-muted-foreground">
-                          {item.domain}
-                        </span>
+                        <span className="text-[10px] text-muted-foreground">{item.domain}</span>
                       </div>
                       <div className="font-semibold text-foreground text-xs leading-snug">
                         {item.projectTitle}
@@ -243,56 +326,35 @@ export default function AdminGitHubReviewPage() {
                     </td>
 
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="font-medium text-foreground">
-                        {item.studentTeamLead} (Lead)
-                      </div>
+                      <div className="font-medium text-foreground">{item.studentTeamLead} (Lead)</div>
                       <div className="text-[10px] text-muted-foreground">
                         Mentor: {item.facultyMentor}
                       </div>
                     </td>
 
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <a
-                        href={item.githubUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 font-mono text-[11px] text-blue-600 dark:text-blue-400 hover:underline"
-                      >
-                        <GitBranch className="size-3.5" />
-                        <span className="truncate max-w-[170px]">{item.githubUrl}</span>
-                        <ExternalLink className="size-2.5 opacity-60" />
-                      </a>
+                      {item.githubUrl ? (
+                        <a
+                          href={item.githubUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 font-mono text-[11px] text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          <GitBranch className="size-3.5" />
+                          <span className="truncate max-w-[170px]">{item.githubUrl}</span>
+                          <ExternalLink className="size-2.5 opacity-60" />
+                        </a>
+                      ) : (
+                        <span className="text-[11px] text-muted-foreground">Not submitted yet</span>
+                      )}
                       <div className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
                         <GitCommit className="size-3" />
-                        <span>{item.commitCount} commits</span>
-                        <span>&middot;</span>
-                        <span>{item.lastCommitDate}</span>
+                        <span>Open inspector for commit &amp; license audit</span>
                       </div>
                     </td>
 
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5 text-[11px]">
-                          {item.hasMitLicense ? (
-                            <CheckCircle2 className="size-3.5 text-emerald-600" />
-                          ) : (
-                            <AlertCircle className="size-3.5 text-rose-600" />
-                          )}
-                          <span className={item.hasMitLicense ? "text-foreground" : "text-rose-600 font-semibold"}>
-                            MIT License: {item.hasMitLicense ? "Valid" : "Missing"}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[11px]">
-                          {item.hasReadme ? (
-                            <CheckCircle2 className="size-3.5 text-emerald-600" />
-                          ) : (
-                            <AlertCircle className="size-3.5 text-rose-600" />
-                          )}
-                          <span className="text-foreground">
-                            README: {item.hasReadme ? "Present" : "Missing"}
-                          </span>
-                        </div>
-                      </div>
+                      <div className="text-[11px] text-muted-foreground">Populated on inspection</div>
                     </td>
 
                     <td className="px-4 py-4 whitespace-nowrap">
@@ -315,7 +377,7 @@ export default function AdminGitHubReviewPage() {
               {filteredReviews.length === 0 && (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-muted-foreground text-xs">
-                    No solutions found matching the filter criteria.
+                    No solutions awaiting review. Gate queue is clear.
                   </td>
                 </tr>
               )}
@@ -325,10 +387,7 @@ export default function AdminGitHubReviewPage() {
       </div>
 
       {/* ── In-Dashboard Repository Inspector Dialog ─────────────────── */}
-      <Dialog
-        open={!!activeItem}
-        onOpenChange={(open) => !open && setActiveItem(null)}
-      >
+      <Dialog open={!!activeItem} onOpenChange={(open) => !open && setActiveItem(null)}>
         {activeItem && (
           <DialogContent className="max-w-3xl p-6 rounded-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader className="pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
@@ -339,21 +398,24 @@ export default function AdminGitHubReviewPage() {
                     Client: {activeItem.msmeCompany}
                   </span>
                 </div>
-                <a
-                  href={activeItem.githubUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs text-blue-600 hover:underline flex items-center gap-1"
-                >
-                  <span>Open GitHub</span>
-                  <ExternalLink className="size-3" />
-                </a>
+                {activeItem.githubUrl && (
+                  <a
+                    href={activeItem.githubUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                  >
+                    <span>Open GitHub</span>
+                    <ExternalLink className="size-3" />
+                  </a>
+                )}
               </div>
               <DialogTitle className="text-base font-bold text-foreground mt-1">
                 {activeItem.projectTitle}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Team Lead: {activeItem.studentTeamLead} &middot; Supervising Mentor: {activeItem.facultyMentor}
+                Team Lead: {activeItem.studentTeamLead} &middot; Supervising Mentor:{" "}
+                {activeItem.facultyMentor}
               </DialogDescription>
             </DialogHeader>
 
@@ -363,110 +425,88 @@ export default function AdminGitHubReviewPage() {
               className="mt-4"
             >
               <TabsList className="grid grid-cols-4 w-full">
-                <TabsTrigger value="tree" className="text-xs">
-                  File Tree
-                </TabsTrigger>
-                <TabsTrigger value="readme" className="text-xs">
-                  README.md
-                </TabsTrigger>
-                <TabsTrigger value="license" className="text-xs">
-                  LICENSE (MIT)
-                </TabsTrigger>
-                <TabsTrigger value="decision" className="text-xs">
-                  Sign-Off Decision
-                </TabsTrigger>
+                <TabsTrigger value="tree" className="text-xs">File Tree</TabsTrigger>
+                <TabsTrigger value="readme" className="text-xs">README</TabsTrigger>
+                <TabsTrigger value="license" className="text-xs">LICENSE</TabsTrigger>
+                <TabsTrigger value="decision" className="text-xs">Sign-Off</TabsTrigger>
               </TabsList>
 
-              {/* Tab 1: File Tree Preview (Cached server proxy preview) */}
+              {/* Tab 1: File Tree (server-cached, 5-min TTL) */}
               <TabsContent value="tree" className="space-y-3 pt-3">
                 <div className="flex items-center justify-between text-xs text-muted-foreground bg-muted/40 px-3 py-2 rounded-lg border border-black/[0.04]">
                   <span>Server-cached repository tree (5-minute TTL)</span>
-                  <span className="font-mono text-[11px]">{activeItem.commitCount} total commits</span>
+                  <span className="font-mono text-[11px]">
+                    {activeItem.treeFiles.length} entries
+                  </span>
                 </div>
 
-                <div className="rounded-xl border border-black/[0.08] dark:border-white/[0.1] bg-black/[0.02] dark:bg-black/30 p-4 font-mono text-xs space-y-2">
-                  <div className="flex items-center gap-2 text-foreground font-semibold">
-                    <Folder className="size-4 text-blue-500" />
-                    <span>root</span>
-                  </div>
-                  <div className="pl-6 space-y-1.5 text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Folder className="size-3.5 text-blue-400" />
-                      <span>src/</span>
-                    </div>
-                    <div className="pl-6 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <FileCode className="size-3.5 text-slate-500" />
-                        <span>main.py (IoT telemetry MQTT ingestion pipeline)</span>
+                <div className="rounded-xl border border-black/[0.08] dark:border-white/[0.1] bg-black/[0.02] dark:bg-black/30 p-4 font-mono text-xs space-y-1.5 max-h-72 overflow-y-auto">
+                  {activeItem.treeFiles.length > 0 ? (
+                    activeItem.treeFiles.slice(0, 60).map((f) => (
+                      <div key={f.path} className="flex items-center gap-2">
+                        {f.type === "tree" ? (
+                          <>
+                            <Folder className="size-3.5 text-blue-400 shrink-0" />
+                            <span>{f.path}/</span>
+                          </>
+                        ) : (
+                          <>
+                            <FileCode className="size-3.5 text-slate-500 shrink-0" />
+                            <span>{f.path}</span>
+                          </>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <FileCode className="size-3.5 text-slate-500" />
-                        <span>sensors.py (Vibration FFT &amp; Accelerometer sampling)</span>
-                      </div>
+                    ))
+                  ) : activeItem.githubUrl ? (
+                    <div className="text-muted-foreground">
+                      Tree not yet cached. Fetching from GitHub may be rate-limited — try again
+                      shortly.
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Folder className="size-3.5 text-blue-400" />
-                      <span>firmware/</span>
+                  ) : (
+                    <div className="text-muted-foreground">
+                      No repository URL has been submitted for this project.
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Folder className="size-3.5 text-blue-400" />
-                      <span>docs/</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-foreground">
-                      <FileText className="size-3.5 text-emerald-500" />
-                      <span>README.md</span>
-                      <CheckCircle2 className="size-3 text-emerald-600" />
-                    </div>
-                    <div className="flex items-center gap-2 text-foreground">
-                      <FileText className="size-3.5 text-amber-500" />
-                      <span>LICENSE</span>
-                      {activeItem.hasMitLicense ? (
-                        <CheckCircle2 className="size-3 text-emerald-600" />
-                      ) : (
-                        <span className="text-rose-600 text-[10px] font-bold">MISSING MIT NOTICE</span>
-                      )}
-                    </div>
-                  </div>
+                  )}
                 </div>
               </TabsContent>
 
-              {/* Tab 2: README Viewer */}
+              {/* Tab 2: README */}
               <TabsContent value="readme" className="space-y-3 pt-3">
-                <div className="rounded-xl border border-black/[0.08] dark:border-white/[0.1] bg-muted/20 p-4 text-xs space-y-3">
-                  <h3 className="text-sm font-bold text-foreground">
-                    # {activeItem.projectTitle}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Designed and built under the FXEC MSME Hub initiative for <strong>{activeItem.msmeCompany}</strong>.
-                    Provides an edge computing telemetry device and automated alert engine.
+                {activeItem.hasReadme ? (
+                  <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 text-xs flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
+                    <CheckCircle2 className="size-4" />
+                    <span>README.md verified present in repository root.</span>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/40 dark:bg-rose-950/20 p-4 text-xs flex items-center gap-2 text-rose-800 dark:text-rose-300">
+                    <AlertCircle className="size-4" />
+                    <span>README.md not detected — request a revision.</span>
+                  </div>
+                )}
+                {activeItem.githubUrl && (
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Open the linked repository to review the README contents in full.
                   </p>
-                  <h4 className="font-semibold text-foreground pt-1">## Setup &amp; Deployment</h4>
-                  <pre className="bg-black/5 dark:bg-black/40 p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto">
-                    pip install -r requirements.txt&#10;python src/main.py --broker mqtt://broker.hivemq.com
-                  </pre>
-                </div>
+                )}
               </TabsContent>
 
               {/* Tab 3: LICENSE Check */}
               <TabsContent value="license" className="space-y-3 pt-3">
                 {activeItem.hasMitLicense ? (
-                  <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 text-xs space-y-2">
-                    <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-semibold">
-                      <CheckCircle2 className="size-4 text-emerald-600" />
-                      <span>MIT License Verified</span>
-                    </div>
-                    <p className="font-mono text-[11px] text-emerald-900/80 dark:text-emerald-300/80 whitespace-pre-line bg-white/70 dark:bg-black/30 p-3 rounded-lg border border-emerald-200/60">
-                      MIT License&#10;&#10;Copyright (c) 2026 FXEC MSME Hub &amp; {activeItem.studentTeamLead}&#10;&#10;Permission is hereby granted, free of charge, to any person obtaining a copy...
-                    </p>
+                  <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 text-xs flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
+                    <CheckCircle2 className="size-4" />
+                    <span>MIT License detected in repository.</span>
                   </div>
                 ) : (
                   <div className="rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/40 dark:bg-rose-950/20 p-4 text-xs space-y-2">
                     <div className="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-semibold">
-                      <AlertCircle className="size-4 text-rose-600" />
-                      <span>Compliance Violation: Missing MIT License</span>
+                      <AlertCircle className="size-4" />
+                      <span>Compliance Violation: MIT License not detected</span>
                     </div>
                     <p className="text-rose-700 dark:text-rose-300 text-[11px] leading-relaxed">
-                      As mandated by PRD §8.5 REQ-STU-02 and ADR 0003, all student deliverables must contain an MIT License file in the root repository. Request a revision to ensure student lead adds the file.
+                      As mandated by PRD §8.5 REQ-STU-02 and ADR 0003, all student deliverables
+                      must contain an MIT License file in the root repository. Request a revision
+                      to ensure the student lead adds the file.
                     </p>
                   </div>
                 )}
@@ -512,7 +552,11 @@ export default function AdminGitHubReviewPage() {
                       onClick={() => handleApproveSolution(activeItem.id)}
                       className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-50"
                     >
-                      <Check className="size-3.5" />
+                      {isProcessing ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : (
+                        <Check className="size-3.5" />
+                      )}
                       <span>{isProcessing ? "Approving..." : "Approve Solution Gate"}</span>
                     </button>
                   </div>
@@ -525,4 +569,3 @@ export default function AdminGitHubReviewPage() {
     </div>
   );
 }
-

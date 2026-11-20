@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
-  Building2,
   Search,
   Filter,
   CheckCircle2,
@@ -11,13 +10,13 @@ import {
   XCircle,
   Eye,
   Check,
-  Send,
   Calendar,
   Layers,
   ArrowRight,
   ShieldCheck,
   RotateCcw,
   UserCheck,
+  Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -33,25 +32,72 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
-import { initialProblemBank, ProblemBankItem } from "@/lib/admin-data";
-import { cn } from "@/lib/utils";
+import { getAdminProblemBank, adminOverrideProblemStatusAction } from "@/app/actions/admin-projects";
+
+interface AdminProblemItem {
+  id: string;
+  title: string;
+  description: string;
+  domain: string;
+  constraints: string | null;
+  expectedDeliverables: string | null;
+  status: string;
+  createdAt: string;
+  industry: { companyName: string; companyId: string; domain: string } | null;
+  claimedByStaff: { name: string; email: string; uniqueId: string | null } | null;
+}
 
 
 
 export default function AdminProblemBankPage() {
-  const [problems, setProblems] = useState<ProblemBankItem[]>(initialProblemBank);
+  const [problems, setProblems] = useState<AdminProblemItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDomain, setSelectedDomain] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
 
   // Review Modal State
-  const [activeModalProblem, setActiveModalProblem] = useState<ProblemBankItem | null>(null);
-  const [activeModalTab, setActiveModalTab] = useState<"inspect" | "assign" | "clarify" | "override">("inspect");
-  const [assignFaculty, setAssignFaculty] = useState("Dr. Selvaraj M (CSE)");
-  const [targetDept, setTargetDept] = useState("Computer Science & Engineering");
-  const [overrideStatus, setOverrideStatus] = useState<ProblemBankItem["status"]>("POOL_AVAILABLE");
+  const [activeModalProblem, setActiveModalProblem] = useState<AdminProblemItem | null>(null);
+  const [activeModalTab, setActiveModalTab] = useState<"inspect" | "assign" | "override">("inspect");
+  const [overrideStatus, setOverrideStatus] = useState<string>("POOL_AVAILABLE");
   const [adminNotes, setAdminNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const loadProblems = async () => {
+    const res = await getAdminProblemBank();
+    if (res.success) {
+      setProblems((res.problems as any[]).map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        domain: p.domain,
+        constraints: p.constraints,
+        expectedDeliverables: p.expectedDeliverables,
+        status: p.status,
+        createdAt: p.createdAt,
+        industry: p.industry ? {
+          companyName: p.industry.companyName,
+          companyId: p.industry.companyId,
+          domain: p.industry.domain,
+        } : null,
+        claimedByStaff: p.claimedByStaff ? {
+          name: p.claimedByStaff.name,
+          email: p.claimedByStaff.email,
+          uniqueId: p.claimedByStaff.uniqueId,
+        } : null,
+      })));
+    } else {
+      toast.error(res.error || "Failed to load problem bank.");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await loadProblems();
+      setLoading(false);
+    })();
+  }, []);
 
   // Extract unique domains
   const domains = useMemo(() => {
@@ -65,7 +111,7 @@ export default function AdminProblemBankPage() {
       const matchesSearch =
         searchQuery.trim() === "" ||
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.industry?.companyName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -82,57 +128,41 @@ export default function AdminProblemBankPage() {
   const claimedCount = problems.filter((p) => p.status === "CLAIMED").length;
   const rejectedCount = problems.filter((p) => p.status === "REJECTED").length;
 
-  const handleOpenReview = (problem: ProblemBankItem, tab: "inspect" | "assign" | "clarify" | "override" = "inspect") => {
+  const handleOpenReview = (problem: AdminProblemItem, tab: "inspect" | "assign" | "override" = "inspect") => {
     setActiveModalProblem(problem);
     setActiveModalTab(tab);
     setAdminNotes("");
-    setOverrideStatus(problem.status);
-  };
-
-  const handleAssignSubmit = async () => {
-    if (!activeModalProblem) return;
-    setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 600));
-
-    setProblems((prev) =>
-      prev.map((item) =>
-        item.id === activeModalProblem.id
-          ? {
-              ...item,
-              status: "CLAIMED",
-              claimedByFaculty: assignFaculty,
-              assignedDepartment: targetDept,
-            }
-          : item
-      )
-    );
-
-    setIsSubmitting(false);
-    toast.success(`Problem ${activeModalProblem.id} assigned to ${assignFaculty} (${targetDept}).`);
-    setActiveModalProblem(null);
+    setOverrideStatus(problem.status === "CLAIMED" ? "CLAIMED" : problem.status === "REJECTED" ? "REJECTED" : "POOL_AVAILABLE");
   };
 
   const handleOverrideSubmit = async () => {
     if (!activeModalProblem) return;
     setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 600));
 
-    setProblems((prev) =>
-      prev.map((item) =>
-        item.id === activeModalProblem.id
-          ? {
-              ...item,
-              status: overrideStatus,
-              clarificationNotes: adminNotes.trim() || item.clarificationNotes,
-            }
-          : item
-      )
-    );
-
+    const res = await adminOverrideProblemStatusAction({
+      problemId: activeModalProblem.id,
+      status: overrideStatus as any,
+      adminNote: adminNotes,
+    });
     setIsSubmitting(false);
-    toast.success(`Problem ${activeModalProblem.id} status overridden to ${overrideStatus}.`);
-    setActiveModalProblem(null);
+
+    if (res.success) {
+      toast.success(res.message || `Problem ${activeModalProblem.id} status overridden to ${overrideStatus}.`);
+      await loadProblems();
+      setActiveModalProblem(null);
+    } else {
+      toast.error(res.error || "Failed to apply status override.");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading problem bank...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -279,7 +309,7 @@ export default function AdminProblemBankPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <CopyIdBadge id={prob.id} size="xs" />
                         <span className="text-[10px] text-muted-foreground">
-                          {prob.submissionDate}
+                          {new Date(prob.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       <div className="font-semibold text-foreground text-xs leading-snug">
@@ -291,10 +321,14 @@ export default function AdminProblemBankPage() {
                     </td>
 
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="font-medium text-foreground">{prob.companyName}</div>
-                      <div className="text-[10px] text-muted-foreground font-mono">
-                        {prob.companyId}
+                      <div className="font-medium text-foreground">
+                        {prob.industry?.companyName || "—"}
                       </div>
+                      {prob.industry?.companyId && (
+                        <div className="text-[10px] text-muted-foreground font-mono">
+                          {prob.industry.companyId}
+                        </div>
+                      )}
                     </td>
 
                     <td className="px-4 py-4">
@@ -304,10 +338,10 @@ export default function AdminProblemBankPage() {
                     </td>
 
                     <td className="px-4 py-4 text-muted-foreground">
-                      <div>{prob.assignedDepartment || "Unassigned"}</div>
-                      {prob.claimedByFaculty && (
+                      <div>{prob.claimedByStaff ? "Claimed by faculty" : "Open in pool"}</div>
+                      {prob.claimedByStaff && (
                         <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">
-                          {prob.claimedByFaculty}
+                          {prob.claimedByStaff.name}
                         </div>
                       )}
                     </td>
@@ -352,7 +386,8 @@ export default function AdminProblemBankPage() {
               <div className="flex items-center gap-2 mb-1">
                 <CopyIdBadge id={activeModalProblem.id} size="xs" />
                 <span className="text-xs text-muted-foreground">
-                  MSME Partner: {activeModalProblem.companyName} ({activeModalProblem.companyId})
+                  MSME Partner: {activeModalProblem.industry?.companyName || "Unknown"}
+                  {activeModalProblem.industry?.companyId ? ` (${activeModalProblem.industry.companyId})` : ""}
                 </span>
               </div>
               <DialogTitle className="text-base font-bold text-foreground">
@@ -368,12 +403,9 @@ export default function AdminProblemBankPage() {
               onValueChange={(val: any) => setActiveModalTab(val)}
               className="mt-4"
             >
-              <TabsList className="grid grid-cols-3 w-full">
+              <TabsList className="grid grid-cols-2 w-full">
                 <TabsTrigger value="inspect" className="text-xs">
                   Inspect Details
-                </TabsTrigger>
-                <TabsTrigger value="assign" className="text-xs">
-                  Direct Assign Faculty
                 </TabsTrigger>
                 <TabsTrigger value="override" className="text-xs">
                   Governance Override
@@ -404,81 +436,16 @@ export default function AdminProblemBankPage() {
 
                 <div className="pt-2 flex justify-end gap-2">
                   <button
-                    onClick={() => setActiveModalTab("assign")}
+                    onClick={() => setActiveModalTab("override")}
                     className="px-4 py-2 rounded-lg bg-[#007AFF] hover:bg-[#007AFF]/90 text-white font-medium text-xs flex items-center gap-1.5 shadow-xs transition-colors"
                   >
-                    <span>Direct Assign to Faculty</span>
+                    <span>Apply Governance Override</span>
                     <ArrowRight className="size-3.5" />
                   </button>
                 </div>
               </TabsContent>
 
-              {/* Tab 2: Assign */}
-              <TabsContent value="assign" className="space-y-4 pt-3">
-                <div className="rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/20 p-3.5 text-xs text-blue-800 dark:text-blue-300 flex items-start gap-2.5">
-                  <UserCheck className="size-4 shrink-0 mt-0.5 text-blue-600" />
-                  <div>
-                    <span className="font-semibold block">Admin Direct Assignment Override</span>
-                    Assign this problem directly to a Department and Faculty Supervisor, bypassing open pool triage.
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-foreground">
-                      Target Academic Department
-                    </label>
-                    <select
-                      value={targetDept}
-                      onChange={(e) => setTargetDept(e.target.value)}
-                      className="w-full h-9 text-xs rounded-lg border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#161618] px-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                    >
-                      <option value="Computer Science & Engineering">Computer Science &amp; Engineering</option>
-                      <option value="Electronics & Communication">Electronics &amp; Communication</option>
-                      <option value="Electrical & Electronics">Electrical &amp; Electronics</option>
-                      <option value="Mechanical Engineering">Mechanical Engineering</option>
-                      <option value="Information Technology">Information Technology</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-foreground">
-                      Assigned Faculty Supervisor
-                    </label>
-                    <select
-                      value={assignFaculty}
-                      onChange={(e) => setAssignFaculty(e.target.value)}
-                      className="w-full h-9 text-xs rounded-lg border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#161618] px-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                    >
-                      <option value="Dr. Selvaraj M (CSE)">Dr. Selvaraj M (CSE)</option>
-                      <option value="Dr. K. Annamalai (EEE)">Dr. K. Annamalai (EEE)</option>
-                      <option value="Prof. S. Muralidharan (ECE)">Prof. S. Muralidharan (ECE)</option>
-                      <option value="Dr. V. Gomathi (IT)">Dr. V. Gomathi (IT)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <DialogFooter className="mt-4">
-                  <button
-                    type="button"
-                    onClick={() => setActiveModalProblem(null)}
-                    className="px-4 py-2 rounded-lg border border-black/[0.06] dark:border-white/[0.08] text-foreground text-xs font-medium hover:bg-black/[0.02]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={handleAssignSubmit}
-                    className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-50"
-                  >
-                    <Check className="size-3.5" />
-                    <span>{isSubmitting ? "Assigning..." : "Confirm Assignment"}</span>
-                  </button>
-                </DialogFooter>
-              </TabsContent>
-
-              {/* Tab 3: Override */}
+              {/* Tab 2: Override */}
               <TabsContent value="override" className="space-y-4 pt-3">
                 <div className="rounded-lg border border-rose-200 dark:border-rose-900/50 bg-rose-50/50 dark:bg-rose-950/20 p-3.5 text-xs text-rose-800 dark:text-rose-300 flex items-start gap-2.5">
                   <AlertCircle className="size-4 shrink-0 mt-0.5 text-rose-600" />
@@ -530,7 +497,7 @@ export default function AdminProblemBankPage() {
                     onClick={handleOverrideSubmit}
                     className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-50"
                   >
-                    <Check className="size-3.5" />
+                    {isSubmitting ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}
                     <span>{isSubmitting ? "Applying..." : "Apply Status Override"}</span>
                   </button>
                 </DialogFooter>

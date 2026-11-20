@@ -5,7 +5,6 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { UserRole, FeedbackCategory, GuidanceStatus } from "@prisma/client";
 import { ensureUserUniqueId } from "@/lib/id-generator";
-import { initialGuidanceRequests, initialMentoredProjects } from "@/lib/alumni-data";
 
 /**
  * Ensures authenticated user has role ALUMNI
@@ -66,30 +65,83 @@ export async function getAlumniOverviewAction() {
     const dbGuidanceRequests = await prisma.guidanceRequest.findMany({
       where: { status: GuidanceStatus.OPEN },
       include: {
-        project: { select: { id: true, title: true, problem: { select: { domain: true } } } },
+        project: {
+          select: {
+            id: true,
+            title: true,
+            problem: { select: { domain: true } },
+            idea: { select: { domain: true } },
+          },
+        },
         requestedByStudent: { select: { id: true, name: true, uniqueId: true } },
       },
       orderBy: { createdAt: "desc" },
       take: 5,
     });
 
-    const openRequestsFormatted =
-      dbGuidanceRequests.length > 0
-        ? dbGuidanceRequests.map((req: any) => ({
-            id: req.id,
-            projectId: req.project.id,
-            projectTitle: req.project.title,
-            projectDomain: req.project.problem?.domain || "General Engineering",
-            studentName: req.requestedByStudent.name,
-            studentUniqueId: req.requestedByStudent.uniqueId || "STU0001",
-            studentDepartment: "Engineering",
-            tags: req.tags,
-            question: req.question,
-            status: req.status,
-            createdAt: req.createdAt.toISOString(),
-            responses: [],
-          }))
-        : initialGuidanceRequests.filter((r) => r.status === "OPEN");
+    const openRequestsFormatted = dbGuidanceRequests.map((req: any) => ({
+      id: req.id,
+      projectId: req.project.id,
+      projectTitle: req.project.title,
+      projectDomain:
+        req.project.problem?.domain || req.project.idea?.domain || "General Engineering",
+      studentName: req.requestedByStudent.name,
+      studentUniqueId: req.requestedByStudent.uniqueId || "STU0001",
+      studentDepartment: "Engineering",
+      tags: req.tags,
+      question: req.question,
+      status: req.status,
+      createdAt: req.createdAt.toISOString(),
+      responses: [],
+    }));
+
+    // Live recently mentored projects (projects where this alumnus authored feedback)
+    const mentoredFeedback = await prisma.feedback.findMany({
+      where: { authorId: user.id },
+      include: {
+        project: {
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            githubUrl: true,
+            problem: { select: { domain: true } },
+            idea: { select: { domain: true } },
+            members: { where: { isLead: true }, select: { student: { select: { name: true, uniqueId: true } } } },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
+
+    const seenProjectIds = new Set<string>();
+    const recentMentoredProjects = mentoredFeedback
+      .filter((f) => {
+        if (seenProjectIds.has(f.projectId)) return false;
+        seenProjectIds.add(f.projectId);
+        return true;
+      })
+      .map((f) => {
+        const p = f.project;
+        const lead = p?.members?.[0]?.student;
+        return {
+          id: p?.id || f.projectId,
+          title: p?.title || "Project",
+          domain: p?.problem?.domain || p?.idea?.domain || "General Engineering",
+          status: (p?.status || "IN_PROGRESS") as
+            | "IN_PROGRESS"
+            | "SOLUTION_SUBMITTED"
+            | "APPROVED"
+            | "REVISION_IN_PROGRESS",
+          teamLeadName: lead?.name || "Unassigned",
+          teamLeadUniqueId: lead?.uniqueId || "STU-0001",
+          facultyMentor: "Faculty",
+          industryPartner: "MSME Partner",
+          lastActivity: `Mentor feedback: ${f.category} (${new Date(f.createdAt).toLocaleDateString()})`,
+          githubUrl: p?.githubUrl || null,
+        };
+      });
 
     return {
       success: true,
@@ -107,16 +159,16 @@ export async function getAlumniOverviewAction() {
         currentCompany: "Technology Services",
         currentRole: "Senior Engineer",
         linkedinUrl: null,
-        helpfulCount: (user.alumniProfile as any)?.helpfulCount ?? 0,
+        helpfulCount: 0,
       },
       stats: {
-        openRequestsCount: Math.max(openRequestsCount, initialGuidanceRequests.filter((r) => r.status === "OPEN").length),
-        myAnswersCount: Math.max(myAnswersCount, 8),
-        helpfulEndorsements: user.alumniProfile?.helpfulCount || Math.max(helpfulCount, 14),
-        projectsMentored: 3,
+        openRequestsCount,
+        myAnswersCount,
+        helpfulEndorsements: user.alumniProfile?.helpfulCount || helpfulCount,
+        projectsMentored: mentoredFeedback.length,
       },
       openRequests: openRequestsFormatted,
-      recentMentoredProjects: initialMentoredProjects,
+      recentMentoredProjects,
     };
   } catch (err: any) {
     console.error("Error in getAlumniOverviewAction:", err);
@@ -180,6 +232,96 @@ export async function respondToGuidanceRequestAction(input: {
       success: false,
       error: err?.message || "Failed to submit response.",
     };
+  }
+}
+
+/**
+ * Fetch all guidance requests (open + answered) for the Guidance Board.
+ * Alumni mentors browse and answer student queries.
+ */
+export async function getGuidanceBoardAction() {
+  try {
+    const { error, user } = await getAuthenticatedAlumni();
+    if (error || !user) {
+      return { success: false, error: error || "Authentication required." };
+    }
+
+    const requests = await prisma.guidanceRequest.findMany({
+      where: {
+        status: { in: [GuidanceStatus.OPEN, GuidanceStatus.ANSWERED, GuidanceStatus.RESOLVED] },
+      },
+      include: {
+        project: {
+          select: {
+            id: true,
+            title: true,
+            problem: { select: { domain: true } },
+            idea: { select: { domain: true } },
+          },
+        },
+        requestedByStudent: { select: { id: true, name: true, uniqueId: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    // Fetch alumni-authored feedback entries to attach as responses
+    const feedbacks = await prisma.feedback.findMany({
+      where: {
+        author: { role: UserRole.ALUMNI },
+        project: {
+          guidanceRequests: {
+            some: {
+              id: { in: requests.map((r) => r.id) },
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+        projectId: true,
+        category: true,
+        content: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const grouped = new Map<string, any[]>();
+    for (const f of feedbacks) {
+      const arr = grouped.get(f.projectId) || [];
+      arr.push({
+        id: f.id,
+        authorName: "Mentor",
+        authorRole: "Alumni Industry Expert",
+        category: f.category,
+        content: f.content,
+        createdAt: f.createdAt.toISOString(),
+      });
+      grouped.set(f.projectId, arr);
+    }
+
+    return {
+      success: true,
+      requests: requests.map((r) => ({
+        id: r.id,
+        projectId: r.projectId,
+        projectTitle: r.project?.title || "Untitled Project",
+        projectDomain:
+          r.project?.problem?.domain || r.project?.idea?.domain || "General Engineering",
+        studentName: r.requestedByStudent?.name || "Student",
+        studentUniqueId: r.requestedByStudent?.uniqueId || "STU-0001",
+        studentDepartment: "Engineering",
+        tags: r.tags || [],
+        question: r.question,
+        status: r.status,
+        isHelpful: r.isHelpful,
+        createdAt: r.createdAt.toISOString(),
+        responses: grouped.get(r.projectId) || [],
+      })),
+    };
+  } catch (err: any) {
+    console.error("Error in getGuidanceBoardAction:", err);
+    return { success: false, error: err?.message || "Failed to load guidance board." };
   }
 }
 

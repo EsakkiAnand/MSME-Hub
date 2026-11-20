@@ -1,36 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Building2,
   ShieldCheck,
   Globe,
   FileText,
-  Save,
-  CheckCircle2,
   ExternalLink,
-  Layers,
-  Calendar,
-  Lock,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { IOSSelect } from "@/components/ui/ios-select";
-import { updateIndustryCompanyProfileAction } from "@/app/actions/industry";
+import { getIndustryOverviewAction, updateIndustryCompanyProfileAction } from "@/app/actions/industry";
 
 export default function IndustryProfilePage() {
-  // Conforms strictly to Prisma IndustryProfile + User
-  const [companyName, setCompanyName] = useState("Hexaware Technology MSME Partner");
-  const [companyId] = useState("HTMP001");
-  const [partnerUserId] = useState("IND0001");
-  const [udyamRegNo] = useState("UDYAM-TN-28-0019284");
+  const [profile, setProfile] = useState<any>(null);
+  const [companyName, setCompanyName] = useState("");
+  const [companyId, setCompanyId] = useState("");
+  const [partnerUserId, setPartnerUserId] = useState("");
+  const [udyamRegNo, setUdyamRegNo] = useState("");
   const [domain, setDomain] = useState("Software & Cloud");
-  const [websiteUrl, setWebsiteUrl] = useState("https://hexaware.com");
-  const [representativeName] = useState("K. Ramanathan");
-  const [representativeEmail] = useState("industry@hexaware.com");
-  const [isVerified] = useState(true);
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [representativeName, setRepresentativeName] = useState("");
+  const [representativeEmail, setRepresentativeEmail] = useState("");
+  const [isVerified, setIsVerified] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const domains = [
     "Software & Cloud",
@@ -42,23 +39,45 @@ export default function IndustryProfilePage() {
     "Biotech & AgriTech",
   ];
 
+  useEffect(() => {
+    const load = async () => {
+      const res = await getIndustryOverviewAction();
+      if ((res as any).success) {
+        const p = (res as any).profile;
+        setProfile(p);
+        setCompanyName(p?.companyName || "");
+        setCompanyId(p?.companyId || "HTMP001");
+        setUdyamRegNo(p?.udyamRegNo || "");
+        setDomain(p?.domain || domains[0]);
+        setWebsiteUrl(p?.websiteUrl || "");
+        const authUser = (res as any).user;
+        setRepresentativeName(authUser?.name || "");
+        setRepresentativeEmail(authUser?.email || "");
+        setPartnerUserId(authUser?.uniqueId || "IND0001");
+        setIsVerified(authUser?.isVerified || false);
+      } else {
+        toast.error(res.error || "Failed to load profile.");
+      }
+      setLoading(false);
+    };
+    load();
+  }, []);
+
   const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyName.trim()) {
       toast.error("Company name is required.");
       return;
     }
-
     setIsSaving(true);
     try {
-      const res = await updateIndustryCompanyProfileAction({
+      const res: any = await updateIndustryCompanyProfileAction({
         companyName: companyName.trim(),
         websiteUrl: websiteUrl.trim(),
         domain,
       });
-
       if (res.success) {
-        toast.success(res.message);
+        toast.success(res.message || "Profile updated successfully.");
       } else {
         toast.error(res.error || "Failed to update profile.");
       }
@@ -69,6 +88,14 @@ export default function IndustryProfilePage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <span className="text-xs text-muted-foreground">Loading profile...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -78,7 +105,7 @@ export default function IndustryProfilePage() {
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Company & Partner Profile
             </h1>
-            <StatusBadge variant="success" label="Verified MSME" />
+            {isVerified && <StatusBadge variant="success" label="Verified MSME" />}
           </div>
           <p className="text-sm text-muted-foreground mt-1">
             Manage your organization identification, Udyam compliance credentials, and partnership details.
@@ -94,7 +121,7 @@ export default function IndustryProfilePage() {
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-xl font-bold text-foreground">{companyName}</h2>
+              <h2 className="text-xl font-bold text-foreground">{companyName || "—"}</h2>
               {isVerified && (
                 <StatusBadge variant="success" label="Udyam Validated" />
               )}
@@ -102,12 +129,12 @@ export default function IndustryProfilePage() {
             <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
               <span>Primary Sector: <strong className="text-foreground">{domain}</strong></span>
               <span>&bull;</span>
-              <span>Registered in MSME Hub since October 2026</span>
+              <span>Registered in MSME Hub</span>
             </p>
           </div>
         </div>
 
-        {/* Dual ID Grid - Mandatory Distinction between Company ID and Industry User ID */}
+        {/* Dual ID Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t border-slate-100">
           <div className="rounded-lg bg-black/[0.02] dark:bg-white/[0.03] p-3.5 border border-black/[0.06] dark:border-white/[0.08]/80">
             <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-between">
@@ -123,7 +150,7 @@ export default function IndustryProfilePage() {
           <div className="rounded-lg bg-black/[0.02] dark:bg-white/[0.03] p-3.5 border border-black/[0.06] dark:border-white/[0.08]/80">
             <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-between">
               <span>Partner User ID</span>
-              <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+              <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
             <CopyIdBadge id={partnerUserId} label="IND" />
             <span className="text-[10px] text-muted-foreground block mt-1.5">
@@ -131,13 +158,13 @@ export default function IndustryProfilePage() {
             </span>
           </div>
 
-          <div className="rounded-lg bg-black/[0.02] dark:bg-white/[0.03] p-3.5 border border-black/[0.06] dark:border-white/[0.08]/80 sm:col-span-2 md:col-span-1">
+          <div className="rounded-lg bg-black/[0.02] dark:bg-white/[0.03] p-3.5 border border-black/[0.06] dark:border-white/[0.08]/80">
             <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-between">
               <span>Udyam Reg. Number</span>
               <FileText className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
             <code className="text-xs font-mono font-bold text-foreground bg-white px-2 py-1 rounded border border-black/[0.06] dark:border-white/[0.08] inline-block">
-              {udyamRegNo}
+              {udyamRegNo || "—"}
             </code>
             <span className="text-[10px] text-emerald-600 font-medium block mt-1.5">
               &bull; Ministry of MSME Verified
@@ -166,7 +193,7 @@ export default function IndustryProfilePage() {
                 required
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-foreground focus:border-blue-500 focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-foreground focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
@@ -194,7 +221,7 @@ export default function IndustryProfilePage() {
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
                   placeholder="https://company.com"
-                  className="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-sm text-foreground focus:border-blue-500 focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-sm text-foreground focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
                 <Globe className="h-4 w-4 text-muted-foreground absolute left-3 top-2.5" />
               </div>
@@ -249,9 +276,8 @@ export default function IndustryProfilePage() {
             <button
               type="submit"
               disabled={isSaving}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#1d4ed8] px-5 py-2 text-xs font-semibold text-white hover:bg-[#1e40af] active:scale-[0.98] transition-all transition-colors disabled:opacity-50 shadow-xs"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#1d4ed8] px-5 py-2 text-xs font-semibold text-white hover:bg-[#1e40af] active:scale-[0.98] transition-all disabled:opacity-50 shadow-xs"
             >
-              <Save className="h-3.5 w-3.5" />
               {isSaving ? "Saving Changes..." : "Save Profile Updates"}
             </button>
           </div>

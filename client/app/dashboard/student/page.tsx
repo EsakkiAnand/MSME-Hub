@@ -13,53 +13,17 @@ import {
   ExternalLink,
   RotateCcw,
   AlertTriangle,
+  Building2,
+  ShieldCheck,
+  ArrowRight,
 } from "lucide-react";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger-group";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getStudentIdeas } from "@/app/actions/ideas";
 import { getStudentTrackStatusAction } from "@/app/actions/auth";
-import { Building2, ShieldCheck, ArrowRight } from "lucide-react";
-
-const myProjects = [
-  {
-    id: "PRJ-2024-001",
-    name: "Smart Inventory Management for MSMEs",
-    status: "IN_PROGRESS",
-    mentor: "Dr. Selvaraj M",
-    isLead: true,
-    deadline: "2026-12-15",
-    domain: "Software",
-  },
-  {
-    id: "PRJ-2024-007",
-    name: "Predictive Maintenance IoT Dashboard",
-    status: "SOLUTION_SUBMITTED",
-    mentor: "Prof. Kavitha R",
-    isLead: false,
-    deadline: "2026-11-30",
-    domain: "IoT & Analytics",
-  },
-];
-
-const recentUpdates = [
-  {
-    id: 1,
-    project: "Smart Inventory Management for MSMEs",
-    event: "Staff approved your Deadline Extension Request",
-    time: "2 hours ago",
-    status: "APPROVED",
-  },
-  {
-    id: 2,
-    project: "Predictive Maintenance IoT Dashboard",
-    event: "Solution submitted for MSME Admin review",
-    time: "1 day ago",
-    status: "SUBMITTED",
-  },
-];
-
-
+import { getStudentProjects, getStudentOverview } from "@/app/actions/student";
+import { toast } from "sonner";
 
 export default function StudentDashboardPage() {
   const session = authClient.useSession();
@@ -69,6 +33,11 @@ export default function StudentDashboardPage() {
   const [studentIdeas, setStudentIdeas] = useState<any[]>([]);
   const [ideasLoading, setIdeasLoading] = useState(false);
   const [trackStatus, setTrackStatus] = useState<any>(null);
+  const [myProjects, setMyProjects] = useState<any[]>([]);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [recentUpdates] = useState<any[]>([
+    { id: 1, event: "Load your recent updates from the dashboard.", project: "", time: "", status: "INFO" },
+  ]);
 
   useEffect(() => {
     getStudentIdeas()
@@ -84,6 +53,30 @@ export default function StudentDashboardPage() {
         }
       }
     });
+
+    getStudentProjects()
+      .then((res) => {
+        if (res.success && res.projects) {
+          setMyProjects(
+            res.projects.map((p: any) => ({
+              id: p.id,
+              name: p.title,
+              status: p.status,
+              mentor: p.staff?.name || "Staff Mentor",
+              isLead: p.isLead,
+              deadline: p.targetDeadline ? new Date(p.targetDeadline).toISOString().split("T")[0] : "—",
+              domain: p.problem?.industry?.companyName || p.problem?.domain || "General",
+            }))
+          );
+        } else {
+          toast.error((res as any).error || "Failed to load projects.");
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load student projects:", err);
+        toast.error("Failed to load projects.");
+      })
+      .finally(() => setProjectsLoading(false));
   }, []);
 
   const needsImprovementIdea = studentIdeas.find((i) => i.status === "NEEDS_CHANGES");
@@ -286,47 +279,51 @@ export default function StudentDashboardPage() {
           </div>
 
           <div className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
-            {myProjects.map((project) => (
-              <div
-                key={project.id}
-                className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-[11px] font-mono font-medium text-muted-foreground bg-black/[0.04] dark:bg-white/[0.06] px-2 py-0.5 rounded-[6px]">
-                      {project.id}
-                    </span>
-                    {project.isLead && (
-                      <StatusBadge status="STUDENT" label="Team Lead" variant="info" />
-                    )}
-                  </div>
-                  <p className="text-sm font-semibold text-foreground tracking-tight">
-                    {project.name}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
-                    <span>Staff Mentor: {project.mentor}</span>
-                    <span>·</span>
-                    <span>Deadline: {project.deadline}</span>
-                  </div>
-                </div>
-
-                <div className="shrink-0 flex sm:flex-col items-start sm:items-end justify-between sm:justify-center gap-2">
-                  <StatusBadge status={project.status} />
-                  <Link
-                    href={`/dashboard/student/project-details?id=${project.id}`}
-                    className="text-xs font-medium text-[#007AFF] hover:underline flex items-center gap-1"
-                  >
-                    View Details
-                    <ExternalLink className="size-3" />
-                  </Link>
-                </div>
+            {projectsLoading ? (
+              <div className="p-8 text-center text-xs text-muted-foreground">
+                Loading your projects...
               </div>
-            ))}
-
-            {myProjects.length === 0 && (
+            ) : myProjects.length === 0 ? (
               <div className="p-8 text-center text-xs text-muted-foreground">
                 No active projects assigned yet.
               </div>
+            ) : (
+              myProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[11px] font-mono font-medium text-muted-foreground bg-black/[0.04] dark:bg-white/[0.06] px-2 py-0.5 rounded-[6px]">
+                        {project.id}
+                      </span>
+                      {project.isLead && (
+                        <StatusBadge status="STUDENT" label="Team Lead" variant="info" />
+                      )}
+                    </div>
+                    <p className="text-sm font-semibold text-foreground tracking-tight">
+                      {project.name}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
+                      <span>Staff Mentor: {project.mentor}</span>
+                      <span>.</span>
+                      <span>Deadline: {project.deadline}</span>
+                    </div>
+                  </div>
+
+                  <div className="shrink-0 flex sm:flex-col items-start sm:items-end justify-between sm:justify-center gap-2">
+                    <StatusBadge status={project.status} />
+                    <Link
+                      href={`/dashboard/student/project-details?id=${project.id}`}
+                      className="text-xs font-medium text-[#007AFF] hover:underline flex items-center gap-1"
+                    >
+                      View Details
+                      <ExternalLink className="size-3" />
+                    </Link>
+                  </div>
+                </div>
+              ))
             )}
           </div>
         </div>

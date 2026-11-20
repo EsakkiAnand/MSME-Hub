@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   Search,
@@ -14,6 +14,7 @@ import {
   BookOpen,
   Eye,
   RotateCcw,
+  Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -27,14 +28,24 @@ import {
 } from "@/components/ui/dialog";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { initialPlatformUsers, PlatformUserItem } from "@/lib/admin-data";
+import { getAllUsersAction } from "@/app/actions/admin-projects";
 import { graduateStudentToIndustryExpertAction } from "@/app/actions/admin";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+interface LiveUser {
+  id: string;
+  uniqueId: string | null;
+  name: string;
+  email: string;
+  role: "STUDENT" | "STAFF" | "INDUSTRY" | "ALUMNI" | "MSME_ADMIN";
+  departmentOrCompany: string;
+  isVerified: boolean;
+  joinedDate: string;
+}
 
 const roleFilterMeta: Record<
-  PlatformUserItem["role"],
+  LiveUser["role"],
   { label: string; icon: React.ElementType }
 > = {
   STUDENT: { label: "Students", icon: BookOpen },
@@ -45,22 +56,64 @@ const roleFilterMeta: Record<
 };
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<PlatformUserItem[]>(initialPlatformUsers);
+  const [users, setUsers] = useState<LiveUser[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("ALL");
-  const [selectedUser, setSelectedUser] = useState<PlatformUserItem | null>(null);
+  const [selectedUser, setSelectedUser] = useState<LiveUser | null>(null);
+
+  const loadUsers = async () => {
+    const res = await getAllUsersAction();
+    if (res.success) {
+      setUsers(
+        (res.users as any[]).map((u: any) => ({
+          id: u.id,
+          uniqueId: u.uniqueId || null,
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          isVerified: u.isVerified,
+          joinedDate: u.createdAt,
+          departmentOrCompany:
+            u.industryProfile?.companyName ||
+            u.alumniProfile?.currentCompany ||
+            u.institutionDomain ||
+            "—",
+        }))
+      );
+    } else {
+      toast.error(res.error || "Failed to load user directory.");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await loadUsers();
+      setLoading(false);
+    })();
+  }, []);
 
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
       searchQuery.trim() === "" ||
       u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.uniqueId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.uniqueId || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.departmentOrCompany.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesRole = roleFilter === "ALL" || u.role === roleFilter;
     return matchesSearch && matchesRole;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading user directory...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -184,7 +237,7 @@ export default function AdminUsersPage() {
                     </td>
 
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <CopyIdBadge id={user.uniqueId} size="xs" />
+                      <CopyIdBadge id={user.uniqueId || "—"} size="xs" />
                     </td>
 
                     <td className="px-4 py-4 whitespace-nowrap">
@@ -243,9 +296,9 @@ export default function AdminUsersPage() {
           <DialogContent className="max-w-md p-6 rounded-2xl">
             <DialogHeader className="pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
               <div className="flex items-center gap-2 mb-1">
-                <CopyIdBadge id={selectedUser.uniqueId} size="xs" />
+                <CopyIdBadge id={selectedUser.uniqueId || "—"} size="xs" />
                 <span className="text-xs text-muted-foreground">
-                  Joined: {selectedUser.joinedDate}
+                  Joined: {new Date(selectedUser.joinedDate).toLocaleDateString()}
                 </span>
               </div>
               <DialogTitle className="text-base font-bold text-foreground">
@@ -279,22 +332,11 @@ export default function AdminUsersPage() {
                     onClick={async () => {
                       const res = await graduateStudentToIndustryExpertAction(selectedUser.id);
                       if (res.success) {
-                        setUsers((prev) =>
-                          prev.map((u) =>
-                            u.id === selectedUser.id ? { ...u, role: "ALUMNI" } : u
-                          )
-                        );
-                        setSelectedUser({ ...selectedUser, role: "ALUMNI" });
-                        toast.success(res.message);
+                        toast.success(res.message || `Successfully graduated ${selectedUser.name} to Industry Expert.`);
+                        await loadUsers();
+                        setSelectedUser(null);
                       } else {
-                        // Fallback in-memory transition
-                        setUsers((prev) =>
-                          prev.map((u) =>
-                            u.id === selectedUser.id ? { ...u, role: "ALUMNI" } : u
-                          )
-                        );
-                        setSelectedUser({ ...selectedUser, role: "ALUMNI" });
-                        toast.success(`Successfully graduated ${selectedUser.name} to Industry Expert.`);
+                        toast.error(res.error || "Failed to graduate student to Industry Expert.");
                       }
                     }}
                     className="w-full px-3 py-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"

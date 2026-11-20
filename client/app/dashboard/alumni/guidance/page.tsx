@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   HelpCircle,
   Search,
@@ -30,13 +30,12 @@ import {
 import { IOSSelect } from "@/components/ui/ios-select";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
-import { initialGuidanceRequests, GuidanceRequestItem } from "@/lib/alumni-data";
-import { respondToGuidanceRequestAction } from "@/app/actions/alumni";
-
-const allTags = ["All", "PostgreSQL", "Next.js", "IoT", "Security", "MQTT", "Concurrency", "Architecture"];
+import { GuidanceRequestItem } from "@/lib/alumni-data";
+import { respondToGuidanceRequestAction, getGuidanceBoardAction } from "@/app/actions/alumni";
 
 export default function GuidanceBoardPage() {
-  const [requests, setRequests] = useState<GuidanceRequestItem[]>(initialGuidanceRequests);
+  const [requests, setRequests] = useState<GuidanceRequestItem[]>([]);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState("All");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -44,6 +43,25 @@ export default function GuidanceBoardPage() {
   const [responseCategory, setResponseCategory] = useState("ARCHITECTURE");
   const [responseText, setResponseText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const loadBoard = async () => {
+    const res = await getGuidanceBoardAction();
+    if (res.success) {
+      setRequests((res as any).requests || []);
+    } else {
+      toast.error((res as any).error || "Failed to load guidance board.");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      setInitialLoading(true);
+      await loadBoard();
+      setInitialLoading(false);
+    })();
+  }, []);
+
+  const allTags = ["All", ...Array.from(new Set(requests.flatMap((r) => r.tags || [])))];
 
   const filteredRequests = requests.filter((req) => {
     const matchesSearch =
@@ -84,29 +102,8 @@ export default function GuidanceBoardPage() {
       });
 
       if (res.success) {
-        toast.success("Guidance response published to student team!");
-        // Update local state
-        setRequests((prev) =>
-          prev.map((r) =>
-            r.id === selectedRequest.id
-              ? {
-                  ...r,
-                  status: "ANSWERED",
-                  responses: [
-                    ...(r.responses || []),
-                    {
-                      id: `FB-${Date.now()}`,
-                      authorName: "You (Industry Expert)",
-                      authorRole: "Industry Expert",
-                      category: responseCategory as any,
-                      content: responseText.trim(),
-                      createdAt: new Date().toISOString(),
-                    },
-                  ],
-                }
-              : r
-          )
-        );
+        toast.success((res as any).message || "Guidance response published to student team!");
+        await loadBoard();
         setSelectedRequest(null);
         setResponseText("");
       } else {
@@ -118,6 +115,15 @@ export default function GuidanceBoardPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading the Guidance Board...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

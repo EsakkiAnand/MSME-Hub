@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   FolderKanban,
@@ -9,49 +9,91 @@ import {
   GitBranch,
   GraduationCap,
   Users,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
   Star,
   ShieldCheck,
   ChevronRight,
   XCircle,
+  Loader2,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
-import { initialIndustryProjects, IndustryProjectItem } from "@/lib/industry-data";
+import { getIndustryProjectsAction } from "@/app/actions/industry";
 import { ProjectCategoryTabs } from "@/components/projects/project-category-tabs";
 import { ProjectStatusCategoryBadge } from "@/components/projects/project-status-category-badge";
 import { ProjectStatusCategory, getProjectStatusCategory } from "@/lib/project-data";
+import { toast } from "sonner";
+
+interface LiveIndustryProject {
+  id: string;
+  problemId: string;
+  title: string;
+  domain: string;
+  status: string;
+  githubUrl: string | null;
+  targetDeadline: string | null;
+  createdAt: string;
+  staff: string;
+  leadStudent: string;
+  hasRating: boolean;
+  rating: {
+    stars: number;
+    feedbackText: string;
+    isModerated: boolean;
+    createdAt: string;
+  } | null;
+}
 
 export default function IndustryProjectsPage() {
-  const [projects] = useState<IndustryProjectItem[]>(initialIndustryProjects);
+  const [projects, setProjects] = useState<LiveIndustryProject[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<ProjectStatusCategory>("ALL");
 
-  // Compute category counts
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      const res = await getIndustryProjectsAction();
+      if (res.success) {
+        setProjects((res.projects as any[]) || []);
+      } else {
+        toast.error(res.error || "Failed to load projects.");
+      }
+      setLoading(false);
+    };
+    load();
+  }, []);
+
   const counts = {
     all: projects.length,
-    inProgressLive: projects.filter((p) => getProjectStatusCategory(p.status) === "IN_PROGRESS_LIVE").length,
-    completed: projects.filter((p) => getProjectStatusCategory(p.status) === "COMPLETED").length,
-    rejected: projects.filter((p) => getProjectStatusCategory(p.status) === "REJECTED").length,
+    inProgressLive: projects.filter((p) => getProjectStatusCategory(p.status as any) === "IN_PROGRESS_LIVE").length,
+    completed: projects.filter((p) => getProjectStatusCategory(p.status as any) === "COMPLETED").length,
+    rejected: projects.filter((p) => getProjectStatusCategory(p.status as any) === "REJECTED").length,
   };
 
   const filteredProjects = projects.filter((prj) => {
     const matchesSearch =
-      prj.problemTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      searchQuery.trim() === "" ||
+      prj.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       prj.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      prj.studentTeamLeadName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      prj.facultyMentorName.toLowerCase().includes(searchQuery.toLowerCase());
+      prj.leadStudent.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      prj.staff.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const projCategory = getProjectStatusCategory(prj.status);
+    const projCategory = getProjectStatusCategory(prj.status as any);
     const matchesCategory = activeCategory === "ALL" || projCategory === activeCategory;
 
     return matchesSearch && matchesCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading collaborative projects...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -64,12 +106,12 @@ export default function IndustryProjectsPage() {
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            PRD §8.3: Track engineering progress across lifecycle categories (In Progress, Completed, Rejected), review audit histories, and inspect public GitHub deliverables.
+            PRD §8.3: Track engineering progress across lifecycle categories, review audit histories, and inspect public GitHub deliverables.
           </p>
         </div>
       </div>
 
-      {/* Category Tabs: In Progress / Live | Completed | Rejected */}
+      {/* Category Tabs + Search */}
       <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
         <ProjectCategoryTabs
           activeCategory={activeCategory}
@@ -101,19 +143,24 @@ export default function IndustryProjectsPage() {
                   <div className="flex items-center gap-2">
                     <CopyIdBadge id={prj.id} label="ID" />
                     <span className="text-[11px] text-muted-foreground font-mono">
-                      Ref: {prj.problemId}
+                      Ref: {prj.problemId.slice(0, 8)}
                     </span>
                   </div>
-                  <ProjectStatusCategoryBadge status={prj.status} size="sm" />
+                  <ProjectStatusCategoryBadge status={prj.status as any} size="sm" />
                 </div>
 
                 <CardTitle className="text-base font-bold text-foreground leading-snug">
-                  {prj.problemTitle}
+                  {prj.title}
                 </CardTitle>
                 <div className="flex items-center gap-2 pt-1 text-xs text-muted-foreground">
                   <span className="font-medium text-foreground">{prj.domain}</span>
                   <span>•</span>
-                  <span>Target Deadline: <strong>{prj.targetDeadline}</strong></span>
+                  <span>
+                    Target Deadline:{" "}
+                    <strong>
+                      {prj.targetDeadline ? new Date(prj.targetDeadline).toLocaleDateString() : "Not set"}
+                    </strong>
+                  </span>
                 </div>
               </CardHeader>
 
@@ -125,19 +172,7 @@ export default function IndustryProjectsPage() {
                       <GraduationCap className="size-3.5 text-emerald-600" />
                       Student Team Lead:
                     </span>
-                    <span className="font-semibold text-foreground">
-                      {prj.studentTeamLeadName} ({prj.studentTeamLeadId})
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-foreground">
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <Users className="size-3.5 text-purple-600" />
-                      Student Roster:
-                    </span>
-                    <span className="font-medium text-foreground">
-                      {prj.studentTeamCount} Assigned Engineers
-                    </span>
+                    <span className="font-semibold text-foreground">{prj.leadStudent}</span>
                   </div>
 
                   <div className="flex items-center justify-between text-foreground">
@@ -145,21 +180,11 @@ export default function IndustryProjectsPage() {
                       <ShieldCheck className="size-3.5 text-[#007AFF]" />
                       Faculty Project Director:
                     </span>
-                    <span className="font-medium text-foreground">{prj.facultyMentorName}</span>
+                    <span className="font-medium text-foreground">{prj.staff}</span>
                   </div>
                 </div>
 
-                {/* Rejection Note if Rejected */}
-                {prj.status === "REJECTED" && prj.rejectionReason && (
-                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-900 flex items-start gap-2">
-                    <XCircle className="size-3.5 text-rose-600 shrink-0 mt-0.5" />
-                    <p className="line-clamp-2">
-                      <strong>Rejection Note:</strong> {prj.rejectionReason}
-                    </p>
-                  </div>
-                )}
-
-                {/* GitHub Code Deliverable Link & Rating / Actions */}
+                {/* GitHub Link & Rating / Actions */}
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
                   <div>
                     {prj.githubUrl ? (
@@ -182,7 +207,7 @@ export default function IndustryProjectsPage() {
 
                   <div className="flex items-center gap-2">
                     {/* Rating Call-to-Action for Approved Solutions */}
-                    {prj.status === "APPROVED" && !prj.hasRated && (
+                    {prj.status === "APPROVED" && !prj.hasRating && (
                       <Link href="/dashboard/industry/ratings">
                         <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white text-xs h-7 px-2.5">
                           <Star className="size-3 mr-1 fill-white" />
@@ -191,10 +216,13 @@ export default function IndustryProjectsPage() {
                       </Link>
                     )}
 
-                    {prj.hasRated && (
+                    {prj.hasRating && prj.rating && (
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                         <Star className="size-3 text-amber-500 fill-amber-500" />
-                        {prj.rating?.stars}/5 Stars
+                        {prj.rating.stars}/5 Stars
+                        {prj.rating.isModerated && (
+                          <XCircle className="size-3 text-amber-500" />
+                        )}
                       </span>
                     )}
 

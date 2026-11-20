@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Lightbulb,
   Search,
@@ -9,50 +9,95 @@ import {
   RotateCcw,
   XCircle,
   Building,
-  GraduationCap,
   Calendar,
-  ChevronRight,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { IOSSelect } from "@/components/ui/ios-select";
-import { initialIdeaSubmissions, FacultyIdeaSubmission } from "@/lib/faculty-data";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { toast } from "sonner";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { getStaffIdeaQueue, reviewStudentIdeaAction } from "@/app/actions/staff";
 
+interface LiveIdea {
+  id: string;
+  title: string;
+  domain: string;
+  description: string;
+  problemStatement: string | null;
+  proposedSolution: string | null;
+  expectedImpact: string | null;
+  status: string;
+  staffComments: string | null;
+  createdAt: string;
+  student: {
+    id: string;
+    name: string;
+    uniqueId: string | null;
+    email: string;
+    institutionDomain: string | null;
+  };
+}
 
 const filterOptions = [
   { value: "All", label: "All Review Statuses" },
-  { value: "PENDING_REVIEW", label: "Awaiting Review" },
+  { value: "SUBMITTED", label: "Submitted / Awaiting Review" },
+  { value: "NEEDS_CHANGES", label: "Changes Requested" },
   { value: "ACCEPTED", label: "Approved" },
-  { value: "REVISION_REQUESTED", label: "Changes Requested" },
   { value: "REJECTED", label: "Rejected" },
 ];
 
 export default function FacultyIdeaSubmissionsPage() {
-  const [ideas, setIdeas] = useState<FacultyIdeaSubmission[]>(initialIdeaSubmissions);
+  const [ideas, setIdeas] = useState<LiveIdea[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
   // Dialog states
-  const [activeIdea, setActiveIdea] = useState<FacultyIdeaSubmission | null>(null);
+  const [activeIdea, setActiveIdea] = useState<LiveIdea | null>(null);
   const [actionType, setActionType] = useState<"APPROVE" | "REQUEST_CHANGES" | "REJECT" | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const loadIdeas = async () => {
+    const res = await getStaffIdeaQueue();
+    if (res.success) {
+      setIdeas((res.ideas as any[]) || []);
+    } else {
+      toast.error(res.error || "Failed to load student ideas.");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await loadIdeas();
+      setLoading(false);
+    })();
+  }, []);
+
   const filteredIdeas = ideas.filter((idea) => {
     const matchesSearch =
+      search.trim() === "" ||
       idea.title.toLowerCase().includes(search.toLowerCase()) ||
-      idea.studentName.toLowerCase().includes(search.toLowerCase()) ||
-      idea.studentRegNo.toLowerCase().includes(search.toLowerCase()) ||
-      idea.domain.toLowerCase().includes(search.toLowerCase()) ||
-      idea.targetSector.toLowerCase().includes(search.toLowerCase());
+      idea.student.name.toLowerCase().includes(search.toLowerCase()) ||
+      (idea.student.uniqueId || "").toLowerCase().includes(search.toLowerCase()) ||
+      idea.domain.toLowerCase().includes(search.toLowerCase());
 
-    const matchesStatus = statusFilter === "All" || idea.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "All" ||
+      (statusFilter === "SUBMITTED"
+        ? ["SUBMITTED", "UNDER_REVIEW", "RESUBMITTED"].includes(idea.status)
+        : idea.status === statusFilter);
+
     return matchesSearch && matchesStatus;
   });
 
-  const handleOpenAction = (idea: FacultyIdeaSubmission, type: "APPROVE" | "REQUEST_CHANGES" | "REJECT") => {
+  const pendingCount = ideas.filter((i) =>
+    ["SUBMITTED", "UNDER_REVIEW", "RESUBMITTED", "NEEDS_CHANGES"].includes(i.status)
+  ).length;
+
+  const handleOpenAction = (idea: LiveIdea, type: "APPROVE" | "REQUEST_CHANGES" | "REJECT") => {
     setActiveIdea(idea);
     setActionType(type);
   };
@@ -62,36 +107,37 @@ export default function FacultyIdeaSubmissionsPage() {
     setIsProcessing(true);
 
     try {
-      await new Promise((r) => setTimeout(r, 600));
-
-      const newStatus =
+      const action =
         actionType === "APPROVE"
-          ? "ACCEPTED"
+          ? "ACCEPT"
           : actionType === "REQUEST_CHANGES"
-          ? "REVISION_REQUESTED"
-          : "REJECTED";
+          ? "REQUEST_IMPROVEMENTS"
+          : "REJECT";
 
       const remarks =
         actionType === "APPROVE"
-          ? "Approved by Faculty Mentor. Recommended for conversion into MSME sponsored challenge."
+          ? "Recommended by faculty mentor. Strong fit for MSME sponsorship incubation."
           : actionType === "REQUEST_CHANGES"
-          ? "Scope needs refinement. Please elaborate on hardware BOM and feasibility."
-          : "Declined due to duplicate research scope or lack of regional MSME application.";
+          ? "Please elaborate on the technical scope, feasibility, and expected impact before re-submission."
+          : "Declined: scope does not align with regional MSME application requirements.";
 
-      setIdeas((prev) =>
-        prev.map((item) =>
-          item.id === activeIdea.id
-            ? { ...item, status: newStatus as any, facultyRemarks: remarks }
-            : item
-        )
-      );
+      const res = await reviewStudentIdeaAction({
+        ideaId: activeIdea.id,
+        action,
+        feedback: remarks,
+      });
 
-      if (actionType === "APPROVE") {
-        toast.success(`Idea "${activeIdea.title}" approved!`);
-      } else if (actionType === "REQUEST_CHANGES") {
-        toast.success(`Requested improvements for "${activeIdea.title}".`);
+      if (res.success) {
+        if (actionType === "APPROVE") {
+          toast.success(`Idea "${activeIdea.title}" accepted. It is now eligible for the Sponsorship Showcase.`);
+        } else if (actionType === "REQUEST_CHANGES") {
+          toast.success(`Improvements requested for "${activeIdea.title}".`);
+        } else {
+          toast.success(`Idea "${activeIdea.title}" rejected.`);
+        }
+        await loadIdeas();
       } else {
-        toast.success(`Idea "${activeIdea.title}" rejected.`);
+        toast.error(res.error || "Failed to process idea review action.");
       }
     } catch {
       toast.error("Failed to process idea review action.");
@@ -101,6 +147,15 @@ export default function FacultyIdeaSubmissionsPage() {
       setActiveIdea(null);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading student ideas...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -121,7 +176,7 @@ export default function FacultyIdeaSubmissionsPage() {
           </p>
         </div>
         <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] text-foreground self-start sm:self-auto">
-          {ideas.filter((i) => i.status === "PENDING_REVIEW").length} Pending Evaluations
+          {pendingCount} Pending Evaluations
         </div>
       </div>
 
@@ -130,7 +185,7 @@ export default function FacultyIdeaSubmissionsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
-            placeholder="Search by idea title, student name, register number, or sector..."
+            placeholder="Search by idea title, student name, ID, or domain..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 text-xs sm:text-sm rounded-md border-black/[0.06] dark:border-white/[0.08] focus-visible:ring-blue-600"
@@ -157,7 +212,8 @@ export default function FacultyIdeaSubmissionsPage() {
           </div>
         ) : (
           filteredIdeas.map((idea) => {
-                        return (
+            const isTerminal = ["ACCEPTED", "REJECTED", "CONVERTED_TO_PROJECT", "SHOWCASE_PUBLISHED"].includes(idea.status);
+            return (
               <div
                 key={idea.id}
                 className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 hover:border-slate-300 hover:shadow-xs transition-all"
@@ -166,7 +222,7 @@ export default function FacultyIdeaSubmissionsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-mono font-medium text-muted-foreground bg-slate-100 px-2 py-0.5 rounded">
-                      {idea.id}
+                      {idea.id.slice(0, 8)}
                     </span>
                     <StatusBadge status={idea.status} />
                     <span className="text-xs text-muted-foreground">·</span>
@@ -175,7 +231,7 @@ export default function FacultyIdeaSubmissionsPage() {
 
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Calendar className="size-3.5" />
-                    <span>Submitted: {idea.submissionDate}</span>
+                    <span>Submitted: {new Date(idea.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
 
@@ -183,39 +239,54 @@ export default function FacultyIdeaSubmissionsPage() {
                 <div className="py-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="size-6 rounded-full bg-slate-100 border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center font-semibold text-foreground text-[11px]">
-                      {idea.studentName.charAt(0)}
+                      {idea.student.name.charAt(0)}
                     </div>
-                    <span className="text-xs font-semibold text-foreground">
-                      {idea.studentName}
-                    </span>
-                    <span className="text-[11px] font-mono text-muted-foreground">
-                      ({idea.studentRegNo})
-                    </span>
+                    <span className="text-xs font-semibold text-foreground">{idea.student.name}</span>
+                    {idea.student.uniqueId && (
+                      <span className="text-[11px] font-mono text-muted-foreground">
+                        ({idea.student.uniqueId})
+                      </span>
+                    )}
                     <span className="text-slate-300">·</span>
-                    <span className="text-[11px] text-muted-foreground">{idea.department}</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      {idea.student.institutionDomain ? `@${idea.student.institutionDomain}` : ""}
+                    </span>
                   </div>
 
-                  <h3 className="text-base font-semibold text-foreground tracking-tight">
-                    {idea.title}
-                  </h3>
+                  <h3 className="text-base font-semibold text-foreground tracking-tight">{idea.title}</h3>
 
                   <div className="mt-2.5 text-xs text-foreground leading-relaxed bg-black/[0.02] dark:bg-white/[0.03]/70 p-3.5 rounded-md border border-slate-100">
                     <p className="font-semibold text-foreground mb-1">Problem &amp; Proposed Solution:</p>
-                    <p>{idea.description}</p>
+                    <p>
+                      {idea.problemStatement || idea.description}
+                      {idea.proposedSolution && (
+                        <span className="block mt-2">
+                          <strong>Proposed Solution:</strong> {idea.proposedSolution}
+                        </span>
+                      )}
+                    </p>
 
-                    <p className="font-semibold text-foreground mt-3 mb-1">Expected Deliverables:</p>
-                    <p className="text-muted-foreground">{idea.expectedOutcome}</p>
+                    {idea.expectedImpact && (
+                      <>
+                        <p className="font-semibold text-foreground mt-3 mb-1">Expected Impact:</p>
+                        <p className="text-muted-foreground">{idea.expectedImpact}</p>
+                      </>
+                    )}
 
                     <div className="mt-3 pt-2.5 border-t border-black/[0.06] dark:border-white/[0.08]/60 flex items-center gap-2 text-[11px] text-muted-foreground">
                       <Building className="size-3.5 text-muted-foreground" />
-                      <span>Target MSME Cluster: <strong className="text-foreground">{idea.targetSector}</strong></span>
+                      <span>
+                        Target MSME Cluster: <strong className="text-foreground">{idea.domain}</strong>
+                      </span>
                     </div>
                   </div>
 
-                  {idea.facultyRemarks && (
+                  {idea.staffComments && (
                     <div className="mt-3 p-3 rounded-md bg-blue-50/60 border border-blue-100 text-xs">
-                      <span className="font-semibold text-blue-900 block mb-0.5">Faculty Evaluation Note:</span>
-                      <span className="text-blue-800">{idea.facultyRemarks}</span>
+                      <span className="font-semibold text-blue-900 block mb-0.5">
+                        Faculty / Admin Evaluation Note:
+                      </span>
+                      <span className="text-blue-800">{idea.staffComments}</span>
                     </div>
                   )}
                 </div>
@@ -224,37 +295,36 @@ export default function FacultyIdeaSubmissionsPage() {
                 <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                     <Sparkles className="size-3 text-amber-500" />
-                    <span>Faculty Academic Recommendation (Official verification &amp; approval governed exclusively by MSME Admin)</span>
+                    <span>Faculty academic recommendation (final verification governed by MSME Admin)</span>
                   </span>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleOpenAction(idea, "APPROVE")}
-                      disabled={idea.status === "ACCEPTED"}
-                      className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white transition-all active:scale-[0.98]"
-                    >
-                      <CheckCircle2 className="size-3.5" />
-                      <span>Recommend to Admin</span>
-                    </button>
+                  {!isTerminal && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleOpenAction(idea, "APPROVE")}
+                        className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white transition-all active:scale-[0.98]"
+                      >
+                        <CheckCircle2 className="size-3.5" />
+                        <span>Accept &amp; Recommend</span>
+                      </button>
 
-                    <button
-                      onClick={() => handleOpenAction(idea, "REQUEST_CHANGES")}
-                      disabled={idea.status === "REVISION_REQUESTED"}
-                      className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md bg-white border border-blue-200 text-[#007AFF] hover:bg-blue-50 disabled:opacity-50 transition-all active:scale-[0.98]"
-                    >
-                      <RotateCcw className="size-3.5" />
-                      <span>Suggest Revisions</span>
-                    </button>
+                      <button
+                        onClick={() => handleOpenAction(idea, "REQUEST_CHANGES")}
+                        className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md bg-white border border-blue-200 text-[#007AFF] hover:bg-blue-50 transition-all active:scale-[0.98]"
+                      >
+                        <RotateCcw className="size-3.5" />
+                        <span>Suggest Revisions</span>
+                      </button>
 
-                    <button
-                      onClick={() => handleOpenAction(idea, "REJECT")}
-                      disabled={idea.status === "REJECTED"}
-                      className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-50 transition-all active:scale-[0.98]"
-                    >
-                      <XCircle className="size-3.5" />
-                      <span>Decline Recommendation</span>
-                    </button>
-                  </div>
+                      <button
+                        onClick={() => handleOpenAction(idea, "REJECT")}
+                        className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 transition-all active:scale-[0.98]"
+                      >
+                        <XCircle className="size-3.5" />
+                        <span>Decline</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -268,24 +338,24 @@ export default function FacultyIdeaSubmissionsPage() {
         onOpenChange={(open) => !open && setActionType(null)}
         title={
           actionType === "APPROVE"
-            ? "Approve Student Idea"
+            ? "Accept Student Idea"
             : actionType === "REQUEST_CHANGES"
             ? "Request Idea Improvements"
             : "Reject Student Idea"
         }
         description={
           actionType === "APPROVE"
-            ? "Are you sure you want to approve this student idea? It will be forwarded to the MSME Incubation & Sponsorship pool."
+            ? "Are you sure you want to accept this student idea? It will be made eligible for the Sponsorship Showcase and project conversion."
             : actionType === "REQUEST_CHANGES"
-            ? "Are you sure you want to request improvements from the student on this pitch?"
+            ? "Are you sure you want to request improvements from the student on this pitch? They will be able to resubmit."
             : "Are you sure you want to reject this idea? This action will mark the submission as declined."
         }
         itemName={activeIdea?.title}
         confirmText={
           actionType === "APPROVE"
-            ? "Approve Idea"
+            ? "Accept Idea"
             : actionType === "REQUEST_CHANGES"
-            ? "Send Improvement"
+            ? "Send Improvement Request"
             : "Reject Idea"
         }
         variant={actionType === "REJECT" ? "destructive" : actionType === "REQUEST_CHANGES" ? "update" : "default"}

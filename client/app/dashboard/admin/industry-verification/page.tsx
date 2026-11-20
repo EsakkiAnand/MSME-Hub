@@ -33,49 +33,118 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
-import {
-  initialIndustryVerifications,
-  initialAlumniVerifications,
-  initialStudentMsmeVerifications,
-  IndustryVerificationItem,
-  AlumniVerificationItem,
-  StudentMsmeVerificationItem,
-} from "@/lib/admin-data";
+import { StudentMsmeVerificationItem } from "@/lib/admin-data";
 import {
   getStudentMsmeRequestsAction,
   approveStudentMsmeAction,
   rejectStudentMsmeAction,
 } from "@/app/actions/admin";
+import {
+  getPendingIndustryVerifications,
+  getPendingAlumniVerifications,
+  approveIndustryVerificationAction,
+  rejectIndustryVerificationAction,
+  approveAlumniVerificationAction,
+  rejectAlumniVerificationAction,
+} from "@/app/actions/admin-projects";
 import { cn } from "@/lib/utils";
 
+interface LiveIndustryItem {
+  id: string;
+  userId: string;
+  companyName: string;
+  companyId: string | null;
+  udyamRegNo: string | null;
+  representativeName: string;
+  email: string;
+  domain: string | null;
+  websiteUrl: string | null;
+  verificationDocUrl: string | null;
+  status: "PENDING";
+  submissionDate: string;
+}
+
+interface LiveAlumniItem {
+  id: string;
+  userId: string;
+  name: string;
+  uniqueId: string | null;
+  email: string;
+  degree: string;
+  passoutYear: number;
+  currentCompany: string;
+  currentRole: string;
+  linkedinUrl: string | null;
+  status: "PENDING";
+  submissionDate: string;
+}
+
 export default function IndustryVerificationPage() {
-  const [industryList, setIndustryList] = useState<IndustryVerificationItem[]>(
-    initialIndustryVerifications
-  );
-  const [alumniList, setAlumniList] = useState<AlumniVerificationItem[]>(
-    initialAlumniVerifications
-  );
-  const [studentList, setStudentList] = useState<StudentMsmeVerificationItem[]>(
-    initialStudentMsmeVerifications
-  );
+  const [industryList, setIndustryList] = useState<LiveIndustryItem[]>([]);
+  const [alumniList, setAlumniList] = useState<LiveAlumniItem[]>([]);
+  const [studentList, setStudentList] = useState<StudentMsmeVerificationItem[]>([]);
 
   const [activeTab, setActiveTab] = useState<"industry" | "students" | "alumni">("industry");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
   // Selected item for modal
-  const [selectedIndustry, setSelectedIndustry] = useState<IndustryVerificationItem | null>(null);
-  const [selectedAlumni, setSelectedAlumni] = useState<AlumniVerificationItem | null>(null);
+  const [selectedIndustry, setSelectedIndustry] = useState<LiveIndustryItem | null>(null);
+  const [selectedAlumni, setSelectedAlumni] = useState<LiveAlumniItem | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<StudentMsmeVerificationItem | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const loadIndustry = async () => {
+    const res = await getPendingIndustryVerifications();
+    if (res.success) {
+      setIndustryList(
+        (res.items as any[]).map((u: any) => ({
+          id: u.userId,
+          userId: u.userId,
+          companyName: u.industryProfile?.companyName || u.name,
+          companyId: u.industryProfile?.companyId || u.uniqueId || "—",
+          udyamRegNo: u.industryProfile?.udyamRegNo || "Pending Udyam",
+          representativeName: u.name,
+          email: u.email,
+          domain: u.industryProfile?.domain || "—",
+          websiteUrl: u.industryProfile?.websiteUrl || null,
+          verificationDocUrl: u.industryProfile?.verificationDocUrl || null,
+          status: "PENDING",
+          submissionDate: u.createdAt,
+        }))
+      );
+    }
+  };
+
+  const loadAlumni = async () => {
+    const res = await getPendingAlumniVerifications();
+    if (res.success) {
+      setAlumniList(
+        (res.items as any[]).map((u: any) => ({
+          id: u.userId,
+          userId: u.userId,
+          name: u.name,
+          uniqueId: u.uniqueId || "—",
+          email: u.email,
+          degree: u.alumniProfile?.degree || "—",
+          passoutYear: u.alumniProfile?.passoutYear || 0,
+          currentCompany: u.alumniProfile?.currentCompany || "—",
+          currentRole: u.alumniProfile?.currentRole || "—",
+          linkedinUrl: u.alumniProfile?.linkedinUrl || null,
+          status: "PENDING",
+          submissionDate: u.createdAt,
+        }))
+      );
+    }
+  };
 
   // Industry filters
   const filteredIndustry = industryList.filter((item) => {
     const matchesSearch =
       searchQuery.trim() === "" ||
       item.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.udyamRegNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.udyamRegNo || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.representativeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.email.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -102,18 +171,20 @@ export default function IndustryVerificationPage() {
       searchQuery.trim() === "" ||
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.uniqueId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.department.toLowerCase().includes(searchQuery.toLowerCase());
+      (item.uniqueId || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.department || "").toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus = statusFilter === "ALL" || item.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const pendingIndustryCount = industryList.filter((i) => i.status === "PENDING").length;
+  const pendingIndustryCount = industryList.length;
   const pendingStudentCount = studentList.filter((s) => s.status === "PENDING").length;
-  const pendingAlumniCount = alumniList.filter((a) => a.status === "PENDING").length;
+  const pendingAlumniCount = alumniList.length;
 
   useEffect(() => {
+    loadIndustry();
+    loadAlumni();
     getStudentMsmeRequestsAction().then((res) => {
       if (res.success && res.students && res.students.length > 0) {
         const liveMapped: StudentMsmeVerificationItem[] = res.students.map((s: any) => ({
@@ -190,13 +261,15 @@ export default function IndustryVerificationPage() {
   };
   const handleApproveIndustry = async (id: string) => {
     setIsProcessing(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setIndustryList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: "APPROVED" } : item))
-    );
+    const res = await approveIndustryVerificationAction(id);
     setIsProcessing(false);
+    if (res.success) {
+      toast.success(res.message || "Industry partner verified and approved! Problem submission unlocked.");
+      await loadIndustry();
+    } else {
+      toast.error(res.error || "Failed to approve industry partner.");
+    }
     setSelectedIndustry(null);
-    toast.success("Industry partner verified and approved! Problem submission unlocked.");
   };
 
   const handleRejectIndustry = async (id: string) => {
@@ -205,40 +278,42 @@ export default function IndustryVerificationPage() {
       return;
     }
     setIsProcessing(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setIndustryList((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, status: "REJECTED", rejectionReason: rejectionReason.trim() }
-          : item
-      )
-    );
+    const res = await rejectIndustryVerificationAction(id, rejectionReason.trim());
     setIsProcessing(false);
+    if (res.success) {
+      toast.info(res.message || "Industry registration rejected with feedback.");
+      await loadIndustry();
+    } else {
+      toast.error(res.error || "Failed to reject industry partner.");
+    }
     setSelectedIndustry(null);
     setRejectionReason("");
-    toast.info("Industry registration rejected with feedback.");
   };
 
   const handleApproveAlumni = async (id: string) => {
     setIsProcessing(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setAlumniList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: "APPROVED" } : item))
-    );
+    const res = await approveAlumniVerificationAction(id);
     setIsProcessing(false);
+    if (res.success) {
+      toast.success(res.message || "Alumni mentor approved! Mentorship portal access unlocked.");
+      await loadAlumni();
+    } else {
+      toast.error(res.error || "Failed to approve alumni mentor.");
+    }
     setSelectedAlumni(null);
-    toast.success("Alumni mentor approved! Mentorship portal access unlocked.");
   };
 
   const handleRejectAlumni = async (id: string) => {
     setIsProcessing(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setAlumniList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: "REJECTED" } : item))
-    );
+    const res = await rejectAlumniVerificationAction(id, rejectionReason || "Profile does not meet verification criteria.");
     setIsProcessing(false);
+    if (res.success) {
+      toast.info(res.message || "Alumni registration rejected.");
+      await loadAlumni();
+    } else {
+      toast.error(res.error || "Failed to reject alumni registration.");
+    }
     setSelectedAlumni(null);
-    toast.info("Alumni registration rejected.");
   };
 
   return (
@@ -405,12 +480,24 @@ export default function IndustryVerificationPage() {
                       </td>
 
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-medium text-[11px]">
-                          <FileText className="size-3.5" />
-                          <span className="truncate max-w-[150px]">
-                            {item.verificationDocName}
-                          </span>
-                        </div>
+                        {item.verificationDocUrl ? (
+                          <a
+                            href={item.verificationDocUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-medium text-[11px] hover:underline"
+                          >
+                            <FileText className="size-3.5" />
+                            <span className="truncate max-w-[150px]">
+                              {item.verificationDocUrl.split("/").pop() || "Verification Document"}
+                            </span>
+                          </a>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-muted-foreground font-medium text-[11px]">
+                            <FileText className="size-3.5" />
+                            <span>Document not uploaded</span>
+                          </div>
+                        )}
                       </td>
 
                       <td className="px-4 py-4 whitespace-nowrap">
@@ -590,16 +677,20 @@ export default function IndustryVerificationPage() {
                       </td>
 
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <a
-                          href={item.linkedinUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-blue-600 hover:underline text-[11px]"
-                        >
-                          <Globe className="size-3" />
-                          <span>Profile</span>
-                          <ExternalLink className="size-2.5 opacity-60" />
-                        </a>
+                        {item.linkedinUrl ? (
+                          <a
+                            href={item.linkedinUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-blue-600 hover:underline text-[11px]"
+                          >
+                            <Globe className="size-3" />
+                            <span>Profile</span>
+                            <ExternalLink className="size-2.5 opacity-60" />
+                          </a>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground">Not linked</span>
+                        )}
                       </td>
 
                       <td className="px-4 py-4 whitespace-nowrap">
@@ -662,9 +753,9 @@ export default function IndustryVerificationPage() {
           <DialogContent className="max-w-xl p-6 rounded-2xl">
             <DialogHeader className="pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
               <div className="flex items-center gap-2 mb-1">
-                <CopyIdBadge id={selectedIndustry.companyId} size="xs" />
+                <CopyIdBadge id={selectedIndustry.companyId || "PENDING"} size="xs" />
                 <span className="font-mono text-xs text-muted-foreground">
-                  {selectedIndustry.udyamRegNo}
+                  {selectedIndustry.udyamRegNo || "No Udyam Number on file"}
                 </span>
               </div>
               <DialogTitle className="text-base font-bold text-foreground">
@@ -692,15 +783,19 @@ export default function IndustryVerificationPage() {
                 </div>
                 <div>
                   <span className="text-muted-foreground block text-[11px]">Corporate Website</span>
-                  <a
-                    href={selectedIndustry.websiteUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-600 hover:underline flex items-center gap-1"
-                  >
-                    <span>{selectedIndustry.websiteUrl}</span>
-                    <ExternalLink className="size-2.5 opacity-60" />
-                  </a>
+                  {selectedIndustry.websiteUrl ? (
+                    <a
+                      href={selectedIndustry.websiteUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      <span>{selectedIndustry.websiteUrl}</span>
+                      <ExternalLink className="size-2.5 opacity-60" />
+                    </a>
+                  ) : (
+                    <span className="text-foreground">Not provided</span>
+                  )}
                 </div>
               </div>
 
@@ -710,12 +805,20 @@ export default function IndustryVerificationPage() {
                   <div className="flex items-center gap-2">
                     <FileText className="size-4 text-blue-600" />
                     <span className="font-semibold text-blue-900 dark:text-blue-200 text-xs">
-                      {selectedIndustry.verificationDocName}
+                      {selectedIndustry.verificationDocUrl
+                        ? selectedIndustry.verificationDocUrl.split("/").pop()
+                        : "Verification document"}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-blue-700 bg-blue-100 dark:bg-blue-900/60 px-2 py-0.5 rounded">
-                    PDF &middot; Verified Checksum
-                  </span>
+                  {selectedIndustry.verificationDocUrl ? (
+                    <span className="text-[10px] font-mono text-blue-700 bg-blue-100 dark:bg-blue-900/60 px-2 py-0.5 rounded">
+                      PDF &middot; Uploaded
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-mono text-amber-700 bg-amber-100 dark:bg-amber-900/60 px-2 py-0.5 rounded">
+                      No document uploaded yet
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] text-blue-800/80 dark:text-blue-300/80 leading-relaxed">
                   Ministry of Micro, Small and Medium Enterprises (MSME) Government of India Certificate with valid Udyam Registration Number ({selectedIndustry.udyamRegNo}).

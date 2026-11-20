@@ -1,69 +1,76 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Filter, ExternalLink, ChevronRight, Crown, XCircle, FolderKanban } from "lucide-react";
+import { Search, Loader2, ExternalLink, ChevronRight, Crown, XCircle, FolderKanban } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { ProjectCategoryTabs } from "@/components/projects/project-category-tabs";
 import { ProjectStatusCategoryBadge } from "@/components/projects/project-status-category-badge";
 import {
   ProjectStatusCategory,
   getProjectStatusCategory,
-  initialProjectsMaster,
 } from "@/lib/project-data";
+import { getStudentProjects } from "@/app/actions/student";
 
-// Extract enrolled projects for current student (Mohamed Farhan STU-001 & teammates)
-const studentProjectsList = [
-  {
-    id: "PRJ-2024-001",
-    name: "Smart Inventory Management for MSMEs",
-    status: "IN_PROGRESS" as const,
-    mentor: "Dr. Selvaraj M",
-    msmeCompany: "Nellai Precision Engineering Ltd.",
-    isLead: true,
-    deadline: "2026-12-15",
-    domain: "Software / Web Development",
-  },
-  {
-    id: "PRJ-2024-007",
-    name: "Automated Yarn Defect Vision Inspection System for Powerlooms",
-    status: "COMPLETED" as const,
-    mentor: "Prof. Kavitha R",
-    msmeCompany: "Apex Tex Machineries",
-    isLead: false,
-    deadline: "2026-10-30",
-    domain: "Manufacturing & AI",
-  },
-  {
-    id: "PRJ-2024-009",
-    name: "High-Frequency Acoustic Crack Detection for Foundries",
-    status: "REJECTED" as const,
-    mentor: "Dr. S. Ramanathan",
-    msmeCompany: "South Castings & Alloys",
-    isLead: true,
-    deadline: "2026-09-30",
-    domain: "Acoustics & Signal Processing",
-    rejectionReason:
-      "Failed foundry floor noise threshold tests; repository missed mandatory MIT licensing requirements.",
-  },
-];
+interface StudentProject {
+  id: string;
+  title: string;
+  status: string;
+  isLead: boolean;
+  targetDeadline: string | null;
+  githubUrl: string | null;
+  adminReviewNotes: string | null;
+  staff: { name: string; email: string; uniqueId: string | null } | null;
+  problem: {
+    industry: { companyName: string; companyId: string; domain: string };
+    domain: string;
+  } | null;
+  idea: { title: string; description: string } | null;
+}
 
 export default function MyProjectsPage() {
+  const [projects, setProjects] = useState<StudentProject[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<ProjectStatusCategory>("ALL");
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      const res = await getStudentProjects();
+      if (res.success) {
+        setProjects(res.projects as StudentProject[]);
+      }
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const normalize = (p: StudentProject) => ({
+    id: p.id,
+    name: p.title,
+    status: p.status,
+    mentor: p.staff?.name ?? "—",
+    msmeCompany: p.problem?.industry?.companyName ?? "Student-Originated Idea",
+    domain: p.problem?.domain ?? "General",
+    isLead: p.isLead,
+    deadline: p.targetDeadline ? new Date(p.targetDeadline).toLocaleDateString() : "Not set",
+    rejectionReason: p.status === "REJECTED" ? p.adminReviewNotes : undefined,
+  });
+
+  const studentProjectsList = projects.map(normalize);
 
   const counts = {
     all: studentProjectsList.length,
     inProgressLive: studentProjectsList.filter(
-      (p) => getProjectStatusCategory(p.status) === "IN_PROGRESS_LIVE"
+      (p) => getProjectStatusCategory(p.status as any) === "IN_PROGRESS_LIVE"
     ).length,
     completed: studentProjectsList.filter(
-      (p) => getProjectStatusCategory(p.status) === "COMPLETED"
+      (p) => getProjectStatusCategory(p.status as any) === "COMPLETED"
     ).length,
     rejected: studentProjectsList.filter(
-      (p) => getProjectStatusCategory(p.status) === "REJECTED"
+      (p) => getProjectStatusCategory(p.status as any) === "REJECTED"
     ).length,
   };
 
@@ -74,11 +81,20 @@ export default function MyProjectsPage() {
       p.mentor.toLowerCase().includes(search.toLowerCase()) ||
       p.domain.toLowerCase().includes(search.toLowerCase());
 
-    const projCategory = getProjectStatusCategory(p.status);
+    const projCategory = getProjectStatusCategory(p.status as any);
     const matchCategory = activeCategory === "ALL" || projCategory === activeCategory;
 
     return matchSearch && matchCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading your projects...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -187,7 +203,7 @@ export default function MyProjectsPage() {
                       )}
                     </td>
                     <td className="px-4 py-4">
-                      <ProjectStatusCategoryBadge status={project.status} size="sm" />
+                      <ProjectStatusCategoryBadge status={project.status as any} size="sm" />
                     </td>
                     <td className="px-4 py-4 text-xs text-foreground font-medium">
                       {project.mentor}
@@ -228,7 +244,7 @@ export default function MyProjectsPage() {
                 )}
               </div>
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <ProjectStatusCategoryBadge status={project.status} size="sm" />
+                <ProjectStatusCategoryBadge status={project.status as any} size="sm" />
                 <span>Mentor: {project.mentor}</span>
               </div>
               <div className="pt-1 flex items-center justify-between text-xs">

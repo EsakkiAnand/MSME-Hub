@@ -1,54 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MessageSquare,
   Star,
   Send,
-  CheckCircle2,
-  AlertCircle,
-  Building2,
-  Calendar,
   FileCheck,
-  RotateCcw,
+  Loader2,
 } from "lucide-react";
 import { IOSSelect } from "@/components/ui/ios-select";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { initialProjects } from "@/lib/faculty-data";
+import { getStaffProjects, submitStaffProjectFeedbackAction, getProjectFeedbackAction } from "@/app/actions/staff";
 import { toast } from "sonner";
 
-const projectOptions = Object.values(initialProjects).map((p) => ({
-  value: p.id,
-  label: `${p.id} - ${p.name.slice(0, 36)}...`,
-}));
+interface ProjectOption {
+  id: string;
+  name: string;
+  leadName: string;
+  clientName: string;
+}
 
-const previousFeedbacks = [
-  {
-    id: "FB-001",
-    projectId: "PRJ-2024-007",
-    projectName: "Predictive Maintenance IoT Dashboard",
-    studentLead: "Santhosh G",
-    date: "2026-10-24",
-    overallScore: 4.8,
-    comments:
-      "Exceptional edge MQTT telemetry pipeline. TinyML inference latency is under 120ms which satisfies Apex Tex's factory floor SLA. Ensure sensor schematics include fuse protection before final sign-off.",
-    rubric: { architecture: 5, execution: 5, msmeFit: 5, timeliness: 4 },
-  },
-  {
-    id: "FB-002",
-    projectId: "PRJ-2024-001",
-    projectName: "Smart Inventory Management for MSMEs",
-    studentLead: "Mohamed Farhan",
-    date: "2026-10-10",
-    overallScore: 4.4,
-    comments:
-      "Database schema normalization is compliant with multi-warehouse requirements. Frontend stock alerts need unit test coverage for concurrent transactions.",
-    rubric: { architecture: 4, execution: 4, msmeFit: 5, timeliness: 5 },
-  },
-];
+interface LogEntry {
+  id: string;
+  projectId: string;
+  content: string;
+  category: string;
+  createdAt: string;
+}
 
 export default function FacultyFeedbackPage() {
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("PRJ-2024-001");
+  const [projects, setProjects] = useState<ProjectOption[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [rubricScores, setRubricScores] = useState({
     architecture: 4,
     execution: 4,
@@ -56,47 +39,81 @@ export default function FacultyFeedbackPage() {
     timeliness: 4,
   });
   const [feedbackText, setFeedbackText] = useState("");
-  const [feedbacks, setFeedbacks] = useState(previousFeedbacks);
+  const [feedbacks, setFeedbacks] = useState<LogEntry[]>([]);
 
   // Dialog state
   const [showConfirm, setShowConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const selectedProject = initialProjects[selectedProjectId] ?? Object.values(initialProjects)[0];
+  const load = async () => {
+    setLoading(true);
+    const res = await getStaffProjects();
+    if (res.success) {
+      const mapped = (res.projects as any[]).map((p) => ({
+        id: p.id,
+        name: p.title,
+        leadName: p.members?.find((m: any) => m.isLead)?.name || "Unassigned",
+        clientName: p.problem?.industry?.companyName || "Student-Originated Idea",
+      }));
+      setProjects(mapped);
+      if (mapped.length > 0) {
+        setSelectedProjectId((prev) => prev || mapped[0].id);
+      }
+    } else {
+      toast.error(res.error || "Failed to load supervised projects.");
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const loadFeedback = async (projectId: string) => {
+    const res = await getProjectFeedbackAction(projectId);
+    if (res.success) {
+      setFeedbacks(
+        ((res as any).feedbacks || []).map((f: any) => ({
+          id: f.id,
+          projectId,
+          content: f.content,
+          category: f.category,
+          createdAt: f.createdAt,
+        }))
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (selectedProjectId) {
+      loadFeedback(selectedProjectId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProjectId]);
+
+  const selectedProject = projects.find((p) => p.id === selectedProjectId) || projects[0];
 
   const handleScoreChange = (dimension: keyof typeof rubricScores, score: number) => {
     setRubricScores((prev) => ({ ...prev, [dimension]: score }));
   };
 
   const handleSubmitEvaluation = async () => {
+    if (!selectedProject) return;
     setIsSubmitting(true);
     try {
-      await new Promise((r) => setTimeout(r, 600));
-
-      const avgScore = Number(
-        (
-          (rubricScores.architecture +
-            rubricScores.execution +
-            rubricScores.msmeFit +
-            rubricScores.timeliness) /
-          4
-        ).toFixed(1)
-      );
-
-      const newEntry = {
-        id: `FB-00${feedbacks.length + 1}`,
+      const res: any = await submitStaffProjectFeedbackAction({
         projectId: selectedProject.id,
-        projectName: selectedProject.name,
-        studentLead: selectedProject.team.find((m) => m.isLead)?.name ?? "Team Lead",
-        date: new Date().toISOString().split("T")[0],
-        overallScore: avgScore,
-        comments: feedbackText || "Milestone deliverable verified against MSME requirements.",
+        category: "GENERAL",
+        content: feedbackText.trim() || "Milestone deliverable verified against MSME requirements.",
         rubric: { ...rubricScores },
-      };
-
-      setFeedbacks([newEntry, ...feedbacks]);
-      setFeedbackText("");
-      toast.success(`Evaluation recorded for ${selectedProject.id}!`);
+      });
+      if (res.success) {
+        toast.success(res.message || `Evaluation recorded for ${selectedProject.name}!`);
+        setFeedbackText("");
+        loadFeedback(selectedProject.id);
+      } else {
+        toast.error(res.error || "Failed to submit faculty feedback.");
+      }
     } catch {
       toast.error("Failed to submit faculty feedback.");
     } finally {
@@ -104,6 +121,20 @@ export default function FacultyFeedbackPage() {
       setShowConfirm(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading your supervised projects...</span>
+      </div>
+    );
+  }
+
+  const projectOptions = projects.map((p) => ({
+    value: p.id,
+    label: `${p.id.slice(0, 8)} - ${p.name.slice(0, 32)}...`,
+  }));
 
   return (
     <div className="space-y-6">
@@ -137,107 +168,114 @@ export default function FacultyFeedbackPage() {
               <span className="text-xs text-muted-foreground font-normal">All fields required</span>
             </h3>
 
-            {/* Select Target Project */}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-foreground mb-1.5">
-                  Select Supervised Project
-                </label>
-                <IOSSelect
-                  options={projectOptions}
-                  value={selectedProjectId}
-                  onChange={setSelectedProjectId}
-                  className="w-full"
-                />
+            {projects.length === 0 ? (
+              <div className="text-xs text-muted-foreground py-8 text-center">
+                No supervised projects available yet. Claim a problem from the industry pool to begin mentoring.
               </div>
-
-              {/* Project Quick Overview */}
-              <div className="p-3.5 bg-black/[0.02] dark:bg-white/[0.03] rounded-md border border-slate-100 text-xs space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-foreground">{selectedProject.name}</span>
-                  <span className="font-mono text-muted-foreground font-medium">{selectedProject.id}</span>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1.5">
+                    Select Supervised Project
+                  </label>
+                  <IOSSelect
+                    options={projectOptions}
+                    value={selectedProjectId}
+                    onChange={setSelectedProjectId}
+                    className="w-full"
+                  />
                 </div>
-                <div className="text-muted-foreground flex items-center gap-2">
-                  <span>Client: {selectedProject.msmeCompany}</span>
-                  <span>·</span>
-                  <span>Lead: {selectedProject.team.find((m) => m.isLead)?.name}</span>
-                </div>
-              </div>
 
-              {/* 4 Rubric Metrics */}
-              <div>
-                <label className="block text-xs font-semibold text-foreground mb-2">
-                  Rubric Assessment (1 to 5 Stars)
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {[
-                    { key: "architecture" as const, label: "Technical Architecture & Code Quality" },
-                    { key: "execution" as const, label: "Implementation & Milestone Progress" },
-                    { key: "msmeFit" as const, label: "MSME Problem Alignment & Practicality" },
-                    { key: "timeliness" as const, label: "Deliverable Timeliness & Communication" },
-                  ].map((dim) => (
-                    <div
-                      key={dim.key}
-                      className="p-3 bg-white border border-black/[0.06] dark:border-white/[0.08] rounded-md flex items-center justify-between"
-                    >
-                      <span className="text-xs text-foreground font-medium pr-2">{dim.label}</span>
-                      <div className="flex items-center gap-1 shrink-0">
-                        {[1, 2, 3, 4, 5].map((val) => (
-                          <button
-                            key={val}
-                            type="button"
-                            onClick={() => handleScoreChange(dim.key, val)}
-                            className="p-0.5 text-slate-300 hover:text-amber-400 focus:outline-none"
-                            aria-label={`${dim.label} ${val} stars`}
-                          >
-                            <Star
-                              className={`size-4 ${
-                                val <= rubricScores[dim.key]
-                                  ? "text-amber-400 fill-amber-400"
-                                  : "text-slate-200"
-                              }`}
-                            />
-                          </button>
-                        ))}
-                      </div>
+                {/* Project Quick Overview */}
+                {selectedProject && (
+                  <div className="p-3.5 bg-black/[0.02] dark:bg-white/[0.03] rounded-md border border-slate-100 text-xs space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-foreground">{selectedProject.name}</span>
+                      <span className="font-mono text-muted-foreground font-medium">{selectedProject.id.slice(0, 8)}</span>
                     </div>
-                  ))}
+                    <div className="text-muted-foreground flex items-center gap-2">
+                      <span>Client: {selectedProject.clientName}</span>
+                      <span>·</span>
+                      <span>Lead: {selectedProject.leadName}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4 Rubric Metrics */}
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-2">
+                    Rubric Assessment (1 to 5 Stars)
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[
+                      { key: "architecture" as const, label: "Technical Architecture & Code Quality" },
+                      { key: "execution" as const, label: "Implementation & Milestone Progress" },
+                      { key: "msmeFit" as const, label: "MSME Problem Alignment & Practicality" },
+                      { key: "timeliness" as const, label: "Deliverable Timeliness & Communication" },
+                    ].map((dim) => (
+                      <div
+                        key={dim.key}
+                        className="p-3 bg-white border border-black/[0.06] dark:border-white/[0.08] rounded-md flex items-center justify-between"
+                      >
+                        <span className="text-xs text-foreground font-medium pr-2">{dim.label}</span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {[1, 2, 3, 4, 5].map((val) => (
+                            <button
+                              key={val}
+                              type="button"
+                              onClick={() => handleScoreChange(dim.key, val)}
+                              className="p-0.5 text-slate-300 hover:text-amber-400 focus:outline-none"
+                              aria-label={`${dim.label} ${val} stars`}
+                            >
+                              <Star
+                                className={`size-4 ${
+                                  val <= rubricScores[dim.key]
+                                    ? "text-amber-400 fill-amber-400"
+                                    : "text-slate-200"
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Formative Feedback Text */}
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1.5">
+                    Detailed Faculty Critique &amp; Technical Recommendations
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={feedbackText}
+                    onChange={(e) => setFeedbackText(e.target.value)}
+                    placeholder="Provide concrete academic and engineering guidance for the student team (e.g., test cases to add, performance bottlenecks, architecture advice)..."
+                    className="w-full text-xs sm:text-sm border border-black/[0.06] dark:border-white/[0.08] rounded-md p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all resize-y"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-2 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFeedbackText("")}
+                    className="px-3.5 py-2 text-xs font-medium text-muted-foreground hover:text-foreground border border-black/[0.06] dark:border-white/[0.08] rounded-md bg-white hover:bg-black/[0.02] dark:bg-white/[0.03] transition-all"
+                  >
+                    Clear Form
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(true)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#007AFF] hover:bg-[#007AFF]/90 rounded-md transition-all shadow-xs active:scale-[0.98]"
+                  >
+                    <Send className="size-3.5" />
+                    <span>Submit Evaluation</span>
+                  </button>
                 </div>
               </div>
-
-              {/* Formative Feedback Text */}
-              <div>
-                <label className="block text-xs font-semibold text-foreground mb-1.5">
-                  Detailed Faculty Critique &amp; Technical Recommendations
-                </label>
-                <textarea
-                  rows={4}
-                  value={feedbackText}
-                  onChange={(e) => setFeedbackText(e.target.value)}
-                  placeholder="Provide concrete academic and engineering guidance for the student team (e.g., test cases to add, performance bottlenecks, architecture advice)..."
-                  className="w-full text-xs sm:text-sm border border-black/[0.06] dark:border-white/[0.08] rounded-md p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all resize-y"
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-2 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFeedbackText("")}
-                  className="px-3.5 py-2 text-xs font-medium text-muted-foreground hover:text-foreground border border-black/[0.06] dark:border-white/[0.08] rounded-md bg-white hover:bg-black/[0.02] dark:bg-white/[0.03] transition-all"
-                >
-                  Clear Form
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#007AFF] hover:bg-[#007AFF]/90 rounded-md transition-all shadow-xs active:scale-[0.98]"
-                >
-                  <Send className="size-3.5" />
-                  <span>Submit Evaluation</span>
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -258,25 +296,23 @@ export default function FacultyFeedbackPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <span className="font-mono text-[10px] font-semibold text-muted-foreground bg-white border border-black/[0.06] dark:border-white/[0.08] px-1.5 py-0.2 rounded">
-                        {item.projectId}
+                        {item.projectId.slice(0, 8)}
                       </span>
                       <h4 className="font-semibold text-foreground mt-1 line-clamp-1">
-                        {item.projectName}
+                        {selectedProject?.name || "Project"}
                       </h4>
                     </div>
-                    <div className="flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-xs shrink-0">
-                      <Star className="size-3 fill-amber-500 text-amber-500" />
-                      <span>{item.overallScore}</span>
-                    </div>
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-muted-foreground">
+                      {item.category}
+                    </span>
                   </div>
 
-                  <p className="text-muted-foreground text-[11px] leading-relaxed line-clamp-3">
-                    &ldquo;{item.comments}&rdquo;
+                  <p className="text-muted-foreground text-[11px] leading-relaxed line-clamp-4">
+                    &ldquo;{item.content}&rdquo;
                   </p>
 
                   <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-black/[0.06] dark:border-white/[0.08]/50">
-                    <span>Lead: {item.studentLead}</span>
-                    <span>{item.date}</span>
+                    <span>{new Date(item.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               ))}
@@ -297,7 +333,7 @@ export default function FacultyFeedbackPage() {
         onOpenChange={setShowConfirm}
         title="Submit Project Evaluation"
         description="Are you sure you want to submit this evaluation? This assessment will be permanently logged on the project record."
-        itemName={`${selectedProject.id} - ${selectedProject.name}`}
+        itemName={`${selectedProject?.id?.slice(0, 8) || ""} - ${selectedProject?.name || ""}`}
         confirmText="Confirm & Submit"
         variant="default"
         isLoading={isSubmitting}

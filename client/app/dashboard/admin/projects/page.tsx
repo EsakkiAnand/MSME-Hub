@@ -1,29 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import {
   FolderKanban,
   Search,
-  Filter,
   Building2,
   GraduationCap,
-  Users,
   ShieldCheck,
-  CheckCircle2,
   Clock,
-  AlertCircle,
   XCircle,
   GitBranch,
   ExternalLink,
-  ChevronRight,
   Eye,
   FileText,
-  Plus,
   MessageSquare,
   Check,
   X,
   RotateCcw,
+  Star,
+  Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,44 +30,92 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  initialProjectsMaster,
-  ProjectItem,
-  ProjectStatusCategory,
   getProjectStatusCategory,
-  ProjectLifecycleStatus,
+  ProjectStatusCategory,
 } from "@/lib/project-data";
 import { ProjectCategoryTabs } from "@/components/projects/project-category-tabs";
 import { ProjectStatusCategoryBadge } from "@/components/projects/project-status-category-badge";
-import { ProjectHistoryTimeline } from "@/components/projects/project-history-timeline";
-import { AuthorizedStakeholdersCard } from "@/components/projects/authorized-stakeholders-card";
+import {
+  getAdminAllProjects,
+  adminReviewSolutionAction,
+  adminOverrideProjectStatusAction,
+} from "@/app/actions/admin-projects";
 import { toast } from "sonner";
 
+interface AdminProject {
+  id: string;
+  problemId: string | null;
+  ideaId: string | null;
+  title: string;
+  domain: string;
+  status: string;
+  githubUrl: string | null;
+  adminReviewNotes: string | null;
+  targetDeadline: string | null;
+  createdAt: string;
+  updatedAt: string;
+  industry: { companyName: string; companyId: string; isIdea?: boolean };
+  facultySupervisor: { name: string; email: string; uniqueId: string | null } | null;
+  studentTeam: {
+    id: string;
+    name: string;
+    uniqueId: string | null;
+    email: string;
+    isLead: boolean;
+  }[];
+  rating: {
+    stars: number;
+    feedbackText: string;
+    isModerated: boolean;
+    createdAt: string;
+  } | null;
+}
+
 export default function AdminProjectsGovernancePage() {
-  const [projects, setProjects] = useState<Record<string, ProjectItem>>(initialProjectsMaster);
+  const [projectsList, setProjectsList] = useState<AdminProject[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<ProjectStatusCategory>("ALL");
   const [domainFilter, setDomainFilter] = useState("ALL");
 
   // Selected project for detailed inspection dialog
-  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+  const [selectedProject, setSelectedProject] = useState<AdminProject | null>(null);
   const [adminNote, setAdminNote] = useState("");
-  const [isSubmittingNote, setIsSubmittingNote] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const projectsList = Object.values(projects);
+  const loadProjects = async () => {
+    const res = await getAdminAllProjects();
+    if (res.success) {
+      setProjectsList((res.projects as any[]) || []);
+    } else {
+      toast.error(res.error || "Failed to load project registry.");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await loadProjects();
+      setLoading(false);
+    })();
+  }, []);
+
+  const domains = Array.from(new Set(projectsList.map((p) => p.domain)));
 
   // Compute category counts
   const counts = {
     all: projectsList.length,
     inProgressLive: projectsList.filter(
-      (p) => getProjectStatusCategory(p.status) === "IN_PROGRESS_LIVE"
+      (p) => getProjectStatusCategory(p.status as any) === "IN_PROGRESS_LIVE"
     ).length,
     completed: projectsList.filter(
-      (p) => getProjectStatusCategory(p.status) === "COMPLETED"
+      (p) => getProjectStatusCategory(p.status as any) === "COMPLETED"
     ).length,
     rejected: projectsList.filter(
-      (p) => getProjectStatusCategory(p.status) === "REJECTED"
+      (p) => getProjectStatusCategory(p.status as any) === "REJECTED"
     ).length,
   };
 
@@ -81,100 +124,92 @@ export default function AdminProjectsGovernancePage() {
       searchQuery.trim() === "" ||
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.problemId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.industryPartner.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.facultySupervisor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.industry.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.facultySupervisor?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.studentTeam.some((m) => m.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const projCategory = getProjectStatusCategory(p.status);
+    const projCategory = getProjectStatusCategory(p.status as any);
     const matchesCategory = activeCategory === "ALL" || projCategory === activeCategory;
-    const matchesDomain = domainFilter === "ALL" || p.domain.toLowerCase().includes(domainFilter.toLowerCase());
+    const matchesDomain =
+      domainFilter === "ALL" || p.domain.toLowerCase().includes(domainFilter.toLowerCase());
 
     return matchesSearch && matchesCategory && matchesDomain;
   });
 
-  // Handler to log an Admin audit note to the individual project history
-  const handleLogAdminNote = async () => {
-    if (!selectedProject || !adminNote.trim()) return;
-
-    setIsSubmittingNote(true);
-    await new Promise((r) => setTimeout(r, 500));
-
-    const newHistoryEvent = {
-      id: `H-${Date.now()}`,
-      timestamp: "Just now",
-      title: "MSME Admin Governance Note Logged",
-      category: "GOVERNANCE" as const,
-      actor: {
-        name: "Central MSME Admin Cell",
-        role: "MSME_ADMIN" as const,
-        roleTitle: "Central Administrator",
-      },
-      description: adminNote.trim(),
-    };
-
-    setProjects((prev) => {
-      const updated = {
-        ...prev,
-        [selectedProject.id]: {
-          ...prev[selectedProject.id],
-          history: [newHistoryEvent, ...prev[selectedProject.id].history],
-        },
-      };
-      setSelectedProject(updated[selectedProject.id]);
-      return updated;
-    });
-
-    setAdminNote("");
-    setIsSubmittingNote(false);
-    toast.success("Governance note appended to individual project history audit trail.");
-  };
-
-  // Quick State Transition Handler by MSME Admin
-  const handleAdminStatusChange = async (newStatus: ProjectLifecycleStatus, actionTitle: string, note?: string) => {
+  // Approval gate actions
+  const handleApprove = async () => {
     if (!selectedProject) return;
-
-    const newHistoryEvent = {
-      id: `H-${Date.now()}`,
-      timestamp: "Just now",
-      title: actionTitle,
-      category: "GOVERNANCE" as const,
-      actor: {
-        name: "Central MSME Admin Cell",
-        role: "MSME_ADMIN" as const,
-        roleTitle: "Governance Administrator",
-      },
-      description: `MSME Admin updated lifecycle status to ${newStatus}.`,
-      notes: note,
-      metadata: {
-        oldStatus: selectedProject.status,
-        newStatus,
-      },
-    };
-
-    setProjects((prev) => {
-      const updated = {
-        ...prev,
-        [selectedProject.id]: {
-          ...prev[selectedProject.id],
-          status: newStatus,
-          history: [newHistoryEvent, ...prev[selectedProject.id].history],
-          ...(newStatus === "REJECTED" && {
-            rejectionInfo: {
-              reason: note || "Administrative governance review flagged compliance failure.",
-              rejectedAt: new Date().toISOString(),
-              rejectedBy: "Central MSME Admin Cell",
-              remediationAction: "Problem statement re-queued for institutional reassessment.",
-            },
-          }),
-        },
-      };
-      setSelectedProject(updated[selectedProject.id]);
-      return updated;
+    setIsSubmitting(true);
+    const res = await adminReviewSolutionAction({
+      projectId: selectedProject.id,
+      decision: "APPROVE",
+      reviewNotes: adminNote.trim() || "Deliverable approved by MSME Admin governance review.",
     });
-
-    toast.success(`Project ${selectedProject.id} status updated to ${newStatus}.`);
+    setIsSubmitting(false);
+    if (res.success) {
+      toast.success(res.message || "Solution approved.");
+      await loadProjects();
+      setSelectedProject(null);
+      setAdminNote("");
+    } else {
+      toast.error(res.error || "Failed to approve solution.");
+    }
   };
+
+  const handleRequestRevision = async () => {
+    if (!selectedProject) return;
+    if (!adminNote.trim()) {
+      toast.error("Structured revision notes are mandatory when requesting revisions.");
+      return;
+    }
+    setIsSubmitting(true);
+    const res = await adminReviewSolutionAction({
+      projectId: selectedProject.id,
+      decision: "REQUEST_REVISION",
+      reviewNotes: adminNote.trim(),
+    });
+    setIsSubmitting(false);
+    if (res.success) {
+      toast.info(res.message || "Revision requested. Student team notified.");
+      await loadProjects();
+      setSelectedProject(null);
+      setAdminNote("");
+    } else {
+      toast.error(res.error || "Failed to request revision.");
+    }
+  };
+
+  const handleRejectAndClose = async () => {
+    if (!selectedProject) return;
+    if (!adminNote.trim()) {
+      toast.error("A rejection justification is mandatory when closing a project.");
+      return;
+    }
+    setIsSubmitting(true);
+    const res = await adminOverrideProjectStatusAction({
+      projectId: selectedProject.id,
+      status: "REJECTED",
+      note: adminNote.trim(),
+    });
+    setIsSubmitting(false);
+    if (res.success) {
+      toast.error(res.message || "Project rejected and closed.");
+      await loadProjects();
+      setSelectedProject(null);
+      setAdminNote("");
+    } else {
+      toast.error(res.error || "Failed to reject project.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading institutional project registry...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -191,7 +226,7 @@ export default function AdminProjectsGovernancePage() {
             Institution-Wide Project Management
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
-            PRD §8.2: Oversee all collaborative MSME engineering projects, filter across lifecycle categories (In Progress / Live, Completed, Rejected), inspect individual project history audit trails, and review authorized stakeholder credentials.
+            PRD §8.2: Oversee all collaborative MSME engineering projects, filter across lifecycle categories, and inspect deliverables.
           </p>
         </div>
 
@@ -224,7 +259,7 @@ export default function AdminProjectsGovernancePage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
-              placeholder="Search by project name, ID, problem ID, company, faculty, student..."
+              placeholder="Search by project name, ID, company, faculty, student..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 text-xs h-9 bg-white rounded-md border-black/[0.06] dark:border-white/[0.08] focus-visible:ring-blue-600"
@@ -235,10 +270,7 @@ export default function AdminProjectsGovernancePage() {
             size="sm"
             options={[
               { value: "ALL", label: "All Tech Domains" },
-              { value: "Software", label: "Software / Web" },
-              { value: "IoT", label: "IoT & Analytics" },
-              { value: "Manufacturing", label: "Manufacturing & AI" },
-              { value: "Acoustics", label: "Signal Processing" },
+              ...domains.map((d) => ({ value: d, label: d })),
             ]}
             value={domainFilter}
             onChange={setDomainFilter}
@@ -289,7 +321,8 @@ export default function AdminProjectsGovernancePage() {
             </thead>
             <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
               {filteredProjects.map((project) => {
-                const leadStudent = project.studentTeam.find((m) => m.isLead) || project.studentTeam[0];
+                const leadStudent =
+                  project.studentTeam.find((m) => m.isLead) || project.studentTeam[0];
 
                 return (
                   <tr
@@ -299,7 +332,7 @@ export default function AdminProjectsGovernancePage() {
                     <td className="px-6 py-4 font-mono text-xs font-medium">
                       <CopyIdBadge id={project.id} label="ID" />
                       <div className="text-[10px] text-muted-foreground font-mono mt-1">
-                        Ref: {project.problemId}
+                        Ref: {project.industry.isIdea ? "Idea-Originated" : project.problemId?.slice(0, 8) || "—"}
                       </div>
                     </td>
 
@@ -307,53 +340,55 @@ export default function AdminProjectsGovernancePage() {
                       <p className="font-semibold text-foreground text-xs">{project.title}</p>
                       <div className="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] text-muted-foreground">
                         <Building2 className="size-3 text-muted-foreground" />
-                        <span className="font-medium text-foreground">{project.industryPartner.companyName}</span>
+                        <span className="font-medium text-foreground">{project.industry.companyName}</span>
                         <span>·</span>
                         <span>{project.domain}</span>
                       </div>
-                      {project.status === "REJECTED" && project.rejectionInfo && (
-                        <p className="text-[11px] text-rose-600 mt-1 line-clamp-1 flex items-center gap-1">
-                          <XCircle className="size-3 shrink-0" />
-                          <span>{project.rejectionInfo.reason}</span>
-                        </p>
-                      )}
                     </td>
 
                     <td className="px-4 py-4">
-                      <ProjectStatusCategoryBadge status={project.status} size="sm" />
+                      <ProjectStatusCategoryBadge status={project.status as any} size="sm" />
                     </td>
 
                     <td className="px-4 py-4 text-xs">
-                      <p className="font-medium text-foreground">{project.facultySupervisor.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{project.facultySupervisor.department}</p>
+                      {project.facultySupervisor ? (
+                        <p className="font-medium text-foreground">{project.facultySupervisor.name}</p>
+                      ) : (
+                        <span className="text-muted-foreground">Unassigned</span>
+                      )}
                     </td>
 
                     <td className="px-4 py-4 text-xs">
-                      {leadStudent && (
+                      {leadStudent ? (
                         <>
                           <p className="font-medium text-foreground flex items-center gap-1">
                             <GraduationCap className="size-3 text-emerald-600" />
                             {leadStudent.name}
                           </p>
                           <p className="text-[10px] text-muted-foreground font-mono">
-                            {leadStudent.regNo} ({project.studentTeam.length} members)
+                            {project.studentTeam.length} member team
                           </p>
                         </>
+                      ) : (
+                        <span className="text-muted-foreground">No team assigned</span>
                       )}
                     </td>
 
                     <td className="px-4 py-4 text-xs font-mono text-muted-foreground">
-                      {project.targetDeadline}
+                      {project.targetDeadline ? new Date(project.targetDeadline).toLocaleDateString() : "—"}
                     </td>
 
                     <td className="px-6 py-4 text-right">
                       <Button
                         size="sm"
-                        onClick={() => setSelectedProject(project)}
+                        onClick={() => {
+                          setSelectedProject(project);
+                          setAdminNote("");
+                        }}
                         className="bg-[#0f2744] hover:bg-[#1a385c] text-white text-xs h-8 px-3 inline-flex items-center gap-1.5 rounded-md"
                       >
                         <Eye className="size-3.5" />
-                        <span>Audit &amp; History</span>
+                        <span>Govern</span>
                       </Button>
                     </td>
                   </tr>
@@ -370,30 +405,108 @@ export default function AdminProjectsGovernancePage() {
         )}
       </div>
 
-      {/* Detailed Inspection & Audit Trail Dialog */}
-      <Dialog open={!!selectedProject} onOpenChange={(open) => !open && setSelectedProject(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6 sm:p-8">
-          {selectedProject && (
+      {/* Detailed Inspection & Governance Dialog */}
+      <Dialog
+        open={!!selectedProject}
+        onOpenChange={(open) => !open && setSelectedProject(null)}
+      >
+        {selectedProject && (
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-6 sm:p-8">
             <div className="space-y-6">
               <DialogHeader className="border-b border-black/[0.06] pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-2">
                     <CopyIdBadge id={selectedProject.id} label="Project ID" />
-                    <span className="text-xs font-mono text-muted-foreground">
-                      Ref: {selectedProject.problemId}
-                    </span>
                   </div>
-                  <ProjectStatusCategoryBadge status={selectedProject.status} size="md" />
+                  <ProjectStatusCategoryBadge status={selectedProject.status as any} size="md" />
                 </div>
                 <DialogTitle className="text-lg font-bold text-foreground">
                   {selectedProject.title}
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground">
-                  Domain: {selectedProject.domain} · Target Deadline: {selectedProject.targetDeadline}
+                  Domain: {selectedProject.domain} · Partner: {selectedProject.industry.companyName} ·
+                  Mentor: {selectedProject.facultySupervisor?.name || "Unassigned"}
                 </DialogDescription>
               </DialogHeader>
 
-              {/* Admin Governance State Machine Actions */}
+              {/* Team Roster */}
+              <div className="p-4 rounded-xl border border-black/[0.06] bg-black/[0.02] space-y-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                  Authorized Student Team
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {selectedProject.studentTeam.map((m) => (
+                    <span
+                      key={m.id}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-black/[0.06] text-xs font-medium"
+                    >
+                      {m.isLead && <Star className="size-3 text-amber-500 fill-amber-500" />}
+                      {m.name}
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        {m.uniqueId || m.id.slice(0, 6)}
+                      </span>
+                    </span>
+                  ))}
+                  {selectedProject.studentTeam.length === 0 && (
+                    <span className="text-xs text-muted-foreground">No team members assigned.</span>
+                  )}
+                </div>
+              </div>
+
+              {/* GitHub Deliverable */}
+              <div className="p-4 rounded-xl border border-black/[0.06] bg-white space-y-2">
+                <div className="flex items-center gap-2">
+                  <GitBranch className="size-4 text-muted-foreground" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Public GitHub Deliverable
+                  </span>
+                </div>
+                {selectedProject.githubUrl ? (
+                  <a
+                    href={selectedProject.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#007AFF] hover:underline break-all"
+                  >
+                    <ExternalLink className="size-3.5" />
+                    <span>{selectedProject.githubUrl}</span>
+                  </a>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    No repository URL submitted yet by the Project Team Lead.
+                  </p>
+                )}
+                {selectedProject.adminReviewNotes && (
+                  <div className="mt-2 p-3 rounded-lg bg-orange-50 border border-orange-200 text-xs text-orange-900">
+                    <span className="font-semibold flex items-center gap-1.5 mb-1">
+                      <FileText className="size-3.5" /> Admin Review Notes
+                    </span>
+                    <p className="leading-relaxed">{selectedProject.adminReviewNotes}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Industry Rating */}
+              {selectedProject.rating && (
+                <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Star className="size-4 text-amber-500 fill-amber-500" />
+                    <span className="text-xs font-bold">
+                      Industry Rating: {selectedProject.rating.stars}/5
+                    </span>
+                    {selectedProject.rating.isModerated && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-200/60 text-amber-900">
+                        Under Moderation
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-amber-900 italic leading-relaxed">
+                    &ldquo;{selectedProject.rating.feedbackText}&rdquo;
+                  </p>
+                </div>
+              )}
+
+              {/* Governance Decision Console */}
               <div className="p-4 rounded-xl border border-black/[0.08] bg-black/[0.02] space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
@@ -408,10 +521,12 @@ export default function AdminProjectsGovernancePage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <Button
                     size="sm"
-                    onClick={() =>
-                      handleAdminStatusChange("APPROVED", "Admin Governance Sign-Off Approved", "Approved following central code deliverable inspection.")
+                    onClick={handleApprove}
+                    disabled={
+                      isSubmitting ||
+                      selectedProject.status === "APPROVED" ||
+                      selectedProject.status === "COMPLETED"
                     }
-                    disabled={selectedProject.status === "APPROVED" || selectedProject.status === "COMPLETED"}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8"
                   >
                     <Check className="size-3.5 mr-1" />
@@ -421,10 +536,13 @@ export default function AdminProjectsGovernancePage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() =>
-                      handleAdminStatusChange("REVISION_IN_PROGRESS", "Admin Itemized Revision Requested", "Compliance notes dispatched to student lead & faculty mentor.")
+                    onClick={handleRequestRevision}
+                    disabled={
+                      isSubmitting ||
+                      selectedProject.status === "REVISION_IN_PROGRESS" ||
+                      selectedProject.status === "COMPLETED" ||
+                      selectedProject.status === "REJECTED"
                     }
-                    disabled={selectedProject.status === "REVISION_IN_PROGRESS" || selectedProject.status === "COMPLETED" || selectedProject.status === "REJECTED"}
                     className="text-amber-700 border-amber-300 hover:bg-amber-50 text-xs h-8"
                   >
                     <RotateCcw className="size-3.5 mr-1" />
@@ -434,58 +552,37 @@ export default function AdminProjectsGovernancePage() {
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() =>
-                      handleAdminStatusChange("REJECTED", "Project Formally Rejected by Central Admin", "Deliverable failed technical compliance and open-source standards.")
+                    onClick={handleRejectAndClose}
+                    disabled={
+                      isSubmitting ||
+                      selectedProject.status === "REJECTED" ||
+                      selectedProject.status === "COMPLETED"
                     }
-                    disabled={selectedProject.status === "REJECTED" || selectedProject.status === "COMPLETED"}
                     className="text-xs h-8"
                   >
                     <X className="size-3.5 mr-1" />
                     Reject &amp; Close Project
                   </Button>
                 </div>
-              </div>
 
-              {/* Authorized Personnel Directory */}
-              <AuthorizedStakeholdersCard
-                studentTeam={selectedProject.studentTeam}
-                facultySupervisor={selectedProject.facultySupervisor}
-                industryPartner={selectedProject.industryPartner}
-                projectId={selectedProject.id}
-              />
-
-              {/* Individual Project History & Audit Trail */}
-              <ProjectHistoryTimeline
-                history={selectedProject.history}
-                projectId={selectedProject.id}
-              />
-
-              {/* Append Admin Audit Note */}
-              <div className="p-4 rounded-xl border border-black/[0.06] bg-white space-y-2">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <MessageSquare className="size-3.5 text-[#007AFF]" />
-                  Append Official Governance Note to Audit History
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    value={adminNote}
-                    onChange={(e) => setAdminNote(e.target.value)}
-                    placeholder="Enter audit remarks or administrative directive..."
-                    className="text-xs h-9 bg-white"
-                  />
-                  <Button
-                    size="sm"
-                    onClick={handleLogAdminNote}
-                    disabled={isSubmittingNote || !adminNote.trim()}
-                    className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs h-9 px-4 shrink-0"
-                  >
-                    Append Note
-                  </Button>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <MessageSquare className="size-3.5 text-[#007AFF]" />
+                    Structured Governance Notes (mandatory for revision / rejection)
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={adminNote}
+                      onChange={(e) => setAdminNote(e.target.value)}
+                      placeholder="Enter audit remarks or administrative directive..."
+                      className="text-xs h-9 bg-white"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          )}
-        </DialogContent>
+          </DialogContent>
+        )}
       </Dialog>
     </div>
   );

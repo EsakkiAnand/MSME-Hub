@@ -1,20 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   FileText,
   Search,
-  Filter,
   PlusCircle,
   Eye,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Building2,
-  Layers,
+  Loader2,
 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,18 +23,50 @@ import {
 } from "@/components/ui/dialog";
 import { IOSSelect } from "@/components/ui/ios-select";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { initialIndustryProblems, IndustryProblemItem } from "@/lib/industry-data";
+import { getIndustryProblemsAction } from "@/app/actions/industry";
+import { toast } from "sonner";
 
+interface LiveProblem {
+  id: string;
+  title: string;
+  domain: string;
+  description: string;
+  constraints: string | null;
+  expectedDeliverables: string | null;
+  status: string;
+  createdAt: string;
+  claimedByFacultyName: string | null;
+  assignedProjectId: string | null;
+}
 
 export default function MySubmittedProblemsPage() {
-  const [problems] = useState<IndustryProblemItem[]>(initialIndustryProblems);
+  const [problems, setProblems] = useState<LiveProblem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [domainFilter, setDomainFilter] = useState("ALL");
-  const [selectedProblem, setSelectedProblem] = useState<IndustryProblemItem | null>(null);
+  const [selectedProblem, setSelectedProblem] = useState<LiveProblem | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    const res = await getIndustryProblemsAction();
+    if (res.success) {
+      setProblems((res.problems as any[]) || []);
+    } else {
+      toast.error(res.error || "Failed to load submitted challenges.");
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const domains = Array.from(new Set(problems.map((p) => p.domain)));
 
   const filteredProblems = problems.filter((prob) => {
     const matchesSearch =
+      searchQuery.trim() === "" ||
       prob.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       prob.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       prob.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -49,6 +76,15 @@ export default function MySubmittedProblemsPage() {
 
     return matchesSearch && matchesStatus && matchesDomain;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-xs text-muted-foreground">Loading your submitted challenges...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -104,10 +140,7 @@ export default function MySubmittedProblemsPage() {
               onChange={setDomainFilter}
               options={[
                 { value: "ALL", label: "All Tech Domains" },
-                { value: "Software & Cloud", label: "Software & Cloud" },
-                { value: "IoT & Analytics", label: "IoT & Analytics" },
-                { value: "FinTech & Web", label: "FinTech & Web" },
-                { value: "Manufacturing & AI", label: "Manufacturing & AI" },
+                ...domains.map((d) => ({ value: d, label: d })),
               ]}
             />
           </div>
@@ -140,7 +173,7 @@ export default function MySubmittedProblemsPage() {
                   return (
                     <tr key={prob.id} className="hover:bg-black/[0.02] dark:bg-white/[0.03]/80 transition-colors">
                       <td className="py-3 px-4 font-mono font-bold text-foreground whitespace-nowrap">
-                        {prob.id}
+                        {prob.id.slice(0, 8)}
                       </td>
                       <td className="py-3 px-4 font-semibold text-foreground max-w-sm truncate">
                         {prob.title}
@@ -188,7 +221,7 @@ export default function MySubmittedProblemsPage() {
             <DialogTitle className="text-base font-bold text-foreground flex items-center justify-between">
               <span>{selectedProblem?.title}</span>
               <Badge variant="outline" className="font-mono text-xs">
-                {selectedProblem?.id}
+                {selectedProblem?.id.slice(0, 8)}
               </Badge>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">

@@ -1,27 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageSquare, CheckCircle2, Star, ShieldCheck, HelpCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IOSSelect } from "@/components/ui/ios-select";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-
-const accessibleProjects = [
-  { id: "PRJ-2024-007", name: "Predictive Maintenance IoT Dashboard" },
-  { id: "PRJ-2023-042", name: "Digital Invoice Generator for SME Retail" },
-];
+import { toast } from "sonner";
+import { getStudentProjects, submitStudentFeedbackAction } from "@/app/actions/student";
 
 const categoryOptions = [
-  { value: "collaboration", label: "Team Collaboration & Communication" },
-  { value: "technical", label: "Technical Quality & Code Deliverables" },
-  { value: "mentor", label: "Staff Mentorship & Guidance" },
-  { value: "platform", label: "Platform Tools & Infrastructure" },
-  { value: "other", label: "General Feedback" },
+  { value: "GENERAL", label: "General Project & Team Collaboration" },
+  { value: "ARCHITECTURE", label: "Technical Architecture & Code Quality" },
+  { value: "INDUSTRY_RELEVANCE", label: "Staff Mentorship & Industry Relevance" },
+  { value: "SECURITY_QUALITY", label: "Security & Code Quality Standards" },
 ];
 
 type FeedbackState = "idle" | "submitting" | "success";
 
 export default function FeedbackPage() {
+  const [projects, setProjects] = useState<{ id: string; title: string }[]>([]);
   const [selectedProject, setSelectedProject] = useState("");
   const [category, setCategory] = useState("");
   const [rating, setRating] = useState(0);
@@ -31,6 +28,20 @@ export default function FeedbackPage() {
   const [feedbackState, setFeedbackState] = useState<FeedbackState>("idle");
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await getStudentProjects();
+      if (res.success) {
+        const list = ((res as any).projects || []).map((p: any) => ({ id: p.id, title: p.title }));
+        setProjects(list);
+        if (list.length > 0) setSelectedProject((prev) => prev || list[0].id);
+      }
+    };
+    load();
+  }, []);
+
+  const projectOptions = projects.map((p) => ({ value: p.id, label: `${p.id.slice(0, 8)} - ${p.title.slice(0, 32)}` }));
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -55,10 +66,21 @@ export default function FeedbackPage() {
   const handleConfirmSubmit = async () => {
     setFeedbackState("submitting");
     try {
-      await new Promise((r) => setTimeout(r, 650));
-      setShowSubmitConfirm(false);
-      setFeedbackState("success");
-    } catch (err) {
+      const res: any = await submitStudentFeedbackAction({
+        projectId: selectedProject,
+        category: category as any,
+        content: content.trim(),
+      });
+      if (res.success) {
+        toast.success(res.message || "Feedback submitted successfully.");
+        setShowSubmitConfirm(false);
+        setFeedbackState("success");
+      } else {
+        toast.error(res.error || "Failed to submit feedback.");
+        setFeedbackState("idle");
+      }
+    } catch {
+      toast.error("Failed to submit feedback.");
       setFeedbackState("idle");
     }
   };
@@ -157,11 +179,7 @@ export default function FeedbackPage() {
                     setSelectedProject(val);
                     setErrors((prev) => ({ ...prev, project: "" }));
                   }}
-                  options={accessibleProjects.map((p) => ({
-                    value: p.id,
-                    label: `${p.id} — ${p.name}`,
-                    badge: p.id,
-                  }))}
+                  options={projectOptions}
                   placeholder="Choose an enrolled project..."
                   headerLabel="CHOOSE PROJECT"
                   error={!!errors.project}
@@ -278,7 +296,7 @@ export default function FeedbackPage() {
             onOpenChange={setShowSubmitConfirm}
             title="Submit Project Evaluation"
             description="Are you sure you want to submit this evaluation feedback? Your assessment will be permanently logged for the academic review committee and staff mentor evaluation."
-            itemName={accessibleProjects.find((p) => p.id === selectedProject)?.name}
+            itemName={projects.find((p) => p.id === selectedProject)?.title}
             itemType={selectedProject ? `Project ID: ${selectedProject}` : "Project Review"}
             confirmText="Submit Evaluation"
             cancelText="Cancel"

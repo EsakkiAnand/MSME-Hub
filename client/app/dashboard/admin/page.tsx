@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import {
@@ -20,73 +21,8 @@ import {
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger-group";
 import { StatusBadge } from "@/components/ui/status-badge";
-
-// ─── Mock Metrics ─────────────────────────────────────────────────────────────
-const dashboardStats = [
-  {
-    label: "Idea Verifications",
-    sublabel: "Student pitches in queue",
-    value: 5,
-    icon: Lightbulb,
-    iconColor: "text-amber-500",
-    href: "/dashboard/admin/idea-verification",
-    accent: "bg-amber-50 dark:bg-amber-950/30",
-  },
-  {
-    label: "Industry Verifications",
-    sublabel: "Pending approval",
-    value: 4,
-    icon: Building2,
-    iconColor: "text-blue-500",
-    href: "/dashboard/admin/industry-verification",
-    accent: "bg-blue-50 dark:bg-blue-950/30",
-  },
-  {
-    label: "GitHub Reviews",
-    sublabel: "Solutions awaiting sign-off",
-    value: 3,
-    icon: GitBranch,
-    iconColor: "text-violet-500",
-    href: "/dashboard/admin/github-review",
-    accent: "bg-violet-50 dark:bg-violet-950/30",
-  },
-  {
-    label: "Rating Moderation",
-    sublabel: "Low-star ratings in queue",
-    value: 2,
-    icon: Star,
-    iconColor: "text-amber-500",
-    href: "/dashboard/admin/rating-moderation",
-    accent: "bg-amber-50 dark:bg-amber-950/30",
-  },
-  {
-    label: "Problems in Pool",
-    sublabel: "Available for student teams",
-    value: 12,
-    icon: FileText,
-    iconColor: "text-emerald-500",
-    href: "/dashboard/admin/problem-bank",
-    accent: "bg-emerald-50 dark:bg-emerald-950/30",
-  },
-  {
-    label: "Active Projects",
-    sublabel: "Across all departments",
-    value: 9,
-    icon: FolderKanban,
-    iconColor: "text-rose-500",
-    href: "/dashboard/admin/problem-bank",
-    accent: "bg-rose-50 dark:bg-rose-950/30",
-  },
-  {
-    label: "Total Users",
-    sublabel: "Registered on platform",
-    value: 47,
-    icon: Users,
-    iconColor: "text-slate-500",
-    href: "/dashboard/admin/users",
-    accent: "bg-slate-100 dark:bg-slate-800/40",
-  },
-];
+import { toast } from "sonner";
+import { getAdminDashboardStatsAction } from "@/app/actions/admin-projects";
 
 // ─── Mock Recent Activity ─────────────────────────────────────────────────────
 const recentActivity = [
@@ -147,62 +83,151 @@ const recentActivity = [
   },
 ];
 
-// ─── Quick Action Links ───────────────────────────────────────────────────────
-const quickActions = [
-  {
-    label: "Verify Student Ideas",
-    description: "Screen, approve, or request improvements for student pitches",
-    href: "/dashboard/admin/idea-verification",
-    icon: Lightbulb,
-    count: 5,
-    countClass: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
-  },
-  {
-    label: "Review Industry Verifications",
-    description: "Approve or reject pending Udyam certificate submissions",
-    href: "/dashboard/admin/industry-verification",
-    icon: Building2,
-    count: 4,
-    countClass: "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
-  },
-  {
-    label: "GitHub Solution Review",
-    description: "Inspect submitted repositories for MIT License and README",
-    href: "/dashboard/admin/github-review",
-    icon: GitBranch,
-    count: 3,
-    countClass: "bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300",
-  },
-  {
-    label: "Moderate Low Ratings",
-    description: "Review and approve/suppress ratings ≤ 2 stars",
-    href: "/dashboard/admin/rating-moderation",
-    icon: Star,
-    count: 2,
-    countClass: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
-  },
-  {
-    label: "Manage Problem Bank",
-    description: "System-wide view of all submitted industry problems",
-    href: "/dashboard/admin/problem-bank",
-    icon: FileText,
-    count: null,
-    countClass: "",
-  },
-  {
-    label: "User Management",
-    description: "View all registered users across all roles",
-    href: "/dashboard/admin/users",
-    icon: Users,
-    count: null,
-    countClass: "",
-  },
-];
 
 export default function AdminDashboardPage() {
   const session = authClient.useSession();
   const user = session?.data?.user;
   const adminId = (user as any)?.uniqueId || "ADM0001";
+
+  const [stats, setStats] = useState<{
+    pendingIndustry: number;
+    pendingAlumni: number;
+    pendingStudents: number;
+    pendingGithub: number;
+    moderatedRatings: number;
+    poolProblems: number;
+    activeProjects: number;
+    totalUsers: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await getAdminDashboardStatsAction();
+      if (res.success && (res as any).stats) {
+        setStats((res as any).stats);
+      } else {
+        toast.error((res as any).error || "Failed to load dashboard stats.");
+      }
+    };
+    load();
+  }, []);
+
+  const dashboardStats = [
+    {
+      label: "Idea Verifications",
+      sublabel: "Student pitches in queue",
+      value: stats?.pendingStudents ?? 0,
+      icon: Lightbulb,
+      iconColor: "text-amber-500",
+      href: "/dashboard/admin/idea-verification",
+      accent: "bg-amber-50 dark:bg-amber-950/30",
+    },
+    {
+      label: "Industry Verifications",
+      sublabel: "Pending approval",
+      value: stats?.pendingIndustry ?? 0,
+      icon: Building2,
+      iconColor: "text-blue-500",
+      href: "/dashboard/admin/industry-verification",
+      accent: "bg-blue-50 dark:bg-blue-950/30",
+    },
+    {
+      label: "GitHub Reviews",
+      sublabel: "Solutions awaiting sign-off",
+      value: stats?.pendingGithub ?? 0,
+      icon: GitBranch,
+      iconColor: "text-violet-500",
+      href: "/dashboard/admin/github-review",
+      accent: "bg-violet-50 dark:bg-violet-950/30",
+    },
+    {
+      label: "Rating Moderation",
+      sublabel: "Low-star ratings in queue",
+      value: stats?.moderatedRatings ?? 0,
+      icon: Star,
+      iconColor: "text-amber-500",
+      href: "/dashboard/admin/rating-moderation",
+      accent: "bg-amber-50 dark:bg-amber-950/30",
+    },
+    {
+      label: "Problems in Pool",
+      sublabel: "Available for student teams",
+      value: stats?.poolProblems ?? 0,
+      icon: FileText,
+      iconColor: "text-emerald-500",
+      href: "/dashboard/admin/problem-bank",
+      accent: "bg-emerald-50 dark:bg-emerald-950/30",
+    },
+    {
+      label: "Active Projects",
+      sublabel: "Across all departments",
+      value: stats?.activeProjects ?? 0,
+      icon: FolderKanban,
+      iconColor: "text-rose-500",
+      href: "/dashboard/admin/projects",
+      accent: "bg-rose-50 dark:bg-rose-950/30",
+    },
+    {
+      label: "Total Users",
+      sublabel: "Registered on platform",
+      value: stats?.totalUsers ?? 0,
+      icon: Users,
+      iconColor: "text-slate-500",
+      href: "/dashboard/admin/users",
+      accent: "bg-slate-100 dark:bg-slate-800/40",
+    },
+  ];
+
+  const quickActions = [
+    {
+      label: "Verify Student Ideas",
+      description: "Screen, approve, or request improvements for student pitches",
+      href: "/dashboard/admin/idea-verification",
+      icon: Lightbulb,
+      count: stats ? stats.pendingStudents : null,
+      countClass: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+    },
+    {
+      label: "Review Industry Verifications",
+      description: "Approve or reject pending Udyam certificate submissions",
+      href: "/dashboard/admin/industry-verification",
+      icon: Building2,
+      count: stats ? stats.pendingIndustry : null,
+      countClass: "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
+    },
+    {
+      label: "GitHub Solution Review",
+      description: "Inspect submitted repositories for MIT License and README",
+      href: "/dashboard/admin/github-review",
+      icon: GitBranch,
+      count: stats ? stats.pendingGithub : null,
+      countClass: "bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300",
+    },
+    {
+      label: "Moderate Low Ratings",
+      description: "Review and approve/suppress ratings ≤ 2 stars",
+      href: "/dashboard/admin/rating-moderation",
+      icon: Star,
+      count: stats ? stats.moderatedRatings : null,
+      countClass: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+    },
+    {
+      label: "Manage Problem Bank",
+      description: "System-wide view of all submitted industry problems",
+      href: "/dashboard/admin/problem-bank",
+      icon: FileText,
+      count: null,
+      countClass: "",
+    },
+    {
+      label: "User Management",
+      description: "View all registered users across all roles",
+      href: "/dashboard/admin/users",
+      icon: Users,
+      count: null,
+      countClass: "",
+    },
+  ];
 
   return (
     <div className="space-y-6">
