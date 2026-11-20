@@ -129,11 +129,11 @@ export default function Home() {
     <div className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/10 selection:text-primary">
       {/* 1. Global Enterprise Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/90 backdrop-blur-md">
-        <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          {/* Official Institutional Brand */}
+        <div className="w-full flex h-16 items-center justify-between px-4 sm:px-8 lg:px-10">
+          {/* Official Institutional Brand (Left Aligned) */}
           <Link
             href="/"
-            className="flex items-center gap-3 transition-opacity hover:opacity-95 select-none"
+            className="flex items-center gap-3 transition-opacity hover:opacity-95 select-none shrink-0"
           >
             <MsmeLogoMark size={34} />
             <div className="flex flex-col leading-tight">
@@ -146,35 +146,7 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-            <a
-              href="#overview"
-              className="hover:text-foreground transition-colors"
-            >
-              Overview
-            </a>
-            <a
-              href="#workspaces"
-              className="hover:text-foreground transition-colors"
-            >
-              Workspaces
-            </a>
-            <a
-              href="#lifecycle"
-              className="hover:text-foreground transition-colors"
-            >
-              How It Works
-            </a>
-            <a
-              href="#governance"
-              className="hover:text-foreground transition-colors"
-            >
-              Governance
-            </a>
-          </nav>
-
-          {/* Action CTAs */}
+          {/* Action CTAs (Right Aligned) */}
           <div className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm">
             <Link
               href="/login"

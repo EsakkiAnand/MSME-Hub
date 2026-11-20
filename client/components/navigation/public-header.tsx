@@ -24,12 +24,12 @@ export function PublicHeader({
   return (
     <header
       className={cn(
-        "w-full border-b bg-background/80 backdrop-blur-md px-3.5 sm:px-6 py-3 sm:py-4",
+        "w-full border-b bg-background/80 backdrop-blur-md px-4 sm:px-8 lg:px-10 py-3 sm:py-4",
         className
       )}
     >
-      <div className="container mx-auto flex items-center justify-between gap-2">
-        {/* Institutional Branding: Always navigates to public root ("/") */}
+      <div className="w-full flex items-center justify-between gap-2">
+        {/* Institutional Branding: Left Aligned */}
         <Link
           href="/"
           title="Return to MSME Hub Home"
