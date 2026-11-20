@@ -147,7 +147,11 @@ export default function Home() {
       {/* Main Centered Gateway Card */}
       <main className="flex flex-1 items-center justify-center px-3.5 sm:px-6 py-6 sm:py-10 md:py-12 overflow-x-hidden">
         <div className="w-full max-w-[480px]">
-          <div className="relative w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-card text-card-foreground shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none p-5 sm:p-8 flex flex-col">
+          <motion.div
+            layout
+            transition={{ layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
+            className="relative w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-card text-card-foreground shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none p-5 sm:p-8 flex flex-col"
+          >
             {/* 1. Official Brand Logo */}
             <div className="flex justify-center mb-4">
               <MsmeFullLogo width={92} priority />
@@ -262,7 +266,7 @@ export default function Home() {
                 <span>Admin Portal &rarr;</span>
               </Link>
             </div>
-          </div>
+          </motion.div>
 
           {/* Institutional Credit Below Card */}
           <p className="text-center text-[11px] text-muted-foreground mt-4">

@@ -289,7 +289,11 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
           </button>
         </div>
 
-        <div className="relative overflow-hidden">
+        <motion.div
+          layout
+          transition={{ layout: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
+          className="relative overflow-hidden"
+        >
           <AnimatePresence mode="wait" initial={false}>
             {loginMode === "standard" ? (
               <motion.div
@@ -589,11 +593,15 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   </div>
 
       {/* Bottom Footer Block */}
-      <div className="mt-auto pt-4 space-y-2 text-center">
+      <motion.div
+        layout
+        transition={{ layout: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
+        className="mt-auto pt-4 space-y-2 text-center"
+      >
         <div className="text-xs text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
@@ -612,7 +620,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
             <span>Return to Home</span>
           </Link>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

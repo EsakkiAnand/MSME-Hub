@@ -207,8 +207,12 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
           </button>
         </div>
 
-        {/* Animated Tab Content with smooth directional slide & cross-fade */}
-        <div className="relative overflow-hidden">
+        {/* Animated Tab Content with smooth directional slide, cross-fade & size transition */}
+        <motion.div
+          layout
+          transition={{ layout: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
+          className="relative overflow-hidden"
+        >
           <AnimatePresence mode="wait" initial={false}>
             {activeTab === "industry" ? (
               <motion.div
@@ -436,11 +440,15 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </motion.div>
       </div>
 
       {/* In-Card Link to Sign In & Return */}
-      <div className="mt-auto pt-5 space-y-2 text-center">
+      <motion.div
+        layout
+        transition={{ layout: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } }}
+        className="mt-auto pt-5 space-y-2 text-center"
+      >
         <div className="text-xs text-muted-foreground">
           Already have an account?{" "}
           <Link
@@ -459,7 +467,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
             <span>Return to Home</span>
           </Link>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

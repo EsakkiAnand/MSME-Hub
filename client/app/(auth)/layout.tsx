@@ -80,13 +80,17 @@ export default function AuthLayout({
 
       <main className="flex flex-1 items-center justify-center px-3.5 sm:px-6 py-6 sm:py-10 md:py-12 overflow-x-hidden">
         <div className="w-full max-w-[480px]">
-          {/* Static card shell — keeps its size during transitions */}
-          <div
+          {/* Smoothly animated card shell — animates size smoothly when switching tabs / routes */}
+          <motion.div
+            layout
+            transition={{
+              layout: { duration: 0.32, ease: EASE },
+            }}
             className={cn(
               "relative w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.08]",
               "bg-card text-card-foreground",
               "shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none",
-              "p-5 sm:p-8 min-h-[580px] sm:min-h-[620px]",
+              "p-5 sm:p-8 min-h-[460px]",
               "flex flex-col overflow-hidden"
             )}
           >
@@ -118,7 +122,7 @@ export default function AuthLayout({
                 {children}
               </motion.div>
             </AnimatePresence>
-          </div>
+          </motion.div>
         </div>
       </main>
     </div>
