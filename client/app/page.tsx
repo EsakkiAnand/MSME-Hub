@@ -170,19 +170,13 @@ export default function Home() {
               <MsmeFullLogo width={92} priority />
             </div>
 
-            {/* 2. Badge & Title */}
+            {/* 2. Title & Subtitle */}
             <div className="space-y-1 text-center">
-              <div className="flex justify-center mb-1.5">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-medium">
-                  <Sparkles className="size-3 shrink-0" />
-                  <span>Role-Governed Innovation Portal</span>
-                </span>
-              </div>
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
                 FXEC MSME Hub
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                Select your persona to enter the collaborative ecosystem
+                Academic & Industry Project Portal
               </p>
             </div>
 
