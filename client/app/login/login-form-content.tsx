@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
 import { authClient } from "@/lib/auth-client";
 import { getRoleDashboardPath, getAuthorizedUserPath } from "@/lib/auth-utils";
 import { adminLoginAction } from "@/app/actions/auth";
@@ -228,7 +229,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
 
         {/* 2. Standard Access / MSME Admin access selector */}
         <div
-          className="w-full p-1 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 grid grid-cols-2 gap-1 my-5"
+          className="w-full p-1 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 grid grid-cols-2 gap-1 my-5 relative"
           role="tablist"
           aria-label="Sign in access type"
         >
@@ -238,13 +239,22 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
             aria-selected={loginMode === "standard"}
             onClick={() => setLoginMode("standard")}
             className={cn(
-              "h-9 text-xs sm:text-[13px] font-medium rounded-lg transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer",
+              "relative h-9 text-xs sm:text-[13px] font-medium rounded-lg transition-colors duration-150 flex items-center justify-center cursor-pointer select-none",
               loginMode === "standard"
-                ? "bg-white dark:bg-[#1C1C1E] text-foreground font-semibold shadow-xs"
+                ? "text-foreground font-semibold"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            Standard Access
+            {loginMode === "standard" && (
+              <motion.div
+                layoutId="activeLoginTabPill"
+                className="absolute inset-0 rounded-lg bg-white dark:bg-[#1C1C1E] shadow-xs"
+                transition={{ type: "spring", stiffness: 450, damping: 35 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center justify-center gap-1.5">
+              Standard Access
+            </span>
           </button>
           <button
             type="button"
@@ -252,28 +262,45 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
             aria-selected={loginMode === "admin"}
             onClick={() => setLoginMode("admin")}
             className={cn(
-              "h-9 text-xs sm:text-[13px] font-medium rounded-lg transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer",
+              "relative h-9 text-xs sm:text-[13px] font-medium rounded-lg transition-colors duration-150 flex items-center justify-center cursor-pointer select-none",
               loginMode === "admin"
-                ? "bg-white dark:bg-[#1C1C1E] text-foreground font-semibold shadow-xs"
+                ? "text-foreground font-semibold"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <ShieldCheck
-              className={cn(
-                "size-3.5 shrink-0",
-                loginMode === "admin"
-                  ? "text-rose-600 dark:text-rose-400"
-                  : "text-muted-foreground"
-              )}
-            />
-            <span>MSME Admin</span>
+            {loginMode === "admin" && (
+              <motion.div
+                layoutId="activeLoginTabPill"
+                className="absolute inset-0 rounded-lg bg-white dark:bg-[#1C1C1E] shadow-xs"
+                transition={{ type: "spring", stiffness: 450, damping: 35 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center justify-center gap-1.5">
+              <ShieldCheck
+                className={cn(
+                  "size-3.5 shrink-0",
+                  loginMode === "admin"
+                    ? "text-rose-600 dark:text-rose-400"
+                    : "text-muted-foreground"
+                )}
+              />
+              <span>MSME Admin</span>
+            </span>
           </button>
         </div>
 
-        {loginMode === "standard" ? (
-          <>
-            {/* Standard Authentication Form */}
-            <form onSubmit={handleEmailSignIn} className="space-y-4">
+        <div className="relative overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
+            {loginMode === "standard" ? (
+              <motion.div
+                key="standard-panel"
+                initial={{ opacity: 0, x: -14, filter: "blur(2px)" }}
+                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, x: -14, filter: "blur(2px)" }}
+                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {/* Standard Authentication Form */}
+                <form onSubmit={handleEmailSignIn} className="space-y-4">
               {/* 3. Email address field */}
               <div className="space-y-1.5">
                 <label
@@ -443,10 +470,17 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
                 </button>
               </div>
             </div>
-          </>
-        ) : (
-          /* MSME Admin Portal Mode */
-          <div className="space-y-4">
+          </motion.div>
+          ) : (
+            /* MSME Admin Portal Mode */
+            <motion.div
+              key="admin-panel"
+              initial={{ opacity: 0, x: 14, filter: "blur(2px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, x: 14, filter: "blur(2px)" }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="space-y-4"
+            >
             {/* Admin Login Form */}
             <form onSubmit={handleAdminSignIn} className="space-y-3.5">
               <div className="space-y-1.5">
@@ -552,9 +586,11 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
                 )}
               </Button>
             </form>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
+    </div>
+  </div>
 
       {/* Bottom Footer Block */}
       <div className="mt-auto pt-4 space-y-2 text-center">
