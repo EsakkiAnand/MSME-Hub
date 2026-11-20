@@ -41,7 +41,7 @@ export default function AuthLayout({
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col bg-muted/20">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50/80 via-slate-100/60 to-slate-50/80 dark:from-[#090D16] dark:via-[#0E1524] dark:to-[#090D16]">
       {/* Persistent header */}
       <PublicHeader
         action={pathname.includes("signup") ? "login" : "signup"}
@@ -52,10 +52,10 @@ export default function AuthLayout({
           {/* Professional Card Shell */}
           <div
             className={cn(
-              "relative w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.08]",
-              "bg-card text-card-foreground",
-              "shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none",
-              "p-5 sm:p-7 min-h-[460px]",
+              "relative w-full rounded-2xl border border-black/[0.07] dark:border-white/[0.08]",
+              "bg-white/95 dark:bg-slate-900/95 text-card-foreground backdrop-blur-xl",
+              "shadow-[0_8px_30px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.02)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]",
+              "p-6 sm:p-8 min-h-[460px]",
               "flex flex-col transition-all duration-200 ease-out"
             )}
           >

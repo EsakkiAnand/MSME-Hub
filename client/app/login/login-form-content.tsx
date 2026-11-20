@@ -75,12 +75,14 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmittingRef.current || isLoading || isGoogleLoading) return;
+    isSubmittingRef.current = true;
+
     if (!email.trim() || !password.trim()) {
       toast.error("Please enter both email and password.");
+      isSubmittingRef.current = false;
       return;
     }
 
-    isSubmittingRef.current = true;
     setIsLoading(true);
     try {
       const response = await authClient.signIn.email({
@@ -239,7 +241,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
 
         {/* 2. Standard Access / MSME Admin access selector */}
         <div
-          className="w-full p-1 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 grid grid-cols-2 gap-1 my-5 relative"
+          className="w-full p-1 rounded-xl bg-slate-100/90 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 grid grid-cols-2 gap-1 my-5 relative"
           role="tablist"
           aria-label="Sign in access type"
         >
@@ -258,7 +260,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
             {loginMode === "standard" && (
               <motion.div
                 layoutId="activeLoginTabPill"
-                className="absolute inset-0 rounded-lg bg-white dark:bg-[#1C1C1E] shadow-xs"
+                className="absolute inset-0 rounded-lg bg-white dark:bg-slate-900 shadow-xs"
                 transition={{ type: "spring", stiffness: 450, damping: 35 }}
               />
             )}
@@ -281,7 +283,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
             {loginMode === "admin" && (
               <motion.div
                 layoutId="activeLoginTabPill"
-                className="absolute inset-0 rounded-lg bg-white dark:bg-[#1C1C1E] shadow-xs"
+                className="absolute inset-0 rounded-lg bg-white dark:bg-slate-900 shadow-xs"
                 transition={{ type: "spring", stiffness: 450, damping: 35 }}
               />
             )}
@@ -319,7 +321,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
               <div className="space-y-1.5">
                 <label
                   htmlFor="email"
-                  className="block text-xs font-semibold text-foreground"
+                  className="block text-xs font-semibold text-foreground tracking-tight"
                 >
                   Email address
                 </label>
@@ -331,7 +333,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading || isGoogleLoading}
-                  className="h-10 text-sm rounded-lg border-black/[0.1] dark:border-white/[0.12] focus-visible:border-[#14283F] focus-visible:ring-[#14283F]/20"
+                  className="h-10 text-sm rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-950 transition-all duration-150 focus-visible:border-[#14283F] dark:focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-[#14283F]/15 dark:focus-visible:ring-primary/20"
                   autoComplete="email"
                 />
               </div>
@@ -340,7 +342,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
               <div className="space-y-1.5">
                 <label
                   htmlFor="password"
-                  className="block text-xs font-semibold text-foreground"
+                  className="block text-xs font-semibold text-foreground tracking-tight"
                 >
                   Password
                 </label>
@@ -353,7 +355,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     disabled={isLoading || isGoogleLoading}
-                    className="h-10 text-sm pr-10 rounded-lg border-black/[0.1] dark:border-white/[0.12] focus-visible:border-[#14283F] focus-visible:ring-[#14283F]/20"
+                    className="h-10 text-sm pr-10 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-950 transition-all duration-150 focus-visible:border-[#14283F] dark:focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-[#14283F]/15 dark:focus-visible:ring-primary/20"
                     autoComplete="current-password"
                   />
                   <button
@@ -404,7 +406,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
               {/* 6. Primary Sign In button */}
               <Button
                 type="submit"
-                className="w-full h-10 font-medium text-sm rounded-lg bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+                className="w-full h-10 font-semibold text-sm rounded-xl bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all duration-150 hover:shadow-sm active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
                 disabled={isLoading || isGoogleLoading}
               >
                 {isLoading ? (
@@ -438,7 +440,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full h-10 flex items-center justify-center gap-2.5 font-medium text-sm rounded-lg border-border hover:bg-muted/50 transition-colors"
+                className="w-full h-10 flex items-center justify-center gap-2.5 font-medium text-sm rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors shadow-2xs"
                 onClick={handleGoogleSignIn}
                 disabled={isGoogleLoading || isLoading}
               >

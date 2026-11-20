@@ -74,6 +74,8 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
   const handleIndustrySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmittingRef.current || isIndustrySubmitting || isGoogleLoading) return;
+    isSubmittingRef.current = true;
+
     if (
       !industryCompanyName.trim() ||
       !industryEmail.trim() ||
@@ -82,15 +84,16 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
       !industryPassword
     ) {
       toast.error("Please fill in all essential industry registration details.");
+      isSubmittingRef.current = false;
       return;
     }
 
     if (industryPassword.length < 8) {
       toast.error("Password must be at least 8 characters long.");
+      isSubmittingRef.current = false;
       return;
     }
 
-    isSubmittingRef.current = true;
     setIsIndustrySubmitting(true);
     try {
       const res = await registerIndustryAction({
@@ -151,7 +154,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
 
         {/* Animated segmented switcher with sliding pill */}
         <div
-          className="w-full p-1 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 grid grid-cols-2 gap-1 my-5 relative"
+          className="w-full p-1 rounded-xl bg-slate-100/90 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 grid grid-cols-2 gap-1 my-5 relative"
           role="tablist"
           aria-label="Account category"
         >
@@ -170,7 +173,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
             {activeTab === "industry" && (
               <motion.div
                 layoutId="activeSignupTabPill"
-                className="absolute inset-0 rounded-lg bg-white dark:bg-[#1C1C1E] shadow-xs"
+                className="absolute inset-0 rounded-lg bg-white dark:bg-slate-900 shadow-xs"
                 transition={{ type: "spring", stiffness: 450, damping: 35 }}
               />
             )}
@@ -195,7 +198,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
             {activeTab === "academic" && (
               <motion.div
                 layoutId="activeSignupTabPill"
-                className="absolute inset-0 rounded-lg bg-white dark:bg-[#1C1C1E] shadow-xs"
+                className="absolute inset-0 rounded-lg bg-white dark:bg-slate-900 shadow-xs"
                 transition={{ type: "spring", stiffness: 450, damping: 35 }}
               />
             )}
@@ -226,7 +229,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                   <div className="space-y-1.5">
                     <label
                       htmlFor="companyName"
-                      className="block text-xs font-semibold text-foreground"
+                      className="block text-xs font-semibold text-foreground tracking-tight"
                     >
                       Company / Organization Name
                     </label>
@@ -236,7 +239,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                       value={industryCompanyName}
                       onChange={(e) => setIndustryCompanyName(e.target.value)}
                       required
-                      className="h-10 text-sm rounded-lg border-black/[0.1] dark:border-white/[0.12] focus-visible:border-[#14283F] focus-visible:ring-[#14283F]/20"
+                      className="h-10 text-sm rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-950 transition-all duration-150 focus-visible:border-[#14283F] dark:focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-[#14283F]/15 dark:focus-visible:ring-primary/20"
                       autoComplete="organization"
                     />
                   </div>
@@ -245,7 +248,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                   <div className="space-y-1.5">
                     <label
                       htmlFor="industryEmail"
-                      className="block text-xs font-semibold text-foreground"
+                      className="block text-xs font-semibold text-foreground tracking-tight"
                     >
                       Work Email Address
                     </label>
@@ -256,7 +259,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                       value={industryEmail}
                       onChange={(e) => setIndustryEmail(e.target.value)}
                       required
-                      className="h-10 text-sm rounded-lg border-black/[0.1] dark:border-white/[0.12] focus-visible:border-[#14283F] focus-visible:ring-[#14283F]/20"
+                      className="h-10 text-sm rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-950 transition-all duration-150 focus-visible:border-[#14283F] dark:focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-[#14283F]/15 dark:focus-visible:ring-primary/20"
                       autoComplete="email"
                     />
                   </div>
@@ -266,7 +269,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                     <div className="space-y-1.5">
                       <label
                         htmlFor="contactName"
-                        className="block text-xs font-semibold text-foreground"
+                        className="block text-xs font-semibold text-foreground tracking-tight"
                       >
                         Contact Person
                       </label>
@@ -276,7 +279,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                         value={industryContactName}
                         onChange={(e) => setIndustryContactName(e.target.value)}
                         required
-                        className="h-10 text-sm rounded-lg border-black/[0.1] dark:border-white/[0.12] focus-visible:border-[#14283F] focus-visible:ring-[#14283F]/20"
+                        className="h-10 text-sm rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-950 transition-all duration-150 focus-visible:border-[#14283F] dark:focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-[#14283F]/15 dark:focus-visible:ring-primary/20"
                         autoComplete="name"
                       />
                     </div>
@@ -284,7 +287,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                     <div className="space-y-1.5">
                       <label
                         htmlFor="designation"
-                        className="block text-xs font-semibold text-foreground"
+                        className="block text-xs font-semibold text-foreground tracking-tight"
                       >
                         Designation
                       </label>
@@ -294,7 +297,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                         value={industryDesignation}
                         onChange={(e) => setIndustryDesignation(e.target.value)}
                         required
-                        className="h-10 text-sm rounded-lg border-black/[0.1] dark:border-white/[0.12] focus-visible:border-[#14283F] focus-visible:ring-[#14283F]/20"
+                        className="h-10 text-sm rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-950 transition-all duration-150 focus-visible:border-[#14283F] dark:focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-[#14283F]/15 dark:focus-visible:ring-primary/20"
                       />
                     </div>
                   </div>
@@ -303,7 +306,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                   <div className="space-y-1.5">
                     <label
                       htmlFor="industryPassword"
-                      className="block text-xs font-semibold text-foreground"
+                      className="block text-xs font-semibold text-foreground tracking-tight"
                     >
                       Password
                     </label>
@@ -316,7 +319,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                         onChange={(e) => setIndustryPassword(e.target.value)}
                         required
                         minLength={8}
-                        className="h-10 text-sm pr-10 rounded-lg border-black/[0.1] dark:border-white/[0.12] focus-visible:border-[#14283F] focus-visible:ring-[#14283F]/20"
+                        className="h-10 text-sm pr-10 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-950 transition-all duration-150 focus-visible:border-[#14283F] dark:focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-[#14283F]/15 dark:focus-visible:ring-primary/20"
                         autoComplete="new-password"
                       />
                       <button
@@ -338,7 +341,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                   <Button
                     type="submit"
                     disabled={isIndustrySubmitting}
-                    className="w-full h-10 font-medium text-sm rounded-lg bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-xs mt-1"
+                    className="w-full h-10 font-semibold text-sm rounded-xl bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all duration-150 hover:shadow-sm active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-xs mt-1"
                   >
                     {isIndustrySubmitting ? (
                       <>
@@ -365,7 +368,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                 className="space-y-4 pt-1"
               >
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-foreground">
+                  <label className="block text-xs font-semibold text-foreground tracking-tight">
                     Academic Role
                   </label>
                   <div className="grid grid-cols-2 gap-2.5">
@@ -373,10 +376,10 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                       type="button"
                       onClick={() => setAcademicRole("STUDENT")}
                       className={cn(
-                        "h-11 px-3 rounded-lg border text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer select-none",
+                        "h-11 px-3 rounded-xl border text-xs sm:text-sm font-medium transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer select-none",
                         academicRole === "STUDENT"
                           ? "border-[#14283F] bg-[#14283F]/5 text-[#14283F] dark:border-primary dark:bg-primary/10 dark:text-primary font-semibold ring-1 ring-[#14283F] dark:ring-primary shadow-2xs"
-                          : "border-black/[0.1] dark:border-white/[0.12] text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                          : "border-slate-200/90 dark:border-slate-800 text-muted-foreground hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-800/40"
                       )}
                     >
                       <GraduationCap className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
@@ -387,10 +390,10 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                       type="button"
                       onClick={() => setAcademicRole("STAFF")}
                       className={cn(
-                        "h-11 px-3 rounded-lg border text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer select-none",
+                        "h-11 px-3 rounded-xl border text-xs sm:text-sm font-medium transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer select-none",
                         academicRole === "STAFF"
                           ? "border-[#14283F] bg-[#14283F]/5 text-[#14283F] dark:border-primary dark:bg-primary/10 dark:text-primary font-semibold ring-1 ring-[#14283F] dark:ring-primary shadow-2xs"
-                          : "border-black/[0.1] dark:border-white/[0.12] text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                          : "border-slate-200/90 dark:border-slate-800 text-muted-foreground hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-800/40"
                       )}
                     >
                       <Users className="size-4 shrink-0 text-purple-600 dark:text-purple-400" />
@@ -408,7 +411,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
                   type="button"
                   onClick={handleGoogleAcademicSignup}
                   disabled={isGoogleLoading}
-                  className="w-full h-10 flex items-center justify-center gap-2.5 font-medium text-sm rounded-lg border border-black/[0.1] dark:border-white/[0.12] bg-background text-foreground hover:bg-muted/50 transition-colors shadow-xs"
+                  className="w-full h-10 flex items-center justify-center gap-2.5 font-medium text-sm rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-foreground hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors shadow-2xs"
                 >
                   {isGoogleLoading ? (
                     <Loader2 className="size-4 animate-spin shrink-0 text-muted-foreground" />

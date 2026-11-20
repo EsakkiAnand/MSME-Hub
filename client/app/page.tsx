@@ -3,9 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import {
+  Building2,
   GraduationCap,
+  Users,
   ShieldCheck,
   ArrowRight,
+  CheckCircle2,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MsmeLogoMark } from "@/components/ui/msme-logo";
@@ -68,17 +72,17 @@ export default function Home() {
         {/* 2. Hero Section */}
         <section
           id="overview"
-          className="relative border-b border-border/60 bg-gradient-to-b from-muted/30 via-background to-background py-16 sm:py-24 md:py-28"
+          className="relative border-b border-border/60 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(20,40,63,0.07),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(56,189,248,0.08),rgba(0,0,0,0))] py-16 sm:py-24 md:py-28"
         >
           <div className="container mx-auto max-w-5xl px-4 sm:px-6 text-center">
             {/* Government & Institutional Accreditation Tag */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/80 px-3.5 py-1 text-xs font-medium text-muted-foreground shadow-2xs mb-6 backdrop-blur-xs">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/80 px-3.5 py-1 text-xs font-medium text-muted-foreground shadow-2xs mb-6 backdrop-blur-xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
               <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Ministry of MSME Recognized · FXEC Technology Incubation Center</span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15] max-w-4xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-extrabold tracking-tight text-foreground leading-[1.14] max-w-4xl mx-auto">
               Connecting Verified Industrial MSMEs with University Engineering Talent
             </h1>
 
@@ -93,7 +97,7 @@ export default function Home() {
             <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               <Link href="/signup?role=industry">
                 <Button
-                  className="h-11 px-6 font-semibold text-sm rounded-lg bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all active:scale-[0.99] shadow-xs flex items-center gap-2"
+                  className="h-11 px-6 font-semibold text-sm rounded-xl bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all duration-150 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] flex items-center gap-2"
                 >
                   <span>Register Your Enterprise</span>
                   <ArrowRight className="size-4 shrink-0" />
@@ -103,7 +107,7 @@ export default function Home() {
               <Link href="/login?portal=student">
                 <Button
                   variant="outline"
-                  className="h-11 px-5 font-medium text-sm rounded-lg border-border hover:bg-muted/50 transition-colors flex items-center gap-2"
+                  className="h-11 px-5 font-medium text-sm rounded-xl border-border hover:bg-muted/50 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
                 >
                   <GraduationCap className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Student & Faculty Google Access</span>
@@ -113,11 +117,54 @@ export default function Home() {
               <Link href="/login">
                 <Button
                   variant="ghost"
-                  className="h-11 px-4 font-medium text-sm text-muted-foreground hover:text-foreground"
+                  className="h-11 px-4 font-medium text-sm rounded-xl text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors"
                 >
                   Sign In to Workspace
                 </Button>
               </Link>
+            </div>
+
+            {/* 4 Feature Trust Cards */}
+            <div className="mt-12 sm:mt-14 pt-8 border-t border-border/60 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 text-left">
+              <div className="p-4 sm:p-4.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card/80 backdrop-blur-xs shadow-2xs hover:shadow-xs hover:border-[#14283F]/30 dark:hover:border-primary/30 transition-all duration-150">
+                <div className="flex items-center gap-2 text-foreground font-semibold text-xs sm:text-sm">
+                  <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />
+                  <span>100% MIT Open Source</span>
+                </div>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                  Zero intellectual property lock in. All deliverables public on GitHub.
+                </p>
+              </div>
+
+              <div className="p-4 sm:p-4.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card/80 backdrop-blur-xs shadow-2xs hover:shadow-xs hover:border-[#14283F]/30 dark:hover:border-primary/30 transition-all duration-150">
+                <div className="flex items-center gap-2 text-foreground font-semibold text-xs sm:text-sm">
+                  <Building2 className="size-4 text-blue-500 shrink-0" />
+                  <span>Verified MSMEs</span>
+                </div>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                  Validated against Udyam registration and corporate credentials.
+                </p>
+              </div>
+
+              <div className="p-4 sm:p-4.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card/80 backdrop-blur-xs shadow-2xs hover:shadow-xs hover:border-[#14283F]/30 dark:hover:border-primary/30 transition-all duration-150">
+                <div className="flex items-center gap-2 text-foreground font-semibold text-xs sm:text-sm">
+                  <Users className="size-4 text-purple-500 shrink-0" />
+                  <span>Accredited Faculty</span>
+                </div>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                  Engineering department leads direct milestones and capstone rigor.
+                </p>
+              </div>
+
+              <div className="p-4 sm:p-4.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card/80 backdrop-blur-xs shadow-2xs hover:shadow-xs hover:border-[#14283F]/30 dark:hover:border-primary/30 transition-all duration-150">
+                <div className="flex items-center gap-2 text-foreground font-semibold text-xs sm:text-sm">
+                  <Star className="size-4 text-amber-500 shrink-0" />
+                  <span>5-Star Verification</span>
+                </div>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                  Industrial rating and admin audit required for capstone completion.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -126,7 +173,7 @@ export default function Home() {
         <section id="lifecycle" className="py-16 sm:py-20 md:py-24 border-b border-border/60 bg-background">
           <div className="container mx-auto max-w-5xl px-4 sm:px-6">
             <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-              <span className="text-xs font-bold uppercase tracking-wider text-primary">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#14283F] dark:text-primary">
                 Engineering Lifecycle
               </span>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mt-2">
@@ -170,22 +217,22 @@ export default function Home() {
               ].map((s) => (
                 <div
                   key={s.step}
-                  className="rounded-2xl border border-border/70 bg-card p-5 space-y-3 relative overflow-hidden flex flex-col justify-between shadow-2xs hover:border-primary/40 transition-colors"
+                  className="group relative rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card p-5 sm:p-6 space-y-3.5 flex flex-col justify-between shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.4)] hover:-translate-y-1 hover:border-[#14283F]/30 dark:hover:border-primary/40 transition-all duration-200"
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-xl font-extrabold text-primary">
+                      <span className="font-mono text-2xl font-black text-[#14283F] dark:text-primary tracking-tight">
                         {s.step}
                       </span>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                      <span className="text-[10.5px] font-medium px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">
                         {s.badge}
                       </span>
                     </div>
-                    <h3 className="font-bold text-sm text-foreground">
+                    <h3 className="font-bold text-sm sm:text-[15px] text-foreground tracking-tight group-hover:text-[#14283F] dark:group-hover:text-primary transition-colors">
                       {s.title}
                     </h3>
-                    <p className="text-[11px] font-medium text-primary/80">
-                      Primary Actor: {s.lead}
+                    <p className="text-[11px] font-semibold text-[#14283F]/90 dark:text-primary/90 flex items-center gap-1">
+                      <span className="text-muted-foreground font-normal">Primary Actor:</span> {s.lead}
                     </p>
                     <p className="text-xs text-muted-foreground leading-relaxed">
                       {s.desc}

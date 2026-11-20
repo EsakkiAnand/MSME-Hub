@@ -149,7 +149,7 @@ export function AdminLoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={isLoading}
-              className="h-10 text-sm font-mono rounded-lg border-black/[0.1] dark:border-white/[0.12] focus-visible:border-rose-500 focus-visible:ring-rose-500/20"
+              className="h-10 text-sm font-mono rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-950 transition-all duration-150 focus-visible:border-rose-500 focus-visible:ring-2 focus-visible:ring-rose-500/20"
               autoComplete="email"
             />
           </div>
@@ -171,7 +171,7 @@ export function AdminLoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                className="h-10 text-sm pr-10 rounded-lg border-black/[0.1] dark:border-white/[0.12] focus-visible:border-rose-500 focus-visible:ring-rose-500/20"
+                className="h-10 text-sm pr-10 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-950 transition-all duration-150 focus-visible:border-rose-500 focus-visible:ring-2 focus-visible:ring-rose-500/20"
                 autoComplete="current-password"
               />
               <button
@@ -204,7 +204,7 @@ export function AdminLoginForm() {
               value={securityKey}
               onChange={(e) => setSecurityKey(e.target.value)}
               disabled={isLoading}
-              className="h-10 text-sm font-mono uppercase rounded-lg border-black/[0.1] dark:border-white/[0.12] focus-visible:border-rose-500 focus-visible:ring-rose-500/20"
+              className="h-10 text-sm font-mono uppercase rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-950 transition-all duration-150 focus-visible:border-rose-500 focus-visible:ring-2 focus-visible:ring-rose-500/20"
             />
           </div>
 
@@ -220,7 +220,7 @@ export function AdminLoginForm() {
 
           <Button
             type="submit"
-            className="w-full h-10 mt-1 font-semibold text-sm rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+            className="w-full h-10 mt-1 font-semibold text-sm rounded-xl bg-rose-600 hover:bg-rose-700 text-white transition-all duration-150 hover:shadow-sm active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
             disabled={isLoading}
           >
             {isLoading ? (
