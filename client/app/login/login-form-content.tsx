@@ -71,6 +71,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading || isGoogleLoading) return;
     if (!email.trim() || !password.trim()) {
       toast.error("Please enter both email and password.");
       return;
@@ -128,6 +129,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
 
   const handleAdminSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isAdminLoading) return;
     if (!adminEmail.trim() || !adminPassword.trim()) {
       toast.error("Please enter administrator email and password.");
       return;
@@ -197,6 +199,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
   };
 
   const handleGoogleSignIn = async () => {
+    if (isGoogleLoading || isLoading) return;
     setIsGoogleLoading(true);
     try {
       await authClient.signIn.social({

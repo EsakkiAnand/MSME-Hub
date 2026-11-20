@@ -44,6 +44,7 @@ export function AdminLoginForm() {
 
   const handleAdminSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
     if (!email.trim() || !password.trim()) {
       toast.error("Please enter both administrator email and password.");
       return;

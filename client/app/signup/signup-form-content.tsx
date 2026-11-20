@@ -30,17 +30,6 @@ export interface SignupFormContentProps {
 
 export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
   const router = useRouter();
-  const session = authClient.useSession();
-
-  // If already authenticated with a valid session, navigate to the user's role dashboard
-  useEffect(() => {
-    if (!session.isPending && session.data?.user) {
-      const userRole = (session.data.user as any)?.role || "STUDENT";
-      const studentTrack = (session.data.user as any)?.studentTrack;
-      const targetPath = getAuthorizedUserPath(userRole, studentTrack);
-      window.location.replace(targetPath);
-    }
-  }, [session.isPending, session.data?.user]);
 
   // Active Tab: industry vs academic
   const [activeTab, setActiveTab] = useState<"industry" | "academic">("industry");
@@ -60,6 +49,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
 
   // Handlers
   const handleGoogleAcademicSignup = async () => {
+    if (isGoogleLoading || isIndustrySubmitting) return;
     setIsGoogleLoading(true);
     try {
       await authClient.signIn.social({
@@ -78,6 +68,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
 
   const handleIndustrySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isIndustrySubmitting || isGoogleLoading) return;
     if (
       !industryCompanyName.trim() ||
       !industryEmail.trim() ||

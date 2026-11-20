@@ -281,52 +281,16 @@ export function DashboardShell({
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
 
-  // ---------------------------------------------------------------------------
-  // Browser Back Button Interception
-  // ---------------------------------------------------------------------------
-  // Intercept the browser Back button across all protected dashboard routes.
-  // When an authenticated user presses Back, prevent leaving or navigating back to
-  // previous dashboard pages and display the logout confirmation dialog.
+  // Evict page from browser bfcache on Back/Forward navigation if session expired
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const armTrap = () => {
-      try {
-        const currentState = window.history.state || {};
-        if (!currentState.__msme_dashboard_trap) {
-          window.history.pushState(
-            { ...currentState, __msme_dashboard_trap: true },
-            "",
-            window.location.href
-          );
-        }
-      } catch {
-        // Fallback for sandboxed environments
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        window.location.reload();
       }
     };
-
-    armTrap();
-
-    const handlePopState = () => {
-      // User pressed the browser Back or Forward button.
-      // 1. Immediately re-arm the trap to prevent slipping back on repeated clicks
-      armTrap();
-
-      // 2. Open the logout confirmation dialog
-      setShowSignOutConfirm(true);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, [pathname]);
-
-  // Ensure confirmation dialog is dismissed when user deliberately navigates via in-app links
-  React.useEffect(() => {
-    setShowSignOutConfirm(false);
-  }, [pathname]);
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
 
   const isActive = (item: NavItem) => {
     if (item.exact) {
