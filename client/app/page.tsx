@@ -3,13 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import {
-  Building2,
   GraduationCap,
-  Users,
   ShieldCheck,
   ArrowRight,
-  CheckCircle2,
-  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MsmeLogoMark } from "@/components/ui/msme-logo";
@@ -68,7 +64,7 @@ export default function Home() {
       </header>
 
       <main className="flex-1">
-        {/* 2. Hero Section + Metrics */}
+        {/* 2. Hero Section */}
         <section
           id="overview"
           className="relative border-b border-border/60 bg-gradient-to-b from-muted/30 via-background to-background py-16 sm:py-24 md:py-28"
@@ -121,49 +117,6 @@ export default function Home() {
                   Sign In to Workspace
                 </Button>
               </Link>
-            </div>
-
-            {/* Institutional Trust & Governance Bar */}
-            <div className="mt-14 pt-8 border-t border-border/60 grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
-              <div className="p-3.5 rounded-xl border border-border/60 bg-card/60">
-                <div className="flex items-center gap-2 text-foreground font-semibold text-xs sm:text-sm">
-                  <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />
-                  <span>100% MIT Open Source</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
-                  Zero intellectual property lock-in. All deliverables public on GitHub.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-xl border border-border/60 bg-card/60">
-                <div className="flex items-center gap-2 text-foreground font-semibold text-xs sm:text-sm">
-                  <Building2 className="size-4 text-blue-500 shrink-0" />
-                  <span>Verified MSMEs</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
-                  Validated against Udyam registration and corporate credentials.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-xl border border-border/60 bg-card/60">
-                <div className="flex items-center gap-2 text-foreground font-semibold text-xs sm:text-sm">
-                  <Users className="size-4 text-purple-500 shrink-0" />
-                  <span>Accredited Faculty</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
-                  Engineering department leads direct milestones and capstone rigor.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-xl border border-border/60 bg-card/60">
-                <div className="flex items-center gap-2 text-foreground font-semibold text-xs sm:text-sm">
-                  <Star className="size-4 text-amber-500 shrink-0" />
-                  <span>5-Star Verification</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
-                  Industrial rating and admin audit required for capstone completion.
-                </p>
-              </div>
             </div>
           </div>
         </section>
@@ -244,92 +197,28 @@ export default function Home() {
         </section>
       </main>
 
-      {/* 4. Enterprise Institutional Footer */}
-      <footer className="border-t border-border/80 bg-background py-12 px-4 sm:px-6">
-        <div className="container mx-auto max-w-6xl space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Column 1: Institutional Credentials */}
-            <div className="md:col-span-2 space-y-3">
-              <div className="flex items-center gap-2.5">
-                <MsmeLogoMark size={28} />
-                <span className="font-bold text-base tracking-tight text-foreground">
-                  Francis Xavier Engineering College
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed max-w-md">
-                Autonomous Institution · Accredited by NAAC with &apos;A+&apos; Grade · Approved by AICTE, New Delhi · Affiliated to Anna University, Chennai.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                103/G2, Bypass Road, Vannarpettai, Tirunelveli - 627 003, Tamil Nadu, India.
-              </p>
-            </div>
-
-            {/* Column 2: Portals */}
-            <div className="space-y-2.5 text-xs">
-              <span className="font-bold uppercase tracking-wider text-foreground block">
-                Workspaces
-              </span>
-              <ul className="space-y-2 text-muted-foreground">
-                <li>
-                  <Link href="/login?portal=industry" className="hover:text-foreground transition-colors">
-                    Industry Partner Portal
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login?portal=student" className="hover:text-foreground transition-colors">
-                    Student Builder Portal
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login?portal=staff" className="hover:text-foreground transition-colors">
-                    Faculty Project Director
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login?portal=alumni" className="hover:text-foreground transition-colors">
-                    Alumni Mentorship Board
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 3: Platform Governance */}
-            <div className="space-y-2.5 text-xs">
-              <span className="font-bold uppercase tracking-wider text-foreground block">
-                Platform
-              </span>
-              <ul className="space-y-2 text-muted-foreground">
-                <li>
-                  <Link href="/admin/login" className="hover:text-foreground transition-colors text-rose-600 dark:text-rose-400">
-                    MSME Admin Portal
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/signup" className="hover:text-foreground transition-colors">
-                    Create New Account
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login" className="hover:text-foreground transition-colors">
-                    Sign In
-                  </Link>
-                </li>
-                <li>
-                  <span className="text-muted-foreground/80">
-                    MIT Open Source License
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-6 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-            <p>
-              &copy; {new Date().getFullYear()} Francis Xavier Engineering College. All rights reserved.
-            </p>
-            <p className="font-mono text-[11px]">
-              MSME-Hub v2.0 · Production Grade
-            </p>
+      {/* 4. Clean 1-Line Minimal Footer */}
+      <footer className="border-t border-border/60 bg-background py-5 px-4 sm:px-8 lg:px-10">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+          <p>
+            &copy; {new Date().getFullYear()} Francis Xavier Engineering College · Academic Project Portal. All rights reserved.
+          </p>
+          <div className="flex items-center gap-3 font-medium">
+            <Link
+              href="/admin/login"
+              className="text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1"
+            >
+              <ShieldCheck className="size-3.5" />
+              <span>Admin Portal</span>
+            </Link>
+            <span className="text-border">·</span>
+            <Link href="/login" className="hover:text-foreground transition-colors">
+              Sign In
+            </Link>
+            <span className="text-border">·</span>
+            <Link href="/signup" className="hover:text-foreground transition-colors">
+              Register
+            </Link>
           </div>
         </div>
       </footer>
