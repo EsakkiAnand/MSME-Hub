@@ -15,15 +15,15 @@ export default function Home() {
     <div className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/10 selection:text-primary">
       {/* 1. Global Enterprise Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/90 backdrop-blur-md">
-        <div className="w-full flex h-16 items-center justify-between px-4 sm:px-8 lg:px-10">
+        <div className="w-full flex h-14 sm:h-16 items-center justify-between px-3 sm:px-8 lg:px-10">
           {/* Official Institutional Brand (Left Aligned) */}
           <Link
             href="/"
-            className="flex items-center gap-3 transition-opacity hover:opacity-95 select-none shrink-0"
+            className="flex items-center gap-2 sm:gap-3 transition-opacity hover:opacity-95 select-none shrink-0"
           >
-            <MsmeLogoMark size={34} />
+            <MsmeLogoMark size={28} className="sm:w-8 sm:h-8" />
             <div className="flex flex-col leading-tight">
-              <span className="font-bold text-base tracking-tight text-foreground sm:text-lg">
+              <span className="font-bold text-sm sm:text-lg tracking-tight text-foreground">
                 FXEC MSME Hub
               </span>
               <span className="text-[11px] font-medium text-muted-foreground hidden sm:block">
@@ -33,10 +33,10 @@ export default function Home() {
           </Link>
 
           {/* Action CTAs (Right Aligned) */}
-          <div className="flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm">
+          <div className="flex items-center gap-1.5 sm:gap-3 text-xs sm:text-sm">
             <Link
               href="/login"
-              className="px-3 py-1.5 font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="px-2 sm:px-3 py-1 sm:py-1.5 font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Sign In
             </Link>
@@ -44,9 +44,10 @@ export default function Home() {
             <Link href="/signup?role=industry">
               <Button
                 size="sm"
-                className="h-9 px-4 font-semibold text-xs sm:text-sm rounded-lg bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all active:scale-[0.99] shadow-xs"
+                className="h-8 sm:h-9 px-2.5 sm:px-4 font-semibold text-xs sm:text-sm rounded-lg bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all active:scale-[0.99] shadow-xs"
               >
-                Register Enterprise
+                <span className="hidden sm:inline">Register Enterprise</span>
+                <span className="sm:hidden">Register</span>
               </Button>
             </Link>
 
@@ -201,7 +202,7 @@ export default function Home() {
       <footer className="border-t border-border/60 bg-background py-5 px-4 sm:px-8 lg:px-10">
         <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
           <p>
-            &copy; {new Date().getFullYear()} Francis Xavier Engineering College · Academic Project Portal. All rights reserved.
+            &copy; 2026 Francis Xavier Engineering College · Academic Project Portal. All rights reserved.
           </p>
           <div className="flex items-center gap-3 font-medium">
             <Link

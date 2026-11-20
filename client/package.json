@@ -41,6 +41,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "prisma": "^7.10.1",
+    "puppeteer-core": "^25.18.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
@@ -47,9 +47,13 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
   const [isIndustrySubmitting, setIsIndustrySubmitting] = useState(false);
   const [showIndustryPassword, setShowIndustryPassword] = useState(false);
 
+  // Synchronous submission lock
+  const isSubmittingRef = useRef(false);
+
   // Handlers
   const handleGoogleAcademicSignup = async () => {
-    if (isGoogleLoading || isIndustrySubmitting) return;
+    if (isSubmittingRef.current || isGoogleLoading || isIndustrySubmitting) return;
+    isSubmittingRef.current = true;
     setIsGoogleLoading(true);
     try {
       await authClient.signIn.social({
@@ -63,12 +67,13 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
     } catch (err: any) {
       toast.error(err?.message || "Failed to initiate Google institutional signup.");
       setIsGoogleLoading(false);
+      isSubmittingRef.current = false;
     }
   };
 
   const handleIndustrySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isIndustrySubmitting || isGoogleLoading) return;
+    if (isSubmittingRef.current || isIndustrySubmitting || isGoogleLoading) return;
     if (
       !industryCompanyName.trim() ||
       !industryEmail.trim() ||
@@ -85,6 +90,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsIndustrySubmitting(true);
     try {
       const res = await registerIndustryAction({
@@ -99,6 +105,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
       if (!res.success) {
         toast.error(res.error || "Failed to register industry account.");
         setIsIndustrySubmitting(false);
+        isSubmittingRef.current = false;
         return;
       }
 
@@ -120,6 +127,7 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
     } catch (err: any) {
       toast.error(err?.message || "An unexpected error occurred.");
       setIsIndustrySubmitting(false);
+      isSubmittingRef.current = false;
     }
   };
 

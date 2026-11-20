@@ -60,43 +60,20 @@ export function AuthContainer({
       {/* Centered Auth Card Viewport */}
       <main className="flex flex-1 items-center justify-center px-3.5 sm:px-6 py-6 sm:py-10 md:py-12 overflow-x-hidden">
         <div className="w-full max-w-[480px]">
-          {/* Static card shell — maintains fixed size between routes */}
-          <motion.div
-            initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : 0.22,
-              ease: MOTION_EASE.ios,
-            }}
+          {/* Static card shell */}
+          <div
             className={cn(
-              "w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-card text-card-foreground shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none p-5 sm:p-8 sm:min-h-[620px] flex flex-col justify-between overflow-hidden",
+              "w-full rounded-2xl border border-black/[0.08] dark:border-white/[0.08] bg-card text-card-foreground shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-none p-5 sm:p-8 sm:min-h-[580px] flex flex-col justify-between overflow-hidden",
               className
             )}
           >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={pathname}
-                initial={
-                  shouldReduceMotion
-                    ? { opacity: 1 }
-                    : { opacity: 0, x: enterX }
-                }
-                animate={{ opacity: 1, x: 0 }}
-                exit={
-                  shouldReduceMotion
-                    ? { opacity: 0 }
-                    : { opacity: 0, x: exitX }
-                }
-                transition={{
-                  duration: shouldReduceMotion ? 0 : 0.22,
-                  ease: MOTION_EASE.ios,
-                }}
-                className="flex flex-col flex-1 h-full"
-              >
-                {children}
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
+            <div
+              key={pathname}
+              className="animate-page-enter flex flex-col flex-1 h-full w-full"
+            >
+              {children}
+            </div>
+          </div>
         </div>
       </main>
     </div>

@@ -24,44 +24,44 @@ export function PublicHeader({
   return (
     <header
       className={cn(
-        "w-full border-b bg-background/80 backdrop-blur-md px-4 sm:px-8 lg:px-10 py-3 sm:py-4",
+        "w-full border-b bg-background/80 backdrop-blur-md px-3 sm:px-8 lg:px-10 py-2.5 sm:py-4",
         className
       )}
     >
-      <div className="w-full flex items-center justify-between gap-2">
+      <div className="w-full flex items-center justify-between gap-1.5 sm:gap-2">
         {/* Institutional Branding: Left Aligned */}
         <Link
           href="/"
           title="Return to MSME Hub Home"
           className="flex items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90 select-none shrink-0"
         >
-          <MsmeLogoMark size={32} />
+          <MsmeLogoMark size={28} className="sm:w-8 sm:h-8" />
           <div>
-            <span className="font-bold text-base sm:text-lg tracking-tight">
+            <span className="font-bold text-sm sm:text-lg tracking-tight">
               FXEC MSME Hub
             </span>
-            <span className="hidden sm:inline-block ml-2 text-xs font-medium text-muted-foreground">
+            <span className="hidden lg:inline-block ml-2 text-xs font-medium text-muted-foreground">
               Academic Project Portal
             </span>
           </div>
         </Link>
 
         {/* Navigation Controls */}
-        <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 text-xs sm:text-sm text-muted-foreground shrink-0">
           {/* Explicit Home / Exit link */}
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1 rounded-md hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
           >
             <ArrowLeft className="size-3.5 shrink-0" />
             <span>Home</span>
           </Link>
 
-          <div className="h-4 w-px bg-border mx-0.5" />
+          <div className="h-3.5 w-px bg-border mx-0.5" />
 
           {action === "signup" && (
             <span>
-              <span className="hidden sm:inline">Don&apos;t have an account? </span>
+              <span className="hidden lg:inline">Don&apos;t have an account? </span>
               <Link
                 href="/signup"
                 onClick={(e) => {
@@ -70,7 +70,7 @@ export function PublicHeader({
                     onActionClick("signup");
                   }
                 }}
-                className="font-semibold text-primary hover:underline"
+                className="font-semibold text-primary hover:underline px-1 py-0.5"
               >
                 Sign up
               </Link>
@@ -79,7 +79,7 @@ export function PublicHeader({
 
           {action === "login" && (
             <span>
-              <span className="hidden sm:inline">Already have an account? </span>
+              <span className="hidden lg:inline">Already have an account? </span>
               <Link
                 href="/login"
                 onClick={(e) => {
@@ -88,22 +88,21 @@ export function PublicHeader({
                     onActionClick("login");
                   }
                 }}
-                className="font-semibold text-primary hover:underline"
+                className="font-semibold text-primary hover:underline px-1 py-0.5"
               >
                 Sign in
               </Link>
             </span>
           )}
 
-          <div className="h-4 w-px bg-border mx-0.5" />
+          <div className="h-3.5 w-px bg-border mx-0.5 hidden md:block" />
 
           <Link
             href="/admin/login"
-            className="text-xs font-medium text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 transition-colors whitespace-nowrap"
+            className="hidden md:inline-flex text-xs font-medium text-rose-600 dark:text-rose-400 hover:underline items-center gap-1 transition-colors whitespace-nowrap"
           >
             <ShieldCheck className="size-3.5 shrink-0" />
-            <span className="hidden xs:inline">Admin Portal</span>
-            <span className="xs:hidden">Admin</span>
+            <span>Admin Portal</span>
           </Link>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
@@ -62,6 +62,9 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [isAdminLoading, setIsAdminLoading] = useState(false);
 
+  // Synchronous submission lock to block rapid multi-clicks
+  const isSubmittingRef = useRef(false);
+
   const handleLoadDemoAdmin = () => {
     setAdminEmail("admin@msmehub.gov.in");
     setAdminPassword("Admin@123456");
@@ -71,12 +74,13 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading || isGoogleLoading) return;
+    if (isSubmittingRef.current || isLoading || isGoogleLoading) return;
     if (!email.trim() || !password.trim()) {
       toast.error("Please enter both email and password.");
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsLoading(true);
     try {
       const response = await authClient.signIn.email({
@@ -91,6 +95,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
             "Invalid credentials. Please check your email and password."
         );
         setIsLoading(false);
+        isSubmittingRef.current = false;
         return;
       }
 
@@ -100,6 +105,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
       if (!user) {
         toast.error("Failed to establish authenticated session. Please try again.");
         setIsLoading(false);
+        isSubmittingRef.current = false;
         return;
       }
 
@@ -124,6 +130,7 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
     } catch (err: any) {
       toast.error(err?.message || "An unexpected error occurred during sign in.");
       setIsLoading(false);
+      isSubmittingRef.current = false;
     }
   };
 
