@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Building2,
   GraduationCap,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MsmeFullLogo, MsmeLogoMark } from "@/components/ui/msme-logo";
+import { cn } from "@/lib/utils";
 
 type RoleKey = "industry" | "student" | "faculty" | "alumni";
 
@@ -181,114 +183,161 @@ export default function Home() {
             </div>
 
             {/* 3. Top-Level Mode Selector: Workspaces vs How It Works */}
-            <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 my-4">
+            <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 my-4 relative">
               <button
                 type="button"
                 onClick={() => setActiveTab("roles")}
-                className={`h-8 text-xs font-medium rounded-lg transition-all duration-150 flex items-center justify-center gap-1 cursor-pointer ${
+                className={cn(
+                  "relative h-8 text-xs font-medium rounded-lg transition-colors duration-150 flex items-center justify-center gap-1 cursor-pointer select-none",
                   activeTab === "roles"
-                    ? "bg-white dark:bg-[#1C1C1E] text-foreground font-semibold shadow-xs"
+                    ? "text-foreground font-semibold"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                )}
               >
-                <span>Portal Workspaces</span>
+                {activeTab === "roles" && (
+                  <motion.div
+                    layoutId="activeHomeTabPill"
+                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#1C1C1E] shadow-xs"
+                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10">Portal Workspaces</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("howItWorks")}
-                className={`h-8 text-xs font-medium rounded-lg transition-all duration-150 flex items-center justify-center gap-1 cursor-pointer ${
+                className={cn(
+                  "relative h-8 text-xs font-medium rounded-lg transition-colors duration-150 flex items-center justify-center gap-1 cursor-pointer select-none",
                   activeTab === "howItWorks"
-                    ? "bg-white dark:bg-[#1C1C1E] text-foreground font-semibold shadow-xs"
+                    ? "text-foreground font-semibold"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                )}
               >
-                <span>How It Works</span>
+                {activeTab === "howItWorks" && (
+                  <motion.div
+                    layoutId="activeHomeTabPill"
+                    className="absolute inset-0 rounded-lg bg-white dark:bg-[#1C1C1E] shadow-xs"
+                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10">How It Works</span>
               </button>
             </div>
 
-            {/* Tab 1: Roles View */}
-            {activeTab === "roles" ? (
-              <div className="space-y-4">
-                {/* 4-Role Segmented Selector (2x2 Grid) */}
-                <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-100/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/40">
-                  {(["industry", "student", "faculty", "alumni"] as RoleKey[]).map((rKey) => {
-                    const r = rolesConfig[rKey];
-                    const Icon = r.icon;
-                    const isSelected = selectedRole === rKey;
-                    return (
-                      <button
-                        key={rKey}
-                        type="button"
-                        onClick={() => setSelectedRole(rKey)}
-                        className={`h-9 px-2.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 cursor-pointer text-left truncate ${
-                          isSelected
-                            ? "bg-white dark:bg-[#1C1C1E] text-foreground font-semibold shadow-xs"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        <Icon className={`size-3.5 shrink-0 ${r.color}`} />
-                        <span className="truncate">{r.title}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+            {/* Tab Content with Animation */}
+            <div className="relative overflow-hidden">
+              <AnimatePresence mode="wait" initial={false}>
+                {activeTab === "roles" ? (
+                  <motion.div
+                    key="roles-panel"
+                    initial={{ opacity: 0, x: -14, filter: "blur(2px)" }}
+                    animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, x: -14, filter: "blur(2px)" }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    className="space-y-4"
+                  >
+                    {/* 4-Role Segmented Selector (2x2 Grid) */}
+                    <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-100/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/40">
+                      {(["industry", "student", "faculty", "alumni"] as RoleKey[]).map((rKey) => {
+                        const r = rolesConfig[rKey];
+                        const Icon = r.icon;
+                        const isSelected = selectedRole === rKey;
+                        return (
+                          <button
+                            key={rKey}
+                            type="button"
+                            onClick={() => setSelectedRole(rKey)}
+                            className={cn(
+                              "relative h-9 px-2.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer text-left truncate select-none",
+                              isSelected
+                                ? "text-foreground font-semibold"
+                                : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            {isSelected && (
+                              <motion.div
+                                layoutId="activeRoleButtonPill"
+                                className="absolute inset-0 rounded-lg bg-white dark:bg-[#1C1C1E] shadow-xs"
+                                transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                              />
+                            )}
+                            <Icon className={`relative z-10 size-3.5 shrink-0 ${r.color}`} />
+                            <span className="relative z-10 truncate">{r.title}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
 
-                {/* Selected Role Card Box */}
-                <div
-                  className={`rounded-xl border p-4 transition-all duration-150 space-y-2.5 ${currentRole.activeBorder}`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <currentRole.icon className={`size-4 ${currentRole.color}`} />
-                      <span className="text-xs font-bold text-foreground">
-                        {currentRole.title}
+                    {/* Selected Role Card Box with AnimatePresence */}
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.div
+                        key={selectedRole}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.18, ease: "easeOut" }}
+                        className={`rounded-xl border p-4 transition-colors space-y-2.5 ${currentRole.activeBorder}`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <currentRole.icon className={`size-4 ${currentRole.color}`} />
+                            <span className="text-xs font-bold text-foreground">
+                              {currentRole.title}
+                            </span>
+                          </div>
+                          <span
+                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${currentRole.activeBadge}`}
+                          >
+                            {currentRole.badge}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {currentRole.description}
+                        </p>
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {/* Subtle Policy / Requirement Note */}
+                    <div className="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 p-3 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2">
+                      <Info className="size-4 text-blue-500 mt-0.5 shrink-0" />
+                      <span className="leading-relaxed">
+                        <strong>{currentRole.infoTitle}:</strong> {currentRole.infoText}
                       </span>
                     </div>
-                    <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${currentRole.activeBadge}`}
-                    >
-                      {currentRole.badge}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {currentRole.description}
-                  </p>
-                </div>
 
-                {/* Subtle Policy / Requirement Note */}
-                <div className="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 p-3 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2">
-                  <Info className="size-4 text-blue-500 mt-0.5 shrink-0" />
-                  <span className="leading-relaxed">
-                    <strong>{currentRole.infoTitle}:</strong> {currentRole.infoText}
-                  </span>
-                </div>
+                    {/* Action Buttons */}
+                    <div className="space-y-2 pt-1">
+                      <Link href={currentRole.loginHref} className="block w-full">
+                        <Button
+                          type="button"
+                          className="w-full h-10 font-semibold text-sm rounded-lg bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all active:scale-[0.99] shadow-xs flex items-center justify-center gap-1.5"
+                        >
+                          <span>{currentRole.loginLabel}</span>
+                          <ArrowRight className="size-4 shrink-0" />
+                        </Button>
+                      </Link>
 
-                {/* Action Buttons */}
-                <div className="space-y-2 pt-1">
-                  <Link href={currentRole.loginHref} className="block w-full">
-                    <Button
-                      type="button"
-                      className="w-full h-10 font-semibold text-sm rounded-lg bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all active:scale-[0.99] shadow-xs flex items-center justify-center gap-1.5"
-                    >
-                      <span>{currentRole.loginLabel}</span>
-                      <ArrowRight className="size-4 shrink-0" />
-                    </Button>
-                  </Link>
-
-                  <Link href={currentRole.signupHref} className="block w-full">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full h-9 font-medium text-xs rounded-lg border-black/[0.1] dark:border-white/[0.12] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] text-foreground"
-                    >
-                      <span>{currentRole.signupLabel}</span>
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              /* Tab 2: How It Works Clean Process */
-              <div className="space-y-3 pt-1">
+                      <Link href={currentRole.signupHref} className="block w-full">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full h-9 font-medium text-xs rounded-lg border-black/[0.1] dark:border-white/[0.12] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] text-foreground"
+                        >
+                          <span>{currentRole.signupLabel}</span>
+                        </Button>
+                      </Link>
+                    </div>
+                  </motion.div>
+                ) : (
+                  /* Tab 2: How It Works Clean Process */
+                  <motion.div
+                    key="how-it-works-panel"
+                    initial={{ opacity: 0, x: 14, filter: "blur(2px)" }}
+                    animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, x: 14, filter: "blur(2px)" }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    className="space-y-3 pt-1"
+                  >
                 <div className="space-y-2.5">
                   {[
                     {
@@ -348,8 +397,10 @@ export default function Home() {
                 >
                   &larr; Return to Workspaces
                 </Button>
-              </div>
+              </motion.div>
             )}
+          </AnimatePresence>
+        </div>
 
             {/* Central Admin Row */}
             <div className="mt-5 pt-3.5 border-t border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between text-xs text-muted-foreground">
