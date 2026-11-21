@@ -232,14 +232,14 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       {/* ── Welcome Banner ─────────────────────────────────────────────── */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
               MSME Administration Console
             </h1>
             <CopyIdBadge id={adminId} label="Admin ID" size="xs" />
-            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#FF3B30]/10 text-[#FF3B30] dark:bg-[#FF453A]/15 dark:text-[#FF453A]">
+            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50">
               Super Admin
             </span>
           </div>
@@ -249,7 +249,7 @@ export default function AdminDashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <ShieldCheck className="size-8 text-rose-400 opacity-60" />
+          <ShieldCheck className="size-8 text-rose-500 opacity-80" />
         </div>
       </div>
 
@@ -261,16 +261,16 @@ export default function AdminDashboardPage() {
             <StaggerItem key={stat.label}>
               <Link
                 href={stat.href}
-                className="group rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-4 flex flex-col gap-3 hover:shadow-md transition-all duration-200 active:scale-[0.98] h-full"
+                className="group rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-4 flex flex-col gap-3 hover:border-[#14283F]/30 dark:hover:border-primary/40 hover:shadow-sm transition-all duration-150 active:scale-[0.99] h-full"
               >
-                <div className={`size-9 rounded-[10px] ${stat.accent} flex items-center justify-center`}>
+                <div className={`size-9 rounded-xl ${stat.accent} flex items-center justify-center`}>
                   <Icon className={`size-4.5 ${stat.iconColor}`} />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-foreground leading-none">
                     {stat.value}
                   </div>
-                  <div className="text-[11px] font-semibold text-foreground mt-1 leading-tight">
+                  <div className="text-[11px] font-semibold text-foreground mt-1.5 leading-tight">
                     {stat.label}
                   </div>
                   <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
@@ -287,12 +287,12 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Quick Actions */}
         <div className="lg:col-span-2">
-          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs overflow-hidden h-full">
-            <div className="px-5 py-4 border-b border-black/[0.06] dark:border-white/[0.08]">
+          <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs overflow-hidden h-full">
+            <div className="px-5 py-4 border-b border-slate-200/80 dark:border-slate-800">
               <h2 className="text-sm font-semibold text-foreground">Quick Actions</h2>
               <p className="text-xs text-muted-foreground mt-0.5">Jump to pending tasks</p>
             </div>
-            <ul className="divide-y divide-black/[0.04] dark:divide-white/[0.05]">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {quickActions.map((action) => {
                 const Icon = action.icon;
                 return (

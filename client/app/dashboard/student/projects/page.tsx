@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Loader2, ExternalLink, ChevronRight, Crown, XCircle, FolderKanban } from "lucide-react";
+import { Search, Loader2, ExternalLink, ChevronRight, Crown, XCircle, FolderKanban, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { ProjectCategoryTabs } from "@/components/projects/project-category-tabs";
@@ -99,19 +99,19 @@ export default function MyProjectsPage() {
   return (
     <div className="space-y-6">
       {/* Standardized Page Header Card */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <FolderKanban className="size-4 text-[#007AFF]" />
+            <FolderKanban className="size-4.5 text-[#14283F] dark:text-sky-400" />
             <h1 className="text-xl font-bold tracking-tight text-foreground">
               My Enrolled Projects &amp; History
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            PRD §8.4: Track capstone progress, review individual project history timelines, and manage deliverables. Max 2 active concurrent projects enforced.
+            Track capstone progress, review individual project history timelines, and manage deliverables. Max 2 active concurrent projects enforced.
           </p>
         </div>
-        <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] text-foreground self-start sm:self-auto shrink-0">
+        <div className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-foreground self-start sm:self-auto shrink-0 shadow-2xs">
           {filtered.length} {filtered.length === 1 ? "Project" : "Projects"}
         </div>
       </div>
@@ -130,14 +130,24 @@ export default function MyProjectsPage() {
             placeholder="Search by project name, ID, domain, or mentor..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 text-xs h-9 bg-white rounded-[10px] border-black/[0.06] dark:border-white/[0.08] focus-visible:ring-blue-600"
+            className="pl-9 pr-8 text-xs h-9 bg-white dark:bg-slate-900 rounded-xl border-slate-200/90 dark:border-slate-800 focus-visible:ring-[#14283F]/20"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-muted-foreground hover:text-foreground rounded-full transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Projects Table Card */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden">
-        <div className="px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold text-foreground">
               Enrolled Capstone Projects
@@ -251,7 +261,7 @@ export default function MyProjectsPage() {
                 <span className="text-muted-foreground">Due: {project.deadline}</span>
                 <Link
                   href={`/dashboard/student/project-details?id=${project.id}`}
-                  className="font-medium text-[#007AFF] hover:underline flex items-center gap-1"
+                  className="font-medium text-[#14283F] dark:text-sky-400 hover:underline flex items-center gap-1"
                 >
                   View Details <ExternalLink className="size-3" />
                 </Link>
@@ -260,8 +270,28 @@ export default function MyProjectsPage() {
           ))}
         </div>
         {filtered.length === 0 && (
-          <div className="p-12 text-center text-xs text-muted-foreground">
-            No projects found matching the selected category.
+          <div className="p-12 text-center flex flex-col items-center justify-center">
+            <div className="size-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-muted-foreground mb-3">
+              <FolderKanban className="size-6 opacity-60" />
+            </div>
+            <p className="text-sm font-semibold text-foreground">No projects found</p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+              {search
+                ? `No projects match "${search}". Try searching with a different keyword or project ID.`
+                : "No projects found matching the selected category filter."}
+            </p>
+            {(search || activeCategory !== "ALL") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setActiveCategory("ALL");
+                }}
+                className="mt-4 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-foreground hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer shadow-2xs"
+              >
+                Reset Search &amp; Filters
+              </button>
+            )}
           </div>
         )}
       </div>

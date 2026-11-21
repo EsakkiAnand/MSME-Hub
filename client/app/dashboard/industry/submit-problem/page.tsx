@@ -235,7 +235,7 @@ export default function SubmitProblemPage() {
                   id="consent"
                   checked={consentChecked}
                   onChange={(e) => setConsentChecked(e.target.checked)}
-                  className="mt-0.5 rounded border-blue-300 text-[#007AFF] focus:ring-blue-500"
+                  className="mt-0.5 rounded border-slate-300 text-[#14283F] accent-[#14283F] focus:ring-[#14283F]"
                 />
                 <label htmlFor="consent" className="text-foreground font-medium cursor-pointer leading-relaxed">
                   I agree that solutions developed by student teams are governed under the{" "}
@@ -257,7 +257,7 @@ export default function SubmitProblemPage() {
 
               <Button
                 type="submit"
-                className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs h-9 px-6"
+                className="bg-[#14283F] hover:bg-[#14283F]/90 text-white text-xs font-semibold h-9 px-6 rounded-xl shadow-xs transition-all active:scale-[0.99]"
               >
                 <Send className="size-3.5 mr-1.5" />
                 Review &amp; Submit Challenge

@@ -73,23 +73,22 @@ export function SidebarProfileCard({
   };
 
   return (
-    <div className={cn("p-3 border-t border-black/[0.06] dark:border-white/[0.08] shrink-0", className)}>
+    <div className={cn("p-3 border-t border-slate-200/90 dark:border-slate-800 shrink-0", className)}>
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
-            "group relative flex w-full items-center justify-between gap-2.5 px-3 py-2.5 rounded-[12px]",
-            "bg-black/[0.025] hover:bg-black/[0.05] dark:bg-white/[0.04] dark:hover:bg-white/[0.07]",
-            "border border-black/[0.05] hover:border-black/[0.08] dark:border-white/[0.06] dark:hover:border-white/[0.1]",
+            "group relative flex w-full items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl",
+            "bg-slate-50/80 hover:bg-slate-100/90 dark:bg-slate-800/40 dark:hover:bg-slate-800/80",
+            "border border-slate-200/80 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700",
             "transition-all duration-150 outline-none select-none text-left active:scale-[0.99] cursor-pointer",
-            "focus-visible:ring-2 focus-visible:ring-[#007AFF]/30"
+            "focus-visible:ring-2 focus-visible:ring-[#14283F]/20 dark:focus-visible:ring-sky-500/20"
           )}
           aria-label="Open user profile menu"
         >
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            {/* iOS Avatar */}
-            <Avatar className="size-8.5 rounded-[10px] shrink-0 bg-[#007AFF]/10 text-[#007AFF] dark:bg-[#0A84FF]/15 dark:text-[#0A84FF] border border-black/[0.06] dark:border-white/[0.08]">
+            <Avatar className="size-8.5 rounded-xl shrink-0 bg-slate-100 text-[#14283F] dark:bg-slate-800 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700">
               <AvatarImage src={user?.image || undefined} alt={user?.name || "User"} />
-              <AvatarFallback className="bg-[#007AFF]/10 text-[#007AFF] dark:bg-[#0A84FF]/15 dark:text-[#0A84FF] text-xs font-semibold rounded-[10px]">
+              <AvatarFallback className="bg-slate-100 text-[#14283F] dark:bg-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -107,21 +106,21 @@ export function SidebarProfileCard({
             </div>
           </div>
 
-          {/* iOS Action Dots [⋯] */}
-          <div className="shrink-0 p-1 text-muted-foreground/60 group-hover:text-foreground transition-colors rounded-[6px]">
+          {/* Action Dots [⋯] */}
+          <div className="shrink-0 p-1 text-muted-foreground/60 group-hover:text-foreground transition-colors rounded-lg">
             <MoreHorizontal className="size-4" />
           </div>
         </DropdownMenuTrigger>
 
-        {/* iOS Native Popover Action Menu */}
+        {/* Popover Action Menu */}
         <DropdownMenuContent
           side="top"
           align="start"
           sideOffset={8}
-          className="w-56 p-1.5 rounded-[16px] border border-black/[0.08] dark:border-white/[0.1] bg-white/98 dark:bg-[#1C1C1E]/98 backdrop-blur-2xl shadow-[0_16px_40px_rgba(0,0,0,0.12)] z-50 animate-in fade-in-0 zoom-in-95"
+          className="w-56 p-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/98 dark:bg-[#0E1524]/98 backdrop-blur-xl shadow-lg z-50 animate-in fade-in-0 zoom-in-95"
         >
           {/* Header detail */}
-          <div className="px-3 py-2 border-b border-black/[0.06] dark:border-white/[0.08]">
+          <div className="px-3 py-2 border-b border-slate-200/80 dark:border-slate-800">
             <p className="text-xs font-semibold text-foreground truncate leading-tight">
               {user?.name || "User"}
             </p>

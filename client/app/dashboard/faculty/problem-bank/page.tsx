@@ -199,7 +199,7 @@ export default function FacultyProblemBankPage() {
   return (
     <div className="space-y-6">
       {/* ── Page Header ──────────────────────────────────────────────── */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
@@ -216,8 +216,8 @@ export default function FacultyProblemBankPage() {
       </div>
 
       {/* ── KPI Metric Cards ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-4 flex flex-col justify-between">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-4 flex flex-col justify-between hover:border-[#14283F]/30 dark:hover:border-primary/40 transition-all duration-150">
           <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
             <span>Total</span>
             <Layers className="size-4 text-slate-500" />
@@ -226,7 +226,7 @@ export default function FacultyProblemBankPage() {
           <p className="text-[11px] text-muted-foreground mt-1">All problem statements</p>
         </div>
 
-        <div className="rounded-[14px] border border-blue-200 dark:border-blue-900/50 bg-blue-50/40 dark:bg-blue-950/20 shadow-xs p-4 flex flex-col justify-between">
+        <div className="rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/40 dark:bg-blue-950/20 shadow-xs p-4 flex flex-col justify-between hover:border-blue-300 transition-all duration-150">
           <div className="flex items-center justify-between text-blue-700 dark:text-blue-300 text-xs font-semibold uppercase tracking-wider mb-2">
             <span>Available</span>
             <CheckCircle2 className="size-4 text-blue-600" />
@@ -235,7 +235,7 @@ export default function FacultyProblemBankPage() {
           <p className="text-[11px] text-blue-600/80 dark:text-blue-400 mt-1">Ready for faculty claim</p>
         </div>
 
-        <div className="rounded-[14px] border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20 shadow-xs p-4 flex flex-col justify-between">
+        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20 shadow-xs p-4 flex flex-col justify-between hover:border-emerald-300 transition-all duration-150">
           <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2">
             <span>Claimed</span>
             <Clock className="size-4 text-emerald-600" />
@@ -244,7 +244,7 @@ export default function FacultyProblemBankPage() {
           <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400 mt-1">In active development</p>
         </div>
 
-        <div className="rounded-[14px] border border-rose-200 dark:border-rose-900/50 bg-rose-50/40 dark:bg-rose-950/20 shadow-xs p-4 flex flex-col justify-between">
+        <div className="rounded-2xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/40 dark:bg-rose-950/20 shadow-xs p-4 flex flex-col justify-between hover:border-rose-300 transition-all duration-150">
           <div className="flex items-center justify-between text-rose-700 dark:text-rose-300 text-xs font-semibold uppercase tracking-wider mb-2">
             <span>Rejected</span>
             <XCircle className="size-4 text-rose-600" />
@@ -255,7 +255,7 @@ export default function FacultyProblemBankPage() {
       </div>
 
       {/* ── Filters & Search Toolbar ─────────────────────────────────── */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-4">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-4">
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
           <div className="relative flex-1 min-w-[240px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
@@ -264,7 +264,7 @@ export default function FacultyProblemBankPage() {
               placeholder="Search by problem title, company, or keywords..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 text-xs h-9"
+              className="pl-9 text-xs h-9 rounded-xl"
             />
           </div>
 
@@ -276,7 +276,7 @@ export default function FacultyProblemBankPage() {
             <select
               value={selectedDomain}
               onChange={(e) => setSelectedDomain(e.target.value)}
-              className="h-9 text-xs rounded-lg border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#161618] px-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="h-9 text-xs rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 text-foreground focus:outline-none focus:ring-2 focus:ring-[#14283F]/20 dark:focus:ring-sky-500/20 shadow-2xs"
             >
               {domains.map((d) => (
                 <option key={d} value={d}>
@@ -288,7 +288,7 @@ export default function FacultyProblemBankPage() {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="h-9 text-xs rounded-lg border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#161618] px-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="h-9 text-xs rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 text-foreground focus:outline-none focus:ring-2 focus:ring-[#14283F]/20 dark:focus:ring-sky-500/20 shadow-2xs"
             >
               <option value="ALL">All Statuses</option>
               <option value="POOL_AVAILABLE">Available in Pool</option>
@@ -303,7 +303,7 @@ export default function FacultyProblemBankPage() {
                   setSelectedDomain("ALL");
                   setSelectedStatus("ALL");
                 }}
-                className="h-9 px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 rounded-lg hover:bg-black/[0.04] transition-colors"
+                className="h-9 px-3 text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 transition-colors shadow-2xs cursor-pointer"
               >
                 <RotateCcw className="size-3" />
                 Reset
@@ -314,7 +314,7 @@ export default function FacultyProblemBankPage() {
       </div>
 
       {/* ── Problem Bank Table ───────────────────────────────────────── */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs overflow-hidden">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-black/[0.02] dark:bg-white/[0.03] border-b border-black/[0.06] dark:border-white/[0.08] text-muted-foreground font-semibold">

@@ -106,7 +106,7 @@ export default function AlumniOverviewPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-muted-foreground">
-        <Loader2 className="size-8 animate-spin text-[#007AFF] mb-3" />
+        <Loader2 className="size-8 animate-spin text-[#14283F] dark:text-sky-400 mb-3" />
         <p className="text-sm font-medium">Loading Alumni Mentor Workspace...</p>
       </div>
     );
@@ -126,27 +126,27 @@ export default function AlumniOverviewPage() {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="bg-white dark:bg-card rounded-xl border border-black/[0.06] dark:border-white/[0.08] dark:border-border p-6 shadow-xs">
+      <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50">
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50">
                 Industry Expert Mentor
               </span>
               <CopyIdBadge id={data?.user?.uniqueId || "EXP0001"} label="Expert ID" size="xs" />
             </div>
-            <h2 className="text-xl font-bold tracking-tight text-foreground dark:text-foreground">
+            <h2 className="text-xl font-bold tracking-tight text-foreground">
               Welcome back, {data?.user?.name || "Mentor"}
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground dark:text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-              {profile?.currentRole} at <span className="text-foreground dark:text-foreground font-semibold">{profile?.currentCompany}</span>.
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+              {profile?.currentRole} at <span className="text-foreground font-semibold">{profile?.currentCompany}</span>.
               Share architectural advice, answer student queries, and help students ship production-grade open-source solutions.
             </p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
             <Link href="/dashboard/alumni/guidance">
-              <Button className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs h-9">
+              <Button className="bg-[#14283F] hover:bg-[#14283F]/90 text-white text-xs font-semibold h-9 px-4 rounded-xl shadow-xs transition-all active:scale-[0.99]">
                 <HelpCircle className="size-3.5 mr-1.5" />
                 Browse Guidance Board
               </Button>

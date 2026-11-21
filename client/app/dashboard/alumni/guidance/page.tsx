@@ -128,16 +128,16 @@ export default function GuidanceBoardPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <HelpCircle className="size-4 text-[#007AFF]" />
+            <HelpCircle className="size-4.5 text-[#14283F] dark:text-sky-400" />
             <h1 className="text-xl font-bold tracking-tight text-foreground">
               Open Guidance Board
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            PRD §8.6 Hybrid Guidance Engine: Discover technical bottlenecks submitted by student project teams and post architectural advice.
+            Discover technical bottlenecks submitted by student project teams and post architectural advice.
           </p>
         </div>
       </div>
@@ -150,12 +150,12 @@ export default function GuidanceBoardPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search questions, projects, student..."
-            className="pl-9 text-xs h-9 bg-white"
+            className="pl-9 text-xs h-9 bg-white dark:bg-slate-900 rounded-xl border-slate-200/90 dark:border-slate-800"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <div className="w-36">
+          <div className="w-40">
             <IOSSelect
               value={statusFilter}
               onChange={setStatusFilter}
@@ -176,10 +176,10 @@ export default function GuidanceBoardPage() {
           <button
             key={tag}
             onClick={() => setSelectedTag(tag)}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors shrink-0 ${
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors shrink-0 cursor-pointer ${
               selectedTag === tag
-                ? "bg-[#1d4ed8] text-white shadow-xs"
-                : "bg-white text-muted-foreground hover:bg-slate-100 border border-black/[0.06] dark:border-white/[0.08]"
+                ? "bg-[#14283F] text-white shadow-xs"
+                : "bg-white dark:bg-slate-900 text-muted-foreground hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800"
             }`}
           >
             {tag}

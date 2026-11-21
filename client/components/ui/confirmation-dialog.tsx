@@ -94,12 +94,11 @@ export function ConfirmationDialog({
                 transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 className={cn(
                   "pointer-events-auto relative w-full overflow-hidden outline-none",
-                  // Balanced, responsive iOS alert width: never cramped on mobile, never stretched on desktop
-                  "w-[310px] min-[370px]:w-[340px] min-[420px]:w-[370px] sm:w-[390px] max-w-[calc(100vw-24px)]",
-                  "rounded-[22px] sm:rounded-[24px]",
-                  "border border-black/[0.08] dark:border-white/[0.12]",
-                  "bg-[#fbfbfb]/95 dark:bg-[#1e1e1e]/95 backdrop-blur-2xl backdrop-saturate-150",
-                  "shadow-[0_20px_50px_rgba(0,0,0,0.22)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.6)]"
+                  "w-[320px] min-[370px]:w-[350px] min-[420px]:w-[380px] sm:w-[410px] max-w-[calc(100vw-24px)]",
+                  "rounded-2xl",
+                  "border border-slate-200/90 dark:border-slate-800",
+                  "bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl",
+                  "shadow-2xl"
                 )}
               >
               {/* Content Header & Body */}
@@ -152,8 +151,8 @@ export function ConfirmationDialog({
                       "transition-colors hover:bg-black/[0.03] active:bg-black/[0.07] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.08]",
                       "disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed select-none",
                       isDestructive
-                        ? "text-[#FF3B30] dark:text-[#FF453A]"
-                        : "text-[#007AFF] dark:text-[#0A84FF]"
+                        ? "text-rose-600 dark:text-rose-400"
+                        : "text-[#14283F] dark:text-sky-400"
                     )}
                   >
                     {isLoading ? (
@@ -166,25 +165,25 @@ export function ConfirmationDialog({
                     )}
                   </button>
 
-                  {/* Cancel Action (Secondary action placed at bottom per iOS HIG) */}
-                  <button
-                    type="button"
-                    disabled={isLoading}
-                    onClick={handleCancel}
-                    className="min-h-[48px] sm:min-h-[50px] w-full px-4 py-2.5 flex items-center justify-center text-[16px] sm:text-[17px] font-normal text-[#007AFF] dark:text-[#0A84FF] transition-colors hover:bg-black/[0.03] active:bg-black/[0.07] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.08] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed select-none whitespace-nowrap"
-                  >
-                    {cancelText}
-                  </button>
-                </div>
-              ) : (
-                /* Native iOS Side-by-Side Horizontal Alert Actions */
-                <div className="border-t border-black/[0.08] dark:border-white/[0.1] grid grid-cols-2 divide-x divide-black/[0.08] dark:divide-white/[0.1] h-[48px] sm:h-[50px] max-[359px]:flex max-[359px]:flex-col max-[359px]:divide-x-0 max-[359px]:divide-y max-[359px]:h-auto">
                   {/* Cancel Action */}
                   <button
                     type="button"
                     disabled={isLoading}
                     onClick={handleCancel}
-                    className="h-full min-h-[48px] sm:min-h-[50px] w-full min-w-0 px-3 flex items-center justify-center text-[15.5px] sm:text-[16.5px] font-normal text-[#007AFF] dark:text-[#0A84FF] transition-colors hover:bg-black/[0.03] active:bg-black/[0.07] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.08] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed select-none whitespace-nowrap"
+                    className="min-h-[48px] sm:min-h-[50px] w-full px-4 py-2.5 flex items-center justify-center text-[15px] sm:text-[16px] font-normal text-muted-foreground hover:text-foreground transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed select-none whitespace-nowrap"
+                  >
+                    {cancelText}
+                  </button>
+                </div>
+              ) : (
+                /* Side-by-Side Horizontal Alert Actions */
+                <div className="border-t border-slate-200/80 dark:border-slate-800 grid grid-cols-2 divide-x divide-slate-200/80 dark:divide-slate-800 h-[48px] sm:h-[50px] max-[359px]:flex max-[359px]:flex-col max-[359px]:divide-x-0 max-[359px]:divide-y max-[359px]:h-auto">
+                  {/* Cancel Action */}
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={handleCancel}
+                    className="h-full min-h-[48px] sm:min-h-[50px] w-full min-w-0 px-3 flex items-center justify-center text-[14.5px] sm:text-[15.5px] font-normal text-muted-foreground hover:text-foreground transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed select-none whitespace-nowrap"
                   >
                     <span className="truncate">{cancelText}</span>
                   </button>
@@ -195,16 +194,16 @@ export function ConfirmationDialog({
                     disabled={isLoading}
                     onClick={handleConfirm}
                     className={cn(
-                      "h-full min-h-[48px] sm:min-h-[50px] w-full min-w-0 px-3 flex items-center justify-center gap-1.5 text-[15.5px] sm:text-[16.5px] font-semibold whitespace-nowrap transition-colors hover:bg-black/[0.03] active:bg-black/[0.07] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.08] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed select-none",
+                      "h-full min-h-[48px] sm:min-h-[50px] w-full min-w-0 px-3 flex items-center justify-center gap-1.5 text-[14.5px] sm:text-[15.5px] font-semibold whitespace-nowrap transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed select-none",
                       isDestructive
-                        ? "text-[#FF3B30] dark:text-[#FF453A]"
-                        : "text-[#007AFF] dark:text-[#0A84FF]"
+                        ? "text-rose-600 dark:text-rose-400"
+                        : "text-[#14283F] dark:text-sky-400 font-semibold"
                     )}
                   >
                     {isLoading ? (
                       <>
                         <Loader2 className="size-4 animate-spin shrink-0" />
-                        <span className="text-[15px]">Working...</span>
+                        <span className="text-[14px]">Working...</span>
                       </>
                     ) : (
                       <span className="truncate">{confirmText}</span>

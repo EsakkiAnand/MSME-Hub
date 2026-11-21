@@ -160,10 +160,10 @@ export default function FacultyIdeaSubmissionsPage() {
   return (
     <div className="space-y-6">
       {/* Header Info */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Lightbulb className="size-4 text-[#007AFF]" />
+            <Lightbulb className="size-4.5 text-[#14283F] dark:text-sky-400" />
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Student Innovation Evaluator
             </span>
@@ -175,20 +175,20 @@ export default function FacultyIdeaSubmissionsPage() {
             Review independent problem pitches submitted by engineering students for MSME incubation.
           </p>
         </div>
-        <div className="text-xs font-medium px-3 py-1.5 rounded-md border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] text-foreground self-start sm:self-auto">
+        <div className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-foreground self-start sm:self-auto shadow-2xs">
           {pendingCount} Pending Evaluations
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Search by idea title, student name, ID, or domain..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 text-xs sm:text-sm rounded-md border-black/[0.06] dark:border-white/[0.08] focus-visible:ring-blue-600"
+            className="pl-9 text-xs sm:text-sm rounded-xl border-slate-200/90 dark:border-slate-800 focus-visible:ring-[#14283F]/20"
           />
         </div>
 
@@ -205,9 +205,9 @@ export default function FacultyIdeaSubmissionsPage() {
       </div>
 
       {/* Idea Cards List */}
-      <div className="space-y-5">
+      <div className="space-y-4">
         {filteredIdeas.length === 0 ? (
-          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-12 text-center text-muted-foreground text-sm">
+          <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-12 text-center text-muted-foreground text-sm">
             No student ideas match the current filter.
           </div>
         ) : (
@@ -216,7 +216,7 @@ export default function FacultyIdeaSubmissionsPage() {
             return (
               <div
                 key={idea.id}
-                className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 hover:border-slate-300 hover:shadow-xs transition-all"
+                className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-5 sm:p-6 hover:border-[#14283F]/30 dark:hover:border-primary/40 hover:shadow-sm transition-all"
               >
                 {/* Header row */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">

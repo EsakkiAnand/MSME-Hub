@@ -234,9 +234,9 @@ export default function SubmitIdeaPage() {
           <div className="lg:col-span-2 space-y-6">
             <form
               onSubmit={handleFormSubmit}
-              className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden"
+              className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs overflow-hidden"
             >
-              <div className="px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between">
+              <div className="px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-semibold text-foreground tracking-tight">
                     Project Concept Pitch
@@ -260,7 +260,7 @@ export default function SubmitIdeaPage() {
                     value={form.title}
                     onChange={(e) => handleChange("title", e.target.value)}
                     maxLength={120}
-                    className="h-9 text-xs rounded-[10px]"
+                    className="h-9 text-xs rounded-xl"
                   />
                   {errors.title && <p className="text-[11px] text-rose-500">{errors.title}</p>}
                 </div>
@@ -290,7 +290,7 @@ export default function SubmitIdeaPage() {
                     placeholder="Clearly define the specific operational bottleneck, equipment inefficiency, or business challenge faced by local micro or small enterprises..."
                     value={form.problemStatement}
                     onChange={(e) => handleChange("problemStatement", e.target.value)}
-                    className="w-full rounded-[10px] border border-black/[0.1] dark:border-white/[0.12] bg-transparent p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-[#007AFF] resize-none"
+                    className="w-full rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:border-[#14283F] dark:focus:border-sky-400 focus:ring-2 focus:ring-[#14283F]/15 dark:focus:ring-sky-400/20 transition-all duration-150 resize-none shadow-2xs"
                   />
                   {errors.problemStatement && (
                     <p className="text-[11px] text-rose-500">{errors.problemStatement}</p>
@@ -307,7 +307,7 @@ export default function SubmitIdeaPage() {
                     placeholder="Detail the technical approach, hardware/software stack, algorithms, and practical implementation strategy you plan to employ..."
                     value={form.proposedSolution}
                     onChange={(e) => handleChange("proposedSolution", e.target.value)}
-                    className="w-full rounded-[10px] border border-black/[0.1] dark:border-white/[0.12] bg-transparent p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-[#007AFF] resize-none"
+                    className="w-full rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:border-[#14283F] dark:focus:border-sky-400 focus:ring-2 focus:ring-[#14283F]/15 dark:focus:ring-sky-400/20 transition-all duration-150 resize-none shadow-2xs"
                   />
                   {errors.proposedSolution && (
                     <p className="text-[11px] text-rose-500">{errors.proposedSolution}</p>
@@ -323,7 +323,7 @@ export default function SubmitIdeaPage() {
                     placeholder="e.g., 40% reduction in manual inspection time; working PCB prototype; web dashboard"
                     value={form.expectedImpact}
                     onChange={(e) => handleChange("expectedImpact", e.target.value)}
-                    className="h-9 text-xs rounded-[10px]"
+                    className="h-9 text-xs rounded-xl"
                   />
                 </div>
 
@@ -336,7 +336,7 @@ export default function SubmitIdeaPage() {
                     placeholder="e.g., https://github.com/student/idea-draft or Google Drive URL"
                     value={form.attachments}
                     onChange={(e) => handleChange("attachments", e.target.value)}
-                    className="h-9 text-xs rounded-[10px]"
+                    className="h-9 text-xs rounded-xl"
                   />
                   <p className="text-[11px] text-muted-foreground">
                     Provide a public repository, block diagram URL, or whitepaper link if available.
@@ -345,19 +345,19 @@ export default function SubmitIdeaPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="px-6 py-4 bg-black/[0.02] dark:bg-white/[0.03]/75 border-t border-black/[0.06] dark:border-white/[0.08] flex items-center justify-end gap-3">
+              <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/40 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-end gap-3">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setShowClearConfirm(true)}
-                  className="rounded-[10px] text-xs h-9"
+                  className="rounded-xl text-xs h-9"
                 >
                   Clear Fields
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="rounded-[10px] bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs font-medium h-9 px-4 transition-all active:scale-[0.98]"
+                  className="rounded-xl bg-[#14283F] hover:bg-[#14283F]/90 text-white text-xs font-semibold h-9 px-4 transition-all active:scale-[0.99] shadow-xs"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-1.5">

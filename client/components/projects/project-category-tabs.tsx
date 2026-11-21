@@ -35,9 +35,9 @@ export function ProjectCategoryTabs({
       label: "In Progress / Live",
       count: counts.inProgressLive,
       icon: PlayCircle,
-      activeColor: "bg-[#007AFF] text-white",
+      activeColor: "bg-[#14283F] dark:bg-sky-500 text-white",
       badgeColor: "bg-white/20 text-white",
-      inactiveBadge: "bg-blue-50 text-[#007AFF] dark:bg-blue-950/40 dark:text-blue-300",
+      inactiveBadge: "bg-slate-100 text-[#14283F] dark:bg-slate-800 dark:text-sky-300",
       dot: "bg-emerald-400 animate-pulse",
     },
     {

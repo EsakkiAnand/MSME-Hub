@@ -27,13 +27,13 @@ export function DashboardPageHeader({
   return (
     <div
       className={cn(
-        "rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4",
+        "rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4",
         className
       )}
     >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2 mb-1">
-          {Icon && <Icon className="size-4 text-[#007AFF] shrink-0" />}
+          {Icon && <Icon className="size-4.5 text-[#14283F] dark:text-sky-400 shrink-0" />}
           <h1 className="text-xl font-bold tracking-tight text-foreground truncate">
             {title}
           </h1>

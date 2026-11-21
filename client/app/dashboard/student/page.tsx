@@ -89,11 +89,11 @@ export default function StudentDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Apple iOS Grouped Welcome Card */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Executive Welcome Card */}
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1">
-            <h2 className="text-xl font-semibold text-foreground tracking-tight">
+            <h2 className="text-xl font-bold text-foreground tracking-tight">
               Welcome, {studentName}
             </h2>
             <CopyIdBadge id={(user as any)?.uniqueId || "STU0001"} label="Student ID" size="xs" />
@@ -102,21 +102,21 @@ export default function StudentDashboardPage() {
             Francis Xavier Engineering College · Academic Project Management Portal
           </p>
           <p className="text-[11px] text-muted-foreground mt-1.5">
-            Active Project Load: <span className="font-medium text-foreground">{activeCount} of 2</span> slots utilized.
+            Active Project Load: <span className="font-semibold text-foreground">{activeCount} of 2</span> slots utilized.
             {activeCount >= 2 && " Maximum project capacity reached."}
           </p>
         </div>
         <div className="flex items-center gap-2.5 shrink-0">
           <Link
             href="/dashboard/student/submit-idea"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-[10px] bg-[#007AFF] hover:bg-[#007AFF]/90 text-white text-xs font-medium transition-all duration-150 active:scale-[0.98] shadow-none"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#14283F] hover:bg-[#14283F]/90 text-white text-xs font-semibold transition-all duration-150 active:scale-[0.99] shadow-xs"
           >
             <Lightbulb className="size-3.5" />
             Submit Idea
           </Link>
           <Link
             href="/dashboard/student/projects"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-[10px] border border-black/[0.08] dark:border-white/[0.12] bg-black/[0.02] dark:bg-white/[0.04] hover:bg-black/[0.05] text-foreground text-xs font-medium transition-all duration-150 active:scale-[0.98]"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-foreground text-xs font-medium transition-all duration-150 active:scale-[0.99] shadow-2xs"
           >
             <FolderKanban className="size-3.5 text-muted-foreground" />
             My Projects
@@ -239,16 +239,16 @@ export default function StudentDashboardPage() {
         ].map((metric) => (
           <StaggerItem key={metric.label}>
             <div
-              className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] ios-card-interactive"
+              className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-5 flex flex-col justify-between shadow-xs hover:border-[#14283F]/30 dark:hover:border-primary/40 transition-all duration-150"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                   {metric.label}
                 </span>
                 <metric.icon className="size-4 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-2xl font-semibold text-foreground tracking-tight">
+                <p className="text-2xl font-bold text-foreground tracking-tight">
                   {metric.value}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-1">{metric.subtext}</p>
@@ -262,8 +262,8 @@ export default function StudentDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2 space-y-6">
           {/* Active Projects Table Card */}
-          <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08]">
+          <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200/80 dark:border-slate-800">
             <div>
               <h3 className="text-sm font-semibold text-foreground tracking-tight">Assigned Projects</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -272,7 +272,7 @@ export default function StudentDashboardPage() {
             </div>
             <Link
               href="/dashboard/student/projects"
-              className="text-xs font-medium text-[#007AFF] hover:underline flex items-center gap-1"
+              className="text-xs font-medium text-[#14283F] dark:text-sky-400 hover:underline flex items-center gap-1"
             >
               View all ({totalCount}) <ChevronRight className="size-3.5" />
             </Link>

@@ -85,7 +85,7 @@ export default function FacultyDashboardPage() {
   return (
     <div className="space-y-6">
       {/* 1. Faculty Profile Header Banner */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
@@ -107,7 +107,7 @@ export default function FacultyDashboardPage() {
         <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
           <Link
             href="/dashboard/faculty/projects"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-[10px] border border-black/[0.08] dark:border-white/[0.12] bg-black/[0.02] dark:bg-white/[0.04] text-foreground hover:bg-black/[0.05] active:scale-[0.98] transition-all"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-foreground hover:bg-slate-50 dark:hover:bg-slate-800/60 active:scale-[0.99] transition-all shadow-2xs"
           >
             <FolderKanban className="size-3.5 text-muted-foreground" />
             <span>Assigned Projects</span>
@@ -115,7 +115,7 @@ export default function FacultyDashboardPage() {
 
           <Link
             href="/dashboard/faculty/idea-submissions"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-[10px] bg-[#007AFF] text-white hover:bg-[#007AFF]/90 active:scale-[0.98] transition-all shadow-none"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-[#14283F] text-white hover:bg-[#14283F]/90 active:scale-[0.99] transition-all shadow-xs"
           >
             <Lightbulb className="size-3.5" />
             <span>Idea Queue</span>
@@ -131,12 +131,12 @@ export default function FacultyDashboardPage() {
       {/* 2. Statistics Grid */}
       <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
         <StaggerItem className="h-full">
-          <div className="h-full rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] ios-card-interactive">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+          <div className="h-full rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-5 flex flex-col justify-between shadow-xs hover:border-[#14283F]/30 dark:hover:border-primary/40 transition-all duration-150">
+            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
               Supervised Students
             </span>
             <div className="mt-3">
-              <div className="text-2xl font-semibold tracking-tight text-foreground">
+              <div className="text-2xl font-bold tracking-tight text-foreground">
                 {assignedStudentsCount}
               </div>
               <p className="text-[11px] text-muted-foreground mt-1">

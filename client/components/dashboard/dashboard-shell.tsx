@@ -424,7 +424,7 @@ export function DashboardShell({
   }
 
   return (
-    <div className="min-h-screen flex bg-[#f2f2f7] dark:bg-[#000000] text-foreground antialiased ios-theme">
+    <div className="min-h-screen flex bg-slate-50/70 dark:bg-[#090D16] text-foreground antialiased ios-theme">
       {/* Mobile Backdrop with AnimatePresence */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -443,12 +443,12 @@ export function DashboardShell({
       {/* Standardized Sidebar (260px) */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-40 h-full w-[260px] bg-[#f8f9fb] dark:bg-[#151516] text-foreground flex flex-col shrink-0 border-r border-black/[0.06] dark:border-white/[0.08] transition-transform duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] lg:translate-x-0",
+          "fixed top-0 left-0 z-40 h-full w-[260px] bg-white dark:bg-[#0B101B] text-foreground flex flex-col shrink-0 border-r border-slate-200/90 dark:border-slate-800 transition-transform duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] lg:translate-x-0",
           sidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
         {/* Sidebar Header with Institutional Branding */}
-        <div className="h-14 flex items-center justify-between px-4 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
+        <div className="h-14 flex items-center justify-between px-4 border-b border-slate-200/90 dark:border-slate-800 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <MsmeLogoMark size={32} className="shrink-0" />
             <div className="min-w-0 flex flex-col">
@@ -485,10 +485,10 @@ export function DashboardShell({
                       href={item.href}
                       onClick={() => setSidebarOpen(false)}
                       className={cn(
-                        "group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13.5px] sm:text-sm font-medium transition-all duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.985] min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] focus-visible:ring-offset-1 dark:focus-visible:ring-offset-[#151516]",
+                        "group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13.5px] sm:text-sm font-medium transition-all duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.985] min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14283F] dark:focus-visible:ring-sky-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-[#0B101B]",
                         active
-                          ? "bg-[#007AFF] text-white font-medium shadow-xs"
-                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
+                          ? "bg-[#14283F] dark:bg-slate-800 text-white font-medium shadow-xs"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/60"
                       )}
                     >
                       <ItemIcon
@@ -511,14 +511,14 @@ export function DashboardShell({
           </div>
 
           {/* Quick Sidebar Actions: Dedicated Logout Option */}
-          <div className="pt-3 mt-auto border-t border-black/[0.06] dark:border-white/[0.08]">
+          <div className="pt-3 mt-auto border-t border-slate-200/90 dark:border-slate-800">
             <button
               type="button"
               onClick={() => {
                 setSidebarOpen(false);
                 setShowSignOutConfirm(true);
               }}
-              className="group w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13.5px] sm:text-sm font-medium text-[#FF3B30] dark:text-[#FF453A] hover:bg-red-500/10 dark:hover:bg-red-500/15 transition-all duration-150 cursor-pointer select-none active:scale-[0.985] text-left min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
+              className="group w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13.5px] sm:text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 dark:hover:bg-rose-500/15 transition-all duration-150 cursor-pointer select-none active:scale-[0.985] text-left min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50"
             >
               <LogOut className="size-[18px] shrink-0 transition-colors" />
               <span className="truncate flex-1 leading-snug">Log Out</span>
@@ -538,11 +538,11 @@ export function DashboardShell({
 
       {/* Main Column */}
       <div className="flex-1 flex flex-col min-w-0 lg:pl-[260px]">
-        {/* Standardized Apple iOS Style Header (h-14) */}
-        <header className="sticky top-0 z-30 h-14 bg-white/80 dark:bg-[#161618]/80 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/[0.08] px-3 sm:px-6 flex items-center justify-between shrink-0 shadow-xs">
+        {/* Enterprise Global Header (h-14) */}
+        <header className="sticky top-0 z-30 h-14 bg-white/90 dark:bg-[#0B101B]/90 backdrop-blur-md border-b border-slate-200/90 dark:border-slate-800 px-3 sm:px-6 flex items-center justify-between shrink-0 shadow-2xs">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
-              className="lg:hidden p-2 min-h-[40px] min-w-[40px] flex items-center justify-center text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-[8px] hover:bg-black/[0.04] transition-colors"
+              className="lg:hidden p-2 min-h-[40px] min-w-[40px] flex items-center justify-center text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open menu"
             >
@@ -576,26 +576,26 @@ export function DashboardShell({
             {/* Notification Bell */}
             <button
               onClick={() => toast.info("No unread notifications at this time.")}
-              className="relative p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06] rounded-[10px] transition-colors cursor-pointer"
+              className="relative p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 rounded-xl transition-colors cursor-pointer"
               aria-label="Notifications"
             >
               <Bell className="size-4" />
-              <span className="absolute top-2 right-2 size-1.5 bg-[#007AFF] rounded-full ring-2 ring-white dark:ring-black" />
+              <span className="absolute top-2 right-2 size-1.5 bg-[#14283F] dark:bg-sky-400 rounded-full ring-2 ring-white dark:ring-black" />
             </button>
 
-            {/* iOS-Inspired Profile Menu */}
+            {/* Profile Menu */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="focus:outline-none cursor-pointer rounded-[10px] active:scale-95 transition-transform">
-                <div className="flex items-center gap-2 p-0.5 rounded-[10px]">
-                  <Avatar className="size-8 rounded-[10px] bg-blue-100 text-[#007AFF] dark:bg-blue-950 dark:text-blue-300 border border-black/[0.08] dark:border-white/[0.1]">
-                    <AvatarFallback className="text-xs font-semibold rounded-[10px] bg-blue-100 text-[#007AFF] dark:bg-blue-950 dark:text-blue-300">
+              <DropdownMenuTrigger className="focus:outline-none cursor-pointer rounded-xl active:scale-95 transition-transform">
+                <div className="flex items-center gap-2 p-0.5 rounded-xl">
+                  <Avatar className="size-8 rounded-xl bg-slate-100 text-[#14283F] dark:bg-slate-800 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700">
+                    <AvatarFallback className="text-xs font-semibold rounded-xl bg-slate-100 text-[#14283F] dark:bg-slate-800 dark:text-slate-200">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60 mt-2 p-1.5 rounded-[16px] border border-black/[0.08] dark:border-white/[0.1] bg-white/95 dark:bg-[#1c1c1e]/95 backdrop-blur-2xl shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
-                <div className="px-3 py-2.5 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between">
+              <DropdownMenuContent align="end" className="w-60 mt-2 p-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/98 dark:bg-[#0E1524]/98 backdrop-blur-xl shadow-lg">
+                <div className="px-3 py-2.5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
                   <div className="min-w-0 flex-1 mr-2">
                     <p className="text-xs font-semibold text-slate-900 dark:text-white truncate leading-tight">
                       {user?.name || activePortalTitle}
@@ -610,7 +610,7 @@ export function DashboardShell({
                   {activeProfileHref && (
                     <DropdownMenuItem
                       onClick={() => router.push(activeProfileHref)}
-                      className="cursor-pointer text-xs rounded-[10px] flex items-center gap-2 py-2 text-slate-700 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
+                      className="cursor-pointer text-xs rounded-xl flex items-center gap-2 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60"
                     >
                       <UserIcon className="size-3.5 text-slate-400" />
                       <span>View Profile</span>

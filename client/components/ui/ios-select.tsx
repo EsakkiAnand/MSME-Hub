@@ -158,8 +158,8 @@ export function IOSSelect({
           error
             ? "border-red-400 bg-red-50/20 text-slate-900 ring-2 ring-red-400/20 dark:bg-red-950/20 dark:text-foreground"
             : isOpen
-            ? "border-[#007AFF] bg-white ring-2 ring-[#007AFF]/20 shadow-sm dark:bg-card dark:border-[#007AFF]"
-            : "border-slate-200/90 bg-white hover:border-slate-300 hover:bg-slate-50/80 shadow-2xs text-slate-800 dark:bg-card dark:border-border dark:text-foreground dark:hover:bg-muted/60"
+            ? "border-[#14283F] bg-white ring-2 ring-[#14283F]/15 shadow-sm dark:bg-slate-900 dark:border-sky-400 dark:ring-sky-400/20"
+            : "border-slate-200/90 bg-white hover:border-slate-300 hover:bg-slate-50/80 shadow-2xs text-slate-800 dark:bg-slate-900 dark:border-slate-800 dark:text-foreground dark:hover:bg-slate-800/60"
         } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} ${triggerClassName}`}
       >
         <span className="flex items-center gap-2.5 truncate">
@@ -230,7 +230,7 @@ export function IOSSelect({
                     : "cursor-pointer"
                 } ${
                   isSelected
-                    ? "bg-[#007AFF] text-white font-semibold shadow-xs"
+                    ? "bg-[#14283F] dark:bg-slate-800 text-white font-semibold shadow-xs"
                     : isHighlighted
                     ? "bg-slate-100 text-slate-900 font-medium dark:bg-muted dark:text-foreground"
                     : "text-slate-700 dark:text-slate-200 hover:bg-slate-100/90 dark:hover:bg-muted/80"

@@ -204,7 +204,7 @@ export default function AdminGitHubReviewPage() {
   return (
     <div className="space-y-6">
       {/* ── Page Header ──────────────────────────────────────────────── */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
@@ -221,8 +221,8 @@ export default function AdminGitHubReviewPage() {
       </div>
 
       {/* ── KPI Metric Cards ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-[14px] border border-blue-200 dark:border-blue-900/50 bg-blue-50/40 dark:bg-blue-950/20 shadow-xs p-4 flex flex-col justify-between">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div className="rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/40 dark:bg-blue-950/20 shadow-xs p-4 flex flex-col justify-between hover:border-blue-300 transition-all duration-150">
           <div className="flex items-center justify-between text-blue-700 dark:text-blue-300 text-xs font-semibold uppercase tracking-wider mb-2">
             <span>Awaiting Gate Review</span>
             <Clock className="size-4 text-blue-600" />
@@ -233,7 +233,7 @@ export default function AdminGitHubReviewPage() {
           </p>
         </div>
 
-        <div className="rounded-[14px] border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20 shadow-xs p-4 flex flex-col justify-between">
+        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20 shadow-xs p-4 flex flex-col justify-between hover:border-emerald-300 transition-all duration-150">
           <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2">
             <span>Approved Solutions</span>
             <CheckCircle2 className="size-4 text-emerald-600" />
@@ -244,7 +244,7 @@ export default function AdminGitHubReviewPage() {
           </p>
         </div>
 
-        <div className="rounded-[14px] border border-amber-200 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/20 shadow-xs p-4 flex flex-col justify-between">
+        <div className="rounded-2xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/20 shadow-xs p-4 flex flex-col justify-between hover:border-amber-300 transition-all duration-150">
           <div className="flex items-center justify-between text-amber-700 dark:text-amber-300 text-xs font-semibold uppercase tracking-wider mb-2">
             <span>Revisions Active</span>
             <AlertCircle className="size-4 text-amber-600" />
@@ -255,7 +255,7 @@ export default function AdminGitHubReviewPage() {
           </p>
         </div>
 
-        <div className="rounded-[14px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1C1C1E] shadow-xs p-4 flex flex-col justify-between">
+        <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-4 flex flex-col justify-between hover:border-[#14283F]/30 dark:hover:border-primary/40 transition-all duration-150">
           <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">
             <span>License Policy</span>
             <Award className="size-4 text-slate-500" />
@@ -268,7 +268,7 @@ export default function AdminGitHubReviewPage() {
       </div>
 
       {/* ── Filter Toolbar ───────────────────────────────────────────── */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
@@ -276,14 +276,14 @@ export default function AdminGitHubReviewPage() {
             placeholder="Search project title, ID, company, or team lead..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 text-xs h-9"
+            className="pl-9 text-xs h-9 rounded-xl"
           />
         </div>
 
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-9 text-xs rounded-lg border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#161618] px-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+          className="h-9 text-xs rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 text-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/20 shadow-2xs"
         >
           <option value="ALL">All Statuses</option>
           <option value="SOLUTION_SUBMITTED">Awaiting Review</option>
@@ -292,7 +292,7 @@ export default function AdminGitHubReviewPage() {
       </div>
 
       {/* ── Submissions Table ────────────────────────────────────────── */}
-      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-xs overflow-hidden">
+      <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-black/[0.02] dark:bg-white/[0.03] border-b border-black/[0.06] dark:border-white/[0.08] text-muted-foreground font-semibold">
