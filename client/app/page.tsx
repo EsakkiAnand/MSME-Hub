@@ -75,12 +75,6 @@ export default function Home() {
           className="relative border-b border-border/60 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(20,40,63,0.07),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(56,189,248,0.08),rgba(0,0,0,0))] py-16 sm:py-24 md:py-28"
         >
           <div className="container mx-auto max-w-5xl px-4 sm:px-6 text-center">
-            {/* Government & Institutional Accreditation Tag */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/80 px-3.5 py-1 text-xs font-medium text-muted-foreground shadow-2xs mb-6 backdrop-blur-xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
-              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Ministry of MSME Recognized · FXEC Technology Incubation Center</span>
-            </div>
-
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-extrabold tracking-tight text-foreground leading-[1.14] max-w-4xl mx-auto">
               Connecting Verified Industrial MSMEs with University Engineering Talent
