@@ -10,11 +10,35 @@ import {
   ArrowRight,
   CheckCircle2,
   Star,
+  LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MsmeLogoMark } from "@/components/ui/msme-logo";
+import { authClient } from "@/lib/auth-client";
+import { signOutAction } from "@/app/actions/auth";
+import { getAuthorizedUserPath } from "@/lib/auth-utils";
 
 export default function Home() {
+  const session = authClient.useSession();
+  const sessionUser = session.data?.user as any;
+
+  const dashboardPath = sessionUser
+    ? getAuthorizedUserPath(sessionUser.role, sessionUser.studentTrack)
+    : "/dashboard";
+
+  const handleSignOut = async () => {
+    try {
+      await authClient.signOut();
+    } catch {}
+    await signOutAction();
+    try {
+      sessionStorage.clear();
+      localStorage.clear();
+    } catch {}
+    window.location.href = "/login?logged_out=1";
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/10 selection:text-primary">
       {/* 1. Global Enterprise Header */}
@@ -38,32 +62,60 @@ export default function Home() {
 
           {/* Action CTAs (Right Aligned) */}
           <div className="flex items-center gap-1.5 sm:gap-3 text-xs sm:text-sm">
-            <Link
-              href="/login"
-              className="px-2 sm:px-3 py-1 sm:py-1.5 font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Sign In
-            </Link>
+            {sessionUser ? (
+              <div className="flex items-center gap-2">
+                <span className="hidden md:inline text-xs font-medium text-muted-foreground truncate max-w-[150px]">
+                  {sessionUser.name || sessionUser.email}
+                </span>
+                <Link href={dashboardPath}>
+                  <Button
+                    size="sm"
+                    className="h-8 sm:h-9 px-3 font-semibold text-xs sm:text-sm rounded-lg bg-[#14283F] hover:bg-[#14283F]/90 text-white flex items-center gap-1.5"
+                  >
+                    <LayoutDashboard className="size-3.5" />
+                    <span>Dashboard</span>
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="h-8 sm:h-9 px-2.5 text-xs text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 flex items-center gap-1"
+                >
+                  <LogOut className="size-3.5" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-2 sm:px-3 py-1 sm:py-1.5 font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Sign In
+                </Link>
 
-            <Link href="/signup?role=industry">
-              <Button
-                size="sm"
-                className="h-8 sm:h-9 px-2.5 sm:px-4 font-semibold text-xs sm:text-sm rounded-lg bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all active:scale-[0.99] shadow-xs"
-              >
-                <span className="hidden sm:inline">Register Enterprise</span>
-                <span className="sm:hidden">Register</span>
-              </Button>
-            </Link>
+                <Link href="/signup?role=industry">
+                  <Button
+                    size="sm"
+                    className="h-8 sm:h-9 px-2.5 sm:px-4 font-semibold text-xs sm:text-sm rounded-lg bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all active:scale-[0.99] shadow-xs"
+                  >
+                    <span className="hidden sm:inline">Register Enterprise</span>
+                    <span className="sm:hidden">Register</span>
+                  </Button>
+                </Link>
 
-            <div className="h-4 w-px bg-border hidden sm:block" />
+                <div className="h-4 w-px bg-border hidden sm:block" />
 
-            <Link
-              href="/admin/login"
-              className="hidden lg:flex items-center gap-1 text-xs font-medium text-rose-600 dark:text-rose-400 hover:underline"
-            >
-              <ShieldCheck className="size-3.5 shrink-0" />
-              <span>Admin Portal</span>
-            </Link>
+                <Link
+                  href="/admin/login"
+                  className="hidden lg:flex items-center gap-1 text-xs font-medium text-rose-600 dark:text-rose-400 hover:underline"
+                >
+                  <ShieldCheck className="size-3.5 shrink-0" />
+                  <span>Admin Portal</span>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -89,33 +141,57 @@ export default function Home() {
 
             {/* Hero CTAs */}
             <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-              <Link href="/signup?role=industry">
-                <Button
-                  className="h-11 px-6 font-semibold text-sm rounded-xl bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all duration-150 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] flex items-center gap-2"
-                >
-                  <span>Register Your Enterprise</span>
-                  <ArrowRight className="size-4 shrink-0" />
-                </Button>
-              </Link>
+              {sessionUser ? (
+                <>
+                  <Link href={dashboardPath}>
+                    <Button
+                      className="h-11 px-6 font-semibold text-sm rounded-xl bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all duration-150 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] flex items-center gap-2"
+                    >
+                      <span>Go to Your Workspace</span>
+                      <ArrowRight className="size-4 shrink-0" />
+                    </Button>
+                  </Link>
 
-              <Link href="/login?portal=student">
-                <Button
-                  variant="outline"
-                  className="h-11 px-5 font-medium text-sm rounded-xl border-border hover:bg-muted/50 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
-                >
-                  <GraduationCap className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Student & Faculty Google Access</span>
-                </Button>
-              </Link>
+                  <Button
+                    variant="outline"
+                    onClick={handleSignOut}
+                    className="h-11 px-5 font-medium text-sm rounded-xl border-border hover:bg-muted/50 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2 text-rose-600 dark:text-rose-400"
+                  >
+                    <LogOut className="size-4 shrink-0" />
+                    <span>Sign Out</span>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/signup?role=industry">
+                    <Button
+                      className="h-11 px-6 font-semibold text-sm rounded-xl bg-[#14283F] hover:bg-[#14283F]/90 text-white transition-all duration-150 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] flex items-center gap-2"
+                    >
+                      <span>Register Your Enterprise</span>
+                      <ArrowRight className="size-4 shrink-0" />
+                    </Button>
+                  </Link>
 
-              <Link href="/login">
-                <Button
-                  variant="ghost"
-                  className="h-11 px-4 font-medium text-sm rounded-xl text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors"
-                >
-                  Sign In to Workspace
-                </Button>
-              </Link>
+                  <Link href="/login?portal=student">
+                    <Button
+                      variant="outline"
+                      className="h-11 px-5 font-medium text-sm rounded-xl border-border hover:bg-muted/50 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
+                    >
+                      <GraduationCap className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span>Student & Faculty Google Access</span>
+                    </Button>
+                  </Link>
+
+                  <Link href="/login">
+                    <Button
+                      variant="ghost"
+                      className="h-11 px-4 font-medium text-sm rounded-xl text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors"
+                    >
+                      Sign In to Workspace
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* 4 Feature Trust Cards */}

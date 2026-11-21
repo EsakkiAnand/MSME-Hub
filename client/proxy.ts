@@ -69,14 +69,8 @@ export async function proxy(request: NextRequest) {
       ? new Date(validSession.expiresAt).getTime() <= Date.now()
       : true;
 
-    // Reject unauthenticated, expired, or missing sessions immediately
+    // Strict fail-closed authentication guard: reject unauthenticated, expired, or invalid sessions immediately
     if (!validSession || isExpired || !validSession.user) {
-      // If there was a database query error, allow the request to proceed to downstream handlers
-      // instead of aggressively wiping cookies and redirecting to /login
-      if (queryError) {
-        return NextResponse.next();
-      }
-
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);
 
@@ -87,8 +81,8 @@ export async function proxy(request: NextRequest) {
       );
       response.headers.set("Pragma", "no-cache");
       response.headers.set("Expires", "0");
-      // Expire stale cookie on client if explicitly confirmed expired/missing in DB
-      if (rawToken && !queryError) {
+      // Expire stale cookie on client if confirmed expired/missing in DB or invalid
+      if (rawToken) {
         response.cookies.set("better-auth.session_token", "", {
           path: "/",
           maxAge: 0,

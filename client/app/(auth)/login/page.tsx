@@ -12,9 +12,19 @@ export const metadata = {
   description: "Sign in to your MSME Hub workspace.",
 };
 
-export default async function AuthLoginPage() {
-  const user = await getOptionalAuth();
-  if (user) redirect(getAuthorizedUserPath(user.role, user.studentTrack));
+export default async function AuthLoginPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = searchParams ? await searchParams : {};
+  const isLoggedOut = params.logged_out === "1";
+  const forceSwitch = params.switch === "1" || params.switch === "true";
+
+  let user = null;
+  if (!isLoggedOut && !forceSwitch) {
+    user = await getOptionalAuth();
+  }
 
   return (
     <Suspense
@@ -24,7 +34,18 @@ export default async function AuthLoginPage() {
         </div>
       }
     >
-      <LoginFormContent />
+      <LoginFormContent
+        currentUser={
+          user
+            ? {
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                studentTrack: user.studentTrack,
+              }
+            : null
+        }
+      />
     </Suspense>
   );
 }

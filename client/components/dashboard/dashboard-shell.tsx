@@ -317,12 +317,12 @@ export function DashboardShell({
       }
 
       toast.success("Signed out successfully.");
-      // Safely navigate out of the dashboard to the public Home page
-      window.location.href = "/";
+      // Safely navigate out of the dashboard with explicit logged out confirmation
+      window.location.href = "/login?logged_out=1";
     } catch (err) {
       console.error("Sign out error:", err);
       toast.info("Signed out.");
-      window.location.href = "/";
+      window.location.href = "/login?logged_out=1";
     } finally {
       setIsSigningOut(false);
       setShowSignOutConfirm(false);

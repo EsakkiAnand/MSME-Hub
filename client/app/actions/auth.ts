@@ -553,6 +553,9 @@ export async function signOutAction() {
         httpOnly: true,
         sameSite: "lax",
       });
+      try {
+        cookieStore.delete(name);
+      } catch {}
     }
 
     // 5. Revalidate all cached layouts
