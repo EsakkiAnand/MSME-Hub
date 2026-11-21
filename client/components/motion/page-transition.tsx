@@ -22,11 +22,11 @@ export function PageTransition({ children, className = "" }: PageTransitionProps
   return (
     <motion.div
       key={pathname}
-      initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{
-        duration: shouldReduceMotion ? 0 : 0.2,
-        ease: MOTION_EASE.ios,
+        duration: shouldReduceMotion ? 0 : 0.18,
+        ease: "easeOut",
       }}
       className={className}
     >

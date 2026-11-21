@@ -42,8 +42,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
+import dynamic from "next/dynamic";
 import { SidebarProfileCard } from "@/components/dashboard/sidebar-profile-card";
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+const ConfirmationDialog = dynamic(
+  () => import("@/components/ui/confirmation-dialog").then((mod) => mod.ConfirmationDialog),
+  { ssr: false }
+);
 import { MsmeLogoMark } from "@/components/ui/msme-logo";
 import { PageTransition } from "@/components/motion/page-transition";
 import { motion, AnimatePresence } from "motion/react";

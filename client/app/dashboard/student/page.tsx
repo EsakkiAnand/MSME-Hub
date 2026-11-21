@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import {
@@ -40,23 +40,30 @@ export default function StudentDashboardPage() {
   ]);
 
   useEffect(() => {
-    getStudentIdeas()
-      .then((ideas) => setStudentIdeas(ideas || []))
-      .catch((err) => console.log("Student ideas load notice:", err.message));
+    let isMounted = true;
 
-    getStudentTrackStatusAction().then((res) => {
-      if (res.success && res.user) {
-        setTrackStatus(res.user);
-        if (!res.user.studentTrack || res.user.studentTrack === "UNSELECTED") {
+    Promise.allSettled([
+      getStudentIdeas(),
+      getStudentTrackStatusAction(),
+      getStudentProjects(),
+    ]).then(([ideasResult, trackResult, projectsResult]) => {
+      if (!isMounted) return;
+
+      if (ideasResult.status === "fulfilled" && ideasResult.value) {
+        setStudentIdeas(ideasResult.value);
+      }
+
+      if (trackResult.status === "fulfilled" && trackResult.value?.success && trackResult.value.user) {
+        setTrackStatus(trackResult.value.user);
+        if (!trackResult.value.user.studentTrack || trackResult.value.user.studentTrack === "UNSELECTED") {
           window.location.replace("/dashboard/student/onboarding");
           return;
         }
       }
-    });
 
-    getStudentProjects()
-      .then((res) => {
-        if (res.success && res.projects) {
+      if (projectsResult.status === "fulfilled") {
+        const res = projectsResult.value;
+        if (res?.success && res.projects) {
           setMyProjects(
             res.projects.map((p: any) => ({
               id: p.id,
@@ -69,22 +76,33 @@ export default function StudentDashboardPage() {
             }))
           );
         } else {
-          toast.error((res as any).error || "Failed to load projects.");
+          toast.error((res as any)?.error || "Failed to load projects.");
         }
-      })
-      .catch((err) => {
-        console.error("Failed to load student projects:", err);
+      } else {
         toast.error("Failed to load projects.");
-      })
-      .finally(() => setProjectsLoading(false));
+      }
+
+      setProjectsLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const needsImprovementIdea = studentIdeas.find((i) => i.status === "NEEDS_CHANGES");
+  const needsImprovementIdea = useMemo(
+    () => studentIdeas.find((i) => i.status === "NEEDS_CHANGES"),
+    [studentIdeas]
+  );
 
-  const activeCount = myProjects.filter(
-    (p) => p.status === "IN_PROGRESS" || p.status === "ASSIGNED"
-  ).length;
-  const completedCount = myProjects.filter((p) => p.status === "APPROVED").length;
+  const activeCount = useMemo(
+    () => myProjects.filter((p) => p.status === "IN_PROGRESS" || p.status === "ASSIGNED").length,
+    [myProjects]
+  );
+  const completedCount = useMemo(
+    () => myProjects.filter((p) => p.status === "APPROVED").length,
+    [myProjects]
+  );
   const totalCount = myProjects.length;
 
   return (

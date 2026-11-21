@@ -219,9 +219,9 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
             {activeTab === "industry" ? (
               <motion.div
                 key="industry-panel"
-                initial={{ opacity: 0, x: -14, filter: "blur(2px)" }}
-                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, x: -14, filter: "blur(2px)" }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               >
                 <form onSubmit={handleIndustrySubmit} className="space-y-3.5">
@@ -361,9 +361,9 @@ export function SignupFormContent({ onSwitchToLogin }: SignupFormContentProps) {
               /* ---------------- Tab 2: Academic Role Selection ---------------- */
               <motion.div
                 key="academic-panel"
-                initial={{ opacity: 0, x: 14, filter: "blur(2px)" }}
-                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, x: 14, filter: "blur(2px)" }}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
                 transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                 className="space-y-4 pt-1"
               >

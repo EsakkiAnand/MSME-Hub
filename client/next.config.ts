@@ -4,9 +4,21 @@ const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
     agentFeedback: true,
+    optimizePackageImports: [
+      "lucide-react",
+      "motion/react",
+      "sonner",
+      "@base-ui/react",
+    ],
   },
+  compress: true,
+  poweredByHeader: false,
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 31536000,
+  },
   turbopack: {
     rules: {
       "*.css": {
@@ -31,6 +43,15 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/(msme-.*|logo.*|icon.*|apple-.*|favicon.ico)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
       {
         source: "/dashboard/:path*",
         headers: [

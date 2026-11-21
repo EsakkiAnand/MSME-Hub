@@ -310,9 +310,9 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
             {loginMode === "standard" ? (
               <motion.div
                 key="standard-panel"
-                initial={{ opacity: 0, x: -14, filter: "blur(2px)" }}
-                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, x: -14, filter: "blur(2px)" }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               >
                 {/* Standard Authentication Form */}
@@ -491,9 +491,9 @@ export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
             /* MSME Admin Portal Mode */
             <motion.div
               key="admin-panel"
-              initial={{ opacity: 0, x: 14, filter: "blur(2px)" }}
-              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, x: 14, filter: "blur(2px)" }}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               className="space-y-4"
             >

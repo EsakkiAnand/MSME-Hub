@@ -20,7 +20,7 @@ export function MsmeLogoMark({
   variant = "full",
   className,
 }: MsmeLogoProps) {
-  const src = variant === "emblem" ? "/msme-emblem.png" : "/msme-logo.png";
+  const src = variant === "emblem" ? "/msme-emblem.webp" : "/msme-logo.webp";
   return (
     <div
       className={cn(
@@ -58,7 +58,7 @@ export function MsmeFullLogo({
   return (
     <div className={cn("relative inline-flex items-center justify-center select-none", className)}>
       <Image
-        src="/msme-logo.png"
+        src="/msme-logo.webp"
         alt="MSME Hub Logo"
         width={width * 2}
         height={height * 2}
