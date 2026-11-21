@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { authClient } from "@/lib/auth-client";
 import { getRoleDashboardPath, getAuthorizedUserPath } from "@/lib/auth-utils";
-import { adminLoginAction, signOutAction } from "@/app/actions/auth";
+import { adminLoginAction } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MsmeFullLogo } from "@/components/ui/msme-logo";
@@ -19,8 +19,6 @@ import {
   ShieldCheck,
   GraduationCap,
   Sparkles,
-  CheckCircle2,
-  UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -28,24 +26,15 @@ import { cn } from "@/lib/utils";
 export interface LoginFormContentProps {
   /** @deprecated — navigation is now handled by the (auth) layout */
   onSwitchToSignup?: () => void;
-  currentUser?: {
-    name: string;
-    email: string;
-    role: string;
-    studentTrack?: string;
-  } | null;
 }
 
-export function LoginFormContent({ onSwitchToSignup, currentUser = null }: LoginFormContentProps) {
+export function LoginFormContent({ onSwitchToSignup }: LoginFormContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const isLoggedOut = searchParams.get("logged_out") === "1";
   const redirectParam = searchParams.get("redirect");
   const portalParam = searchParams.get("portal") || searchParams.get("role");
-
-  const [activeSessionUser, setActiveSessionUser] = useState(currentUser);
-  const [isSwitchingAccount, setIsSwitchingAccount] = useState(false);
 
   // Portal Mode: standard (Student, Faculty, Industry Partner, Industry Expert) vs admin (MSME Admin)
   const [loginMode, setLoginMode] = useState<"standard" | "admin">(
@@ -249,68 +238,6 @@ export function LoginFormContent({ onSwitchToSignup, currentUser = null }: Login
             Sign in to your MSME-Hub account to access your workspace
           </p>
         </div>
-
-        {/* Active Session Notice when already authenticated */}
-        {activeSessionUser && !isLoggedOut ? (
-          <div className="mt-5 p-4 rounded-xl border border-border bg-slate-50/80 dark:bg-slate-900/50 space-y-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-              <UserCheck className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>Active Workspace Session Detected</span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              You are currently signed in as <strong className="text-foreground">{activeSessionUser.name}</strong> ({activeSessionUser.email}).
-            </p>
-            <div className="flex flex-col gap-2 pt-1">
-              <Button
-                type="button"
-                className="w-full bg-[#14283F] hover:bg-[#14283F]/90 text-white font-medium text-xs h-9 rounded-lg flex items-center justify-center gap-1.5"
-                onClick={() => {
-                  const target = getAuthorizedUserPath(activeSessionUser.role as any, activeSessionUser.studentTrack as any);
-                  window.location.href = target;
-                }}
-              >
-                <span>Continue to {activeSessionUser.role} Workspace</span>
-                <ArrowRight className="size-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isSwitchingAccount}
-                onClick={async () => {
-                  setIsSwitchingAccount(true);
-                  try {
-                    await authClient.signOut();
-                  } catch {}
-                  await signOutAction();
-                  try {
-                    sessionStorage.clear();
-                    localStorage.clear();
-                  } catch {}
-                  setActiveSessionUser(null);
-                  setIsSwitchingAccount(false);
-                  toast.success("Signed out. You can now sign in with another account.");
-                }}
-                className="w-full text-xs h-9 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/20 border-rose-200 dark:border-rose-900/40"
-              >
-                {isSwitchingAccount ? (
-                  <span className="flex items-center gap-1.5">
-                    <Loader2 className="size-3.5 animate-spin" />
-                    <span>Signing out...</span>
-                  </span>
-                ) : (
-                  <span>Sign Out / Use Another Account</span>
-                )}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
-            {isLoggedOut && (
-              <div className="mt-4 p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
-                <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                <span>You have signed out successfully. Enter credentials to sign in.</span>
-              </div>
-            )}
 
         {/* 2. Standard Access / MSME Admin access selector */}
         <div
@@ -679,8 +606,6 @@ export function LoginFormContent({ onSwitchToSignup, currentUser = null }: Login
         )}
       </AnimatePresence>
     </motion.div>
-        </>
-      )}
   </div>
 
       {/* Bottom Footer Block */}
