@@ -26,9 +26,47 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://msme.francisxavier.ac.in"),
   title: "FXEC MSME Hub | Industry-Academia Collaboration Platform",
   description:
     "Official institutional platform connecting verified MSMEs, academic departments, student project teams, and industry experts at Francis Xavier Engineering College.",
+  keywords: [
+    "MSME",
+    "Francis Xavier Engineering College",
+    "FXEC",
+    "Industry Academia Collaboration",
+    "Open Source Capstone",
+    "Engineering Projects",
+  ],
+  authors: [{ name: "Francis Xavier Engineering College" }],
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: "https://msme.francisxavier.ac.in",
+    siteName: "FXEC MSME Hub",
+    title: "FXEC MSME Hub | Industry-Academia Collaboration Platform",
+    description:
+      "A centralized platform connecting micro, small, and medium enterprises with multidisciplinary engineering talent.",
+    images: [
+      {
+        url: "/msme-logo.webp",
+        width: 678,
+        height: 649,
+        alt: "FXEC MSME Hub",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FXEC MSME Hub | Industry-Academia Collaboration Platform",
+    description:
+      "Official institutional platform connecting verified MSMEs with engineering talent.",
+    images: ["/msme-logo.webp"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
