@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, User as UserIcon, LogOut, Check, Copy } from "lucide-react";
+import { MoreHorizontal, User as UserIcon, LogOut, Check, Copy, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -154,6 +154,15 @@ export function SidebarProfileCard({
                 )}
                 <span>Copy ID ({userUniqueId})</span>
               </div>
+            </DropdownMenuItem>
+
+            {/* Return to Public Home */}
+            <DropdownMenuItem
+              onClick={() => router.push("/")}
+              className="cursor-pointer text-xs rounded-[10px] flex items-center gap-2 py-2 text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
+            >
+              <Home className="size-3.5 text-muted-foreground" />
+              <span>Return to Home</span>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator className="-mx-1 my-1 h-[0.5px] bg-black/[0.06] dark:border-white/[0.08]" />

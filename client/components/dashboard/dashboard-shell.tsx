@@ -33,6 +33,7 @@ import {
   History,
   Loader2,
   GitBranch,
+  Home,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -42,12 +43,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
-import dynamic from "next/dynamic";
 import { SidebarProfileCard } from "@/components/dashboard/sidebar-profile-card";
-const ConfirmationDialog = dynamic(
-  () => import("@/components/ui/confirmation-dialog").then((mod) => mod.ConfirmationDialog),
-  { ssr: false }
-);
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { MsmeLogoMark } from "@/components/ui/msme-logo";
 import { PageTransition } from "@/components/motion/page-transition";
 import { motion, AnimatePresence } from "motion/react";
@@ -262,40 +259,6 @@ export function DashboardShell({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [sidebarOpen]);
 
-  // Prevent bfcache restoration on browser Back button
-  React.useEffect(() => {
-    const handlePageShow = (event: PageTransitionEvent) => {
-      if (event.persisted) {
-        window.location.reload();
-      } else {
-        // Double check session validity on navigation/pageshow to prevent stale bfcache views
-        authClient
-          .getSession()
-          .then((res) => {
-            if (!res?.data?.user) {
-              window.location.replace("/login");
-            }
-          })
-          .catch(() => {
-            window.location.replace("/login");
-          });
-      }
-    };
-    window.addEventListener("pageshow", handlePageShow);
-    return () => window.removeEventListener("pageshow", handlePageShow);
-  }, []);
-
-  // Evict page from browser bfcache on Back/Forward navigation if session expired
-  React.useEffect(() => {
-    const handlePageShow = (event: PageTransitionEvent) => {
-      if (event.persisted) {
-        window.location.reload();
-      }
-    };
-    window.addEventListener("pageshow", handlePageShow);
-    return () => window.removeEventListener("pageshow", handlePageShow);
-  }, []);
-
   const isActive = (item: NavItem) => {
     if (item.exact) {
       return pathname === item.href;
@@ -325,18 +288,7 @@ export function DashboardShell({
       .join(" ");
   }, [pathname, activeNavItems, activePortalTitle]);
 
-  // Evict page from browser bfcache on Back/Forward navigation
-  React.useEffect(() => {
-    const handlePageShow = (event: PageTransitionEvent) => {
-      if (event.persisted) {
-        window.location.replace("/login");
-      }
-    };
-    window.addEventListener("pageshow", handlePageShow);
-    return () => window.removeEventListener("pageshow", handlePageShow);
-  }, []);
-
-  // Client-side session guard: if session is resolved and no authenticated user exists, immediately redirect to /login
+  // Client-side session guard: if session is resolved and no authenticated user exists, redirect to /login
   React.useEffect(() => {
     if (!session.isPending && !session.data?.user) {
       window.location.replace("/login");
@@ -365,11 +317,12 @@ export function DashboardShell({
       }
 
       toast.success("Signed out successfully.");
-      window.location.replace("/login?logged_out=1");
+      // Safely navigate out of the dashboard to the public Home page
+      window.location.href = "/";
     } catch (err) {
       console.error("Sign out error:", err);
-      toast.error("Failed to sign out. Please try again.");
-      window.location.replace("/login?logged_out=1");
+      toast.info("Signed out.");
+      window.location.href = "/";
     } finally {
       setIsSigningOut(false);
       setShowSignOutConfirm(false);
@@ -394,18 +347,27 @@ export function DashboardShell({
     return (
       <div className="min-h-screen flex flex-col bg-[#f8f9fb] dark:bg-[#0c0c0e] text-foreground antialiased">
         <header className="h-14 border-b border-black/[0.06] dark:border-white/[0.08] bg-white/80 dark:bg-[#151516]/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
+          <Link href="/" title="Return to Home" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
             <MsmeLogoMark size={26} className="shrink-0" />
             <span className="text-sm font-semibold tracking-tight text-foreground">FXEC MSME-Hub</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
+            >
+              <Home className="size-3.5" />
+              <span>Home</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setShowSignOutConfirm(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors cursor-pointer"
+            >
+              <LogOut className="size-3.5" />
+              <span>Sign Out</span>
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowSignOutConfirm(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
-          >
-            <LogOut className="size-3.5" />
-            <span>Sign Out</span>
-          </button>
         </header>
         <main className="flex-1 flex flex-col">{children}</main>
         <ConfirmationDialog
@@ -451,19 +413,23 @@ export function DashboardShell({
           sidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
-        {/* Sidebar Header with Institutional Branding */}
+        {/* Sidebar Header with Institutional Branding - Clickable to Home */}
         <div className="h-14 flex items-center justify-between px-4 border-b border-slate-200/90 dark:border-slate-800 shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
+          <Link
+            href="/"
+            title="Return to FXEC MSME Hub Home"
+            className="flex items-center gap-2.5 min-w-0 group hover:opacity-90 transition-opacity"
+          >
             <MsmeLogoMark size={32} className="shrink-0" />
             <div className="min-w-0 flex flex-col">
-              <span className="text-sm font-semibold tracking-tight text-slate-900 dark:text-white leading-tight truncate">
+              <span className="text-sm font-semibold tracking-tight text-slate-900 dark:text-white leading-tight truncate group-hover:text-primary transition-colors">
                 FXEC MSME Hub
               </span>
               <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight truncate">
                 {activePortalSubtitle}
               </span>
             </div>
-          </div>
+          </Link>
           <button
             className="lg:hidden p-1.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-[8px] hover:bg-black/[0.04] transition-colors"
             onClick={() => setSidebarOpen(false)}
@@ -514,8 +480,17 @@ export function DashboardShell({
             </ul>
           </div>
 
-          {/* Quick Sidebar Actions: Dedicated Logout Option */}
-          <div className="pt-3 mt-auto border-t border-slate-200/90 dark:border-slate-800">
+          {/* Quick Sidebar Actions: Return to Home & Dedicated Logout Option */}
+          <div className="pt-3 mt-auto border-t border-slate-200/90 dark:border-slate-800 space-y-1">
+            <Link
+              href="/"
+              onClick={() => setSidebarOpen(false)}
+              className="group w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13.5px] sm:text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all duration-150 select-none active:scale-[0.985] min-h-[40px]"
+            >
+              <Home className="size-[18px] shrink-0 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors" />
+              <span className="truncate flex-1 leading-snug">Return to Home</span>
+            </Link>
+
             <button
               type="button"
               onClick={() => {
@@ -564,6 +539,16 @@ export function DashboardShell({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Direct Exit to Public Home Button */}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-[#14283F] dark:hover:text-white bg-slate-100/90 hover:bg-slate-200/90 dark:bg-slate-800/80 dark:hover:bg-slate-800 transition-colors shadow-2xs"
+              title="Return to FXEC MSME Hub Home page"
+            >
+              <Home className="size-3.5 shrink-0" />
+              <span className="hidden sm:inline">Home</span>
+            </Link>
+
             {/* Role / Institutional Badge */}
             {activeBadge && (
               <div
@@ -620,6 +605,13 @@ export function DashboardShell({
                       <span>View Profile</span>
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem
+                    onClick={() => router.push("/")}
+                    className="cursor-pointer text-xs rounded-xl flex items-center gap-2 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                  >
+                    <Home className="size-3.5 text-slate-400" />
+                    <span>Return to Home</span>
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setShowSignOutConfirm(true)}
                     className="cursor-pointer text-xs rounded-[10px] text-[#FF3B30] dark:text-[#FF453A] hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center gap-2 py-2"
