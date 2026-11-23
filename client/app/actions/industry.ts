@@ -6,6 +6,9 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { UserRole, ProblemStatus, ProjectStatus, IdeaStatus } from "@prisma/client";
 import { ensureUserUniqueId, allocateCompanyId } from "@/lib/id-generator";
+import { projectStateMachine } from "@/lib/state-machines/machines/project-machine";
+import { ideaStateMachine } from "@/lib/state-machines/machines/idea-machine";
+import { assertTransition } from "@/lib/state-machines";
 import {
   IndustryProblemItem,
   IndustryProjectItem,
@@ -298,28 +301,59 @@ export async function submitIndustryRatingAction(input: {
       return { success: false, error: "Referenced project not found." };
     }
 
+    // State machine check: ratings can only be recorded on approved deliverables
+    if (project.status !== ProjectStatus.APPROVED && project.status !== ProjectStatus.COMPLETED) {
+      return {
+        success: false,
+        error: `Ratings can only be submitted for approved deliverables. Current project status is "${project.status}".`,
+      };
+    }
+
+    if (project.status === ProjectStatus.APPROVED) {
+      assertTransition(
+        projectStateMachine,
+        project.status,
+        ProjectStatus.COMPLETED,
+        UserRole.INDUSTRY,
+        {
+          ratingStars: stars,
+          feedbackText: feedbackText.trim(),
+          userRole: UserRole.INDUSTRY,
+        }
+      );
+    }
+
     // ADR 0004: Ratings <= 2 stars are flagged for Admin Moderation
     const isModerated = stars <= 2;
 
-    await prisma.industryRating.upsert({
-      where: {
-        projectId_industryId: {
+    await prisma.$transaction(async (tx) => {
+      await tx.industryRating.upsert({
+        where: {
+          projectId_industryId: {
+            projectId,
+            industryId: profile.id,
+          },
+        },
+        create: {
           projectId,
           industryId: profile.id,
+          stars,
+          feedbackText: feedbackText.trim(),
+          isModerated,
         },
-      },
-      create: {
-        projectId,
-        industryId: profile.id,
-        stars,
-        feedbackText: feedbackText.trim(),
-        isModerated,
-      },
-      update: {
-        stars,
-        feedbackText: feedbackText.trim(),
-        isModerated,
-      },
+        update: {
+          stars,
+          feedbackText: feedbackText.trim(),
+          isModerated,
+        },
+      });
+
+      if (project.status === ProjectStatus.APPROVED) {
+        await tx.project.update({
+          where: { id: projectId },
+          data: { status: ProjectStatus.COMPLETED },
+        });
+      }
     });
 
     return {
@@ -630,6 +664,14 @@ export async function adoptShowcaseIdeaAction(input: {
     if (ideaStatusStr !== "ACCEPTED" && ideaStatusStr !== "SHOWCASE_PUBLISHED") {
       return { success: false, error: "Only accepted or published showcase ideas can be adopted." };
     }
+
+    // State machine check
+    assertTransition(
+      ideaStateMachine,
+      idea.status,
+      IdeaStatus.CONVERTED_TO_PROJECT,
+      UserRole.INDUSTRY
+    );
 
     let resolvedStaffId = staffId;
     if (!resolvedStaffId) {

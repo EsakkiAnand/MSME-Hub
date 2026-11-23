@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { UserRole, FeedbackCategory, GuidanceStatus } from "@prisma/client";
 import { ensureUserUniqueId } from "@/lib/id-generator";
+import { guidanceStateMachine } from "@/lib/state-machines/machines/guidance-machine";
+import { assertTransition } from "@/lib/state-machines";
 
 /**
  * Ensures authenticated user has role ALUMNI
@@ -199,6 +201,21 @@ export async function respondToGuidanceRequestAction(input: {
     if (!content.trim()) {
       return { success: false, error: "Response comments cannot be empty." };
     }
+
+    const existingReq = await prisma.guidanceRequest.findUnique({
+      where: { id: guidanceRequestId },
+    });
+    if (!existingReq) {
+      return { success: false, error: "Guidance request not found." };
+    }
+
+    // State machine check
+    assertTransition(
+      guidanceStateMachine,
+      existingReq.status,
+      GuidanceStatus.ANSWERED,
+      UserRole.ALUMNI
+    );
 
     // Create Feedback record and update GuidanceRequest in transaction
     await prisma.$transaction(async (tx: any) => {

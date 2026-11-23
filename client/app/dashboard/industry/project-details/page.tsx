@@ -21,6 +21,7 @@ import {
 import { ContextualBreadcrumb } from "@/components/navigation/contextual-breadcrumb";
 import { ContextualBack } from "@/components/navigation/contextual-back";
 import { ProjectStatusCategoryBadge } from "@/components/projects/project-status-category-badge";
+import { LifecycleStepper, StateExplanationCard } from "@/components/state-machines";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getIndustryProjectDetailAction } from "@/app/actions/industry";
@@ -204,6 +205,25 @@ function IndustryProjectDetailsContent() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Lifecycle Progress Stepper (UX Elevation) */}
+      <div className="rounded-[16px] border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+          Project Lifecycle Progression
+        </h3>
+        <LifecycleStepper
+          machineId="project"
+          currentState={data.status}
+          className="pb-2"
+        />
+        <div className="mt-4 pt-4 border-t border-black/[0.04] dark:border-white/[0.06]">
+          <StateExplanationCard
+            machineId="project"
+            currentState={data.status}
+            adminNotes={data.adminReviewNotes}
+          />
+        </div>
       </div>
 
       {/* Team Roster */}

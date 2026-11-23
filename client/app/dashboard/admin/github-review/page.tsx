@@ -31,6 +31,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CopyIdBadge } from "@/components/ui/copy-id-badge";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { LifecycleStepper } from "@/components/state-machines";
 import { toast } from "sonner";
 import {
   getAdminSolutionReviewQueue,
@@ -418,6 +419,11 @@ export default function AdminGitHubReviewPage() {
                 {activeItem.facultyMentor}
               </DialogDescription>
             </DialogHeader>
+
+            {/* Lifecycle Progress Stepper (UX Elevation) */}
+            <div className="py-3 px-1 border-b border-black/[0.04] dark:border-white/[0.06]">
+              <LifecycleStepper machineId="project" currentState={activeItem.status} size="sm" />
+            </div>
 
             <Tabs
               value={activeTab}

@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { UserRole, ProjectStatus, ProblemStatus, GuidanceStatus } from "@prisma/client";
 import { requireRole } from "@/lib/auth-server";
+import { projectStateMachine } from "@/lib/state-machines/machines/project-machine";
+import { ratingModerationStateMachine } from "@/lib/state-machines/machines/rating-machine";
+import { assertTransition } from "@/lib/state-machines";
 
 async function getAdmin() {
   return requireRole([UserRole.MSME_ADMIN]);
@@ -112,7 +115,7 @@ export async function getAdminSolutionReviewQueue() {
 
 export async function adminReviewSolutionAction(input: {
   projectId: string;
-  decision: "APPROVE" | "REQUEST_REVISION";
+  decision: "APPROVE" | "REQUEST_REVISION" | "REJECT";
   reviewNotes: string;
 }) {
   try {
@@ -130,11 +133,18 @@ export async function adminReviewSolutionAction(input: {
 
     if (!project) return { success: false, error: "Project not found." };
 
-    if (project.status !== ProjectStatus.SOLUTION_SUBMITTED && project.status !== ProjectStatus.REVISION_IN_PROGRESS) {
-      return { success: false, error: "Project is not awaiting review." };
-    }
+    const newStatus =
+      decision === "APPROVE"
+        ? ProjectStatus.APPROVED
+        : decision === "REJECT"
+        ? ProjectStatus.REJECTED
+        : ProjectStatus.REVISION_IN_PROGRESS;
 
-    const newStatus = decision === "APPROVE" ? ProjectStatus.APPROVED : ProjectStatus.REVISION_IN_PROGRESS;
+    // Assert valid state machine transition
+    assertTransition(projectStateMachine, project.status, newStatus, UserRole.MSME_ADMIN, {
+      userRole: UserRole.MSME_ADMIN,
+      feedbackText: reviewNotes.trim(),
+    });
 
     const updated = await prisma.project.update({
       where: { id: projectId },
@@ -155,7 +165,12 @@ export async function adminReviewSolutionAction(input: {
 
     return {
       success: true,
-      message: decision === "APPROVE" ? "Solution approved successfully." : "Revision requested. Student team notified.",
+      message:
+        decision === "APPROVE"
+          ? "Solution approved successfully."
+          : decision === "REJECT"
+          ? "Solution deliverable rejected."
+          : "Revision requested. Student team notified.",
       project: {
         id: updated.id,
         title: updated.title,
@@ -229,6 +244,14 @@ export async function approveRatingAction(ratingId: string) {
 
     if (!rating) return { success: false, error: "Rating not found." };
 
+    // Assert valid state machine transition (QUEUED_FOR_MODERATION -> ADMIN_APPROVED_PUBLISHED)
+    assertTransition(
+      ratingModerationStateMachine,
+      "QUEUED_FOR_MODERATION",
+      "ADMIN_APPROVED_PUBLISHED",
+      UserRole.MSME_ADMIN
+    );
+
     await prisma.industryRating.update({
       where: { id: ratingId },
       data: { isModerated: false },
@@ -259,6 +282,14 @@ export async function approveRatingAction(ratingId: string) {
 export async function suppressRatingAction(ratingId: string) {
   try {
     await getAdmin();
+
+    // Assert valid state machine transition (QUEUED_FOR_MODERATION -> SUPPRESSED)
+    assertTransition(
+      ratingModerationStateMachine,
+      "QUEUED_FOR_MODERATION",
+      "SUPPRESSED",
+      UserRole.MSME_ADMIN
+    );
 
     await prisma.industryRating.update({
       where: { id: ratingId },

@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-server";
 import { UserRole, IdeaStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { ideaStateMachine } from "@/lib/state-machines/machines/idea-machine";
+import { assertTransition } from "@/lib/state-machines";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -119,6 +121,14 @@ export async function resubmitStudentIdea(data: ResubmitIdeaInput) {
       "Only ideas marked 'Needs Improvement' can be revised and resubmitted."
     );
   }
+
+  // State machine transition validation
+  assertTransition(
+    ideaStateMachine,
+    existingIdea.status,
+    IdeaStatus.RESUBMITTED,
+    UserRole.STUDENT
+  );
 
   const description = `${problemStatement}\n\nProposed Solution:\n${proposedSolution}`;
 
@@ -401,6 +411,15 @@ export async function reviewIdeaByAdmin(data: ReviewIdeaInput) {
     default:
       throw new Error("Invalid review action.");
   }
+
+  // State machine transition validation
+  assertTransition(
+    ideaStateMachine,
+    existingIdea.status,
+    targetStatus,
+    UserRole.MSME_ADMIN,
+    { feedbackText: defaultFeedback }
+  );
 
   // Transaction-safe state update
   const updatedIdea = await prisma.$transaction(async (tx) => {

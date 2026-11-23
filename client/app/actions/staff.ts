@@ -6,6 +6,9 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { UserRole, ProblemStatus, ProjectStatus, IdeaStatus, ProjectMember } from "@prisma/client";
 import { requireRole } from "@/lib/auth-server";
+import { problemStateMachine } from "@/lib/state-machines/machines/problem-machine";
+import { extensionStateMachine } from "@/lib/state-machines/machines/extension-machine";
+import { assertTransition } from "@/lib/state-machines";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -147,6 +150,14 @@ export async function claimProblemAction(problemId: string) {
     if (problem.status !== ProblemStatus.POOL_AVAILABLE) {
       return { success: false, error: "Problem is no longer available in the pool." };
     }
+
+    // State machine check
+    assertTransition(
+      problemStateMachine,
+      problem.status,
+      ProblemStatus.CLAIMED,
+      UserRole.STAFF
+    );
 
     await prisma.problem.update({
       where: { id: problemId },
@@ -520,6 +531,14 @@ export async function reviewDeadlineExtensionAction(extensionId: string, decisio
     if (ext.project.staffId !== (await getStaff()).id) {
       return { success: false, error: "You do not supervise this project." };
     }
+
+    // State machine check
+    assertTransition(
+      extensionStateMachine,
+      ext.status as any,
+      decision as any,
+      UserRole.STAFF
+    );
 
     const updateData: any = {
       status: decision,

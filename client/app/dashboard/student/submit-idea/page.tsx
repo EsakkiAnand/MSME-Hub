@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { IOSSelect } from "@/components/ui/ios-select";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { LifecycleStepper } from "@/components/state-machines";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import {
   submitStudentIdea,
@@ -476,6 +477,11 @@ export default function SubmitIdeaPage() {
                         </span>
                       )}
                     </div>
+                  </div>
+
+                  {/* Lifecycle Stepper (UX Elevation) */}
+                  <div className="px-6 py-4 bg-slate-50/40 dark:bg-white/[0.01] border-b border-black/[0.04] dark:border-white/[0.04]">
+                    <LifecycleStepper machineId="idea" currentState={idea.status} size="sm" />
                   </div>
 
                   {/* Body Content */}

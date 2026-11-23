@@ -6,6 +6,9 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { UserRole, ProjectStatus, GuidanceStatus } from "@prisma/client";
 import { requireRole } from "@/lib/auth-server";
+import { projectStateMachine } from "@/lib/state-machines/machines/project-machine";
+import { guidanceStateMachine } from "@/lib/state-machines/machines/guidance-machine";
+import { assertTransition } from "@/lib/state-machines";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -334,6 +337,20 @@ export async function submitGithubSolutionAction(projectId: string, githubUrl: s
       };
     }
 
+    // Assert valid state machine transition (DX + AX safeguard)
+    assertTransition(
+      projectStateMachine,
+      project.status,
+      ProjectStatus.SOLUTION_SUBMITTED,
+      UserRole.STUDENT,
+      {
+        isLead: membership.isLead,
+        hasGithubUrl: true,
+        hasMitLicense: validation.details?.hasMitLicense ?? true,
+        hasReadme: validation.details?.hasReadme ?? true,
+      }
+    );
+
     // Update project — cache tree JSON and timestamp
     const updated = await prisma.project.update({
       where: { id: projectId },
@@ -382,6 +399,20 @@ export async function unlinkGithubSolutionAction(projectId: string) {
       select: { status: true },
     });
     if (!project) return { success: false, error: "Project not found." };
+
+    if (project.status === ProjectStatus.APPROVED || project.status === ProjectStatus.COMPLETED) {
+      return { success: false, error: "Cannot unlink GitHub repository from an approved or completed project." };
+    }
+
+    if (project.status === ProjectStatus.SOLUTION_SUBMITTED) {
+      assertTransition(
+        projectStateMachine,
+        project.status,
+        ProjectStatus.IN_PROGRESS,
+        UserRole.STUDENT,
+        { isLead: membership.isLead }
+      );
+    }
 
     // @ts-ignore — Prisma v7 enum cast
     await prisma.project.update({
@@ -603,6 +634,14 @@ export async function resolveGuidanceRequestAction(guidanceRequestId: string, is
       return { success: false, error: "You can only resolve your own guidance requests." };
     }
 
+    // State machine check
+    assertTransition(
+      guidanceStateMachine,
+      request.status,
+      GuidanceStatus.RESOLVED,
+      UserRole.STUDENT
+    );
+
     const updated = await prisma.guidanceRequest.update({
       where: { id: guidanceRequestId },
       data: {
@@ -649,6 +688,14 @@ export async function closeGuidanceRequestAction(guidanceRequestId: string) {
     if (request.requestedByStudentId !== session.user.id) {
       return { success: false, error: "Unauthorized." };
     }
+
+    // State machine check
+    assertTransition(
+      guidanceStateMachine,
+      request.status,
+      GuidanceStatus.CLOSED,
+      UserRole.STUDENT
+    );
 
     await prisma.guidanceRequest.update({
       where: { id: guidanceRequestId },
