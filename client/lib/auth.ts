@@ -7,6 +7,22 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  baseURL: {
+    allowedHosts: [
+      "localhost:3000",
+      "localhost:3005",
+      "127.0.0.1:3000",
+      "127.0.0.1:3005",
+      "*.vercel.app",
+      "fxec-msme-hub.vercel.app",
+      "msme-hub-fxec.vercel.app",
+      "client-henna-one-80.vercel.app",
+    ],
+    fallback:
+      process.env.BETTER_AUTH_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      "https://fxec-msme-hub.vercel.app",
+  },
   advanced: {
     database: {
       // studentTrack and msmeApprovalStatus are managed by our own Prisma
@@ -23,6 +39,11 @@ export const auth = betterAuth({
     "http://localhost:3005",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3005",
+    "https://*.vercel.app",
+    "https://fxec-msme-hub.vercel.app",
+    "https://msme-hub-fxec.vercel.app",
+    "https://client-henna-one-80.vercel.app",
+    "https://client-esakkianand852-5175s-projects.vercel.app",
     ...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : []),
     ...(process.env.NEXT_PUBLIC_APP_URL ? [process.env.NEXT_PUBLIC_APP_URL] : []),
     ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
